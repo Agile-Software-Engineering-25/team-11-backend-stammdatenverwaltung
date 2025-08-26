@@ -19,7 +19,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,openapi,swagger-ui
+        include: health,info,openapi,swagger-ui,metrics,env,beans,configprops
   endpoint:
     health:
       show-details: always
@@ -32,9 +32,4 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
     operationsSorter: method
-    configUrl: /api-docs/swagger-config
-    urls:
-      - url: /api-docs
-        name: API Documentation
-      - url: /actuator
-        name: Actuator Endpoints
+  show-actuator: true

@@ -50,4 +50,13 @@ public class OpenApiConfig {
                 .pathsToMatch("/actuator/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi allApi() {
+        return GroupedOpenApi.builder()
+                .group("all")
+                .displayName("All Endpoints")
+                .pathsToMatch("/api/**", "/actuator/**")
+                .build();
+    }
 }
