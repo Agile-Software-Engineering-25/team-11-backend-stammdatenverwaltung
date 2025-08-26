@@ -1,0 +1,14 @@
+{
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Spring Boot-StammdatenverwaltungApplication<userservice>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"mainClass": "com.ase.stammdatenverwaltung.StammdatenverwaltungApplication",
+			"projectName": "userservice",
+			"args": "",
+			"envFile": "${workspaceFolder}/.env"
+		}
+	]
+}
