@@ -98,11 +98,13 @@ OpenAPI 3.0 with grouped endpoints:
 
 ## Environment Variables (Production)
 
-Essential variables for production deployment:
+Essential variables for production deployment (all required):
 
 - `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
 - `ADMIN_USERNAME`, `ADMIN_PASSWORD`
 - `SERVER_PORT` (optional, defaults to 8080)
+
+**Security Note**: As of commit 7ff88d1, all authentication credentials must be explicitly provided via environment variables for production deployment - no default values are used to enhance security.
 
 ## Documentation Maintenance
 
