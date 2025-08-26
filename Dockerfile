@@ -49,8 +49,9 @@ EXPOSE 8080
 # Create a volume for the H2 database persistence
 VOLUME ["/app/data"]
 
-# Set environment variables
+# Set environment variables with defaults
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
+ENV SPRING_PROFILES_ACTIVE=prod
 
 # Run the application
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -jar app.jar"]

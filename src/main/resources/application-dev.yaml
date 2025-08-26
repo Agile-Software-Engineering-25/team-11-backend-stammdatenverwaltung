@@ -1,0 +1,32 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+  datasource:
+    url: jdbc:h2:file:./data/mydb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  security:
+    user:
+      name: dev-user
+      password: dev-password
+      roles: ADMIN
+
+server:
+  port: 8080
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.ase.stammdatenverwaltung: DEBUG
+    org.springframework.security: DEBUG
+
+# Development-specific settings
+app:
+  security:
+    relaxed: true
