@@ -35,3 +35,6 @@ build/
 
 ### MacOs ###
 */.DS_STORE
+
+### H2 Database ###
+*.mv.db
