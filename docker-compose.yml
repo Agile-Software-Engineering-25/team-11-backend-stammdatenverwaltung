@@ -6,8 +6,8 @@ services:
     container_name: stammdatenverwaltung-postgres
     environment:
       POSTGRES_DB: stammdatenverwaltung
-      POSTGRES_USER: stammdaten_user
-      POSTGRES_PASSWORD: secure_db_password
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -24,12 +24,12 @@ services:
       
       # Database Configuration
       DATABASE_URL: jdbc:postgresql://postgres:5432/stammdatenverwaltung
-      DATABASE_USERNAME: stammdaten_user
-      DATABASE_PASSWORD: secure_db_password
-      
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
       # Security Configuration
-      ADMIN_USERNAME: prod-admin
-      ADMIN_PASSWORD: very-secure-production-password
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       
       # Server Configuration
       SERVER_PORT: 8080
