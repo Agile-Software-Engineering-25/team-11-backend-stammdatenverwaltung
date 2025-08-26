@@ -1,0 +1,38 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/stammdatenverwaltung}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:password}
+    driverClassName: org.postgresql.Driver
+  security:
+    user:
+      name: ${ADMIN_USERNAME}
+      password: ${ADMIN_PASSWORD}
+      roles: ADMIN
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.ase.stammdatenverwaltung: INFO
+    org.springframework.security: WARN
+
+# Production-specific settings
+app:
+  security:
+    relaxed: false

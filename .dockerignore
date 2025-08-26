@@ -1,0 +1,54 @@
+# Ignore Git files
+.git
+.gitignore
+.gitattributes
+.github
+
+# Ignore IDE files
+.vscode
+.idea
+*.iml
+*.ipr
+*.iws
+.editorconfig
+
+# Ignore build outputs that we don't need for Docker build
+target/classes/
+target/test-classes/
+target/maven-status/
+target/surefire-reports/
+target/generated-sources/
+target/generated-test-sources/
+target/maven-archiver/
+
+# Keep the final JAR but ignore other target contents we don't need
+# target/*.jar will be built during Docker build anyway
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore data directory (H2 database files) - we'll create fresh in container
+data/
+
+# Ignore documentation that's not needed for runtime
+README.md
+*.md
+docs/
+
+# Ignore test files for production build
+src/test/
+
+# Ignore checkstyle files (build tools, not runtime)
+checkstyle*.jar
+checkstyle.xml

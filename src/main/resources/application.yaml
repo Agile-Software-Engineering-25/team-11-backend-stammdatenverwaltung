@@ -1,19 +1,35 @@
 spring:
   application:
-    name: ASE-UserService
+    name: stammdatenverwaltung
+  profiles:
+    active: dev
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         format_sql: true
-  datasource:
-    url: jdbc:h2:file:./data/mydb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
+
 server:
   error:
     include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,openapi,swagger-ui,metrics,env,beans,configprops
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+  show-actuator: true

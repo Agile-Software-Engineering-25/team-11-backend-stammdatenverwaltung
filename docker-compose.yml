@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: stammdatenverwaltung-postgres
+    environment:
+      POSTGRES_DB: stammdatenverwaltung
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - stammdaten-network
+
+  app:
+    build: .
+    container_name: stammdatenverwaltung-app
+    environment:
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Database Configuration
+      DATABASE_URL: jdbc:postgresql://postgres:5432/stammdatenverwaltung
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
+      # Security Configuration
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      
+      # Server Configuration
+      SERVER_PORT: 8080
+      
+      # Java Options
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      - app_data:/app/data
+    networks:
+      - stammdaten-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  app_data:
+
+networks:
+  stammdaten-network:
+    driver: bridge
