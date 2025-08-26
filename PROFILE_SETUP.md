@@ -37,8 +37,8 @@ This application supports two profiles: `dev` and `prod`.
 
 **Credentials via environment variables:**
 
-- Username: `${ADMIN_USERNAME}` (default: admin)
-- Password: `${ADMIN_PASSWORD}` (default: changeme)
+- Username: `${ADMIN_USERNAME}` (required)
+- Password: `${ADMIN_PASSWORD}` (required)
 
 **Features:**
 
@@ -67,6 +67,9 @@ SERVER_PORT=8080
 
 ```bash
 export SPRING_PROFILES_ACTIVE=prod
+export DATABASE_URL=jdbc:postgresql://localhost:5432/stammdatenverwaltung
+export DATABASE_USERNAME=db_user
+export DATABASE_PASSWORD=db_password
 export ADMIN_USERNAME=prod-admin
 export ADMIN_PASSWORD=secure-password
 ./mvnw spring-boot:run
@@ -132,6 +135,6 @@ docker run -p 8080:8080 \
 | `DATABASE_URL`           | Prod only | -          | Database connection URL |
 | `DATABASE_USERNAME`      | Prod only | -          | Database username       |
 | `DATABASE_PASSWORD`      | Prod only | -          | Database password       |
-| `ADMIN_USERNAME`         | Prod only | `admin`    | Admin username          |
-| `ADMIN_PASSWORD`         | Prod only | `changeme` | Admin password          |
+| `ADMIN_USERNAME`         | Prod only | -          | Admin username          |
+| `ADMIN_PASSWORD`         | Prod only | -          | Admin password          |
 | `SERVER_PORT`            | No        | `8080`     | Server port             |

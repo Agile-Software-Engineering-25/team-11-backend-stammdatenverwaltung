@@ -77,6 +77,9 @@ cd team-11-backend-stammdatenverwaltung
 export SPRING_PROFILES_ACTIVE=prod
 export ADMIN_USERNAME=admin
 export ADMIN_PASSWORD=secure-password
+export DATABASE_URL=jdbc:postgresql://localhost:5432/stammdatenverwaltung
+export DATABASE_USERNAME=db_user
+export DATABASE_PASSWORD=db_password
 ./mvnw spring-boot:run
 ```
 
@@ -271,6 +274,6 @@ The application supports two distinct profiles:
 | `DATABASE_URL`           | prod    | Yes      | -          | PostgreSQL connection URL |
 | `DATABASE_USERNAME`      | prod    | Yes      | -          | Database username         |
 | `DATABASE_PASSWORD`      | prod    | Yes      | -          | Database password         |
-| `ADMIN_USERNAME`         | prod    | No       | `admin`    | Admin username            |
-| `ADMIN_PASSWORD`         | prod    | No       | `changeme` | Admin password            |
+| `ADMIN_USERNAME`         | prod    | Yes      | -          | Admin username            |
+| `ADMIN_PASSWORD`         | prod    | Yes      | -          | Admin password            |
 | `SERVER_PORT`            | Both    | No       | `8080`     | Server port               |
