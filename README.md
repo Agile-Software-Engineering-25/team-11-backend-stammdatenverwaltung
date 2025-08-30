@@ -166,22 +166,33 @@ System tests will be executed on a central server with reports provided separate
 
 ## 🎨 Code Quality & Formatting
 
-This project uses a **dual approach** for code quality: **Spotless** for automatic formatting and **Checkstyle** for logic validation.
+This project uses a **dual approach** for code quality:
 
-### ✨ Quick Commands
+### ✨ Spotless (Automatic Formatting)
+- **Purpose**: Automatic code formatting using Google Java Format
+- **Handles**: Indentation (2 spaces), line length, import organization, braces, spacing
+- **Behavior**: Automatically fixes formatting issues
+
+### 🔍 Checkstyle (Logic & Complexity)
+- **Purpose**: Code logic and complexity analysis only (no formatting rules)
+- **Focus**: Best practices, naming conventions, complexity metrics
+- **Behavior**: Reports violations for manual review (warnings only, doesn't fail build)
+
+### 🚀 Quick Commands
 
 ```bash
-# 🚀 Format code + run logic checks
+# Format code + run logic checks (recommended workflow)
 ./format-code.cmd     # Windows
 ./format-code.sh      # Linux/Mac
 
-# 🎨 Format code only
+# Format code only
 ./format-only.cmd     # Windows
 ./format-only.sh      # Linux/Mac
 
-# 🔍 Individual commands
+# Individual commands
 ./mvnw spotless:apply    # Auto-format code
-./mvnw checkstyle:check  # Logic & complexity check
+./mvnw spotless:check    # Check formatting
+./mvnw checkstyle:check  # Logic & complexity checks
 ```
 
 ### 📊 What's Automated vs Manual
@@ -190,10 +201,6 @@ This project uses a **dual approach** for code quality: **Spotless** for automat
 | ----------------- | ---------------- | ----------------------- | ---------------------------------- |
 | 🎨 **Spotless**   | Code formatting  | ✅ **Auto-fixes**       | Style, indentation, imports        |
 | 🔍 **Checkstyle** | Logic validation | ⚠️ **Reports warnings** | Complexity, naming, best practices |
-
-### 📋 Current Status
-
-After setup: **44 formatting violations → 11 meaningful logic warnings**
 
 > 📖 **See [`FORMATTING_SETUP.md`](FORMATTING_SETUP.md)** for complete configuration details.
 
@@ -212,65 +219,21 @@ This application supports dual-environment configuration:
 
 ## 🔧 Dependencies & Tech Stack
 
-- Naming:
-  - `TypeName`, `MethodName`, `LocalVariableName`, `MemberName`, `ConstantName`
-  - Generic type parameters: `ClassTypeParameterName`, `MethodTypeParameterName`, `InterfaceTypeParameterName` (single capital letter)
-- Packages: `PackageName` (lowercase dotted segments)
-- Formatting:
-  - `Indentation`: 2 spaces; continuation indent 4; tabs disallowed
-  - `LeftCurly` = `eol`; `RightCurly` = `alone`
-  - `MethodParamPad` = `nospace`
-  - `WhitespaceAfter` for `COMMA` and control‑flow keywords
-  - `OperatorWrap` enabled (default behavior)
-  - `LineLength` max 80; ignores package/import/URLs
-  - `ParenPad` is disabled in this config
-- Statements:
-  - `NeedBraces` on all control statements
-  - `FallThrough` for switch
-  - `OneStatementPerLine`
-- Imports:
-  - `ImportOrder` under `TreeWalker`: groups `java, javax, org, com`; `option=top`; `sortStaticImportsAlphabetically=true`
-  - `UnusedImports` to flag and fail on unused imports
-- Other:
-  - `MagicNumber` enabled; ignores `-1,0,1,2`, annotations, and `hashCode`
-
-Adjust rules in `checkstyle.xml`; IDE basics are in `.editorconfig`.
-
-## CI: GitHub Actions (Checkstyle)
-
-We run Checkstyle in CI on every push and on PRs to `main`.
-
-- Workflow: `.github/workflows/checkstyle.yml`
-
-  - Sets up Temurin JDK 21
-  - Uses `checkstyle-11.0.0-all.jar` (downloaded if not in repo) or `checkstyle.jar` if present
-  - Runs Checkstyle against `src/main/java` and `src/test/java`
-  - Fails the job on violations and uploads `target/checkstyle-report.xml` as an artifact
-
-- Blocking PRs on failures:
-  - In GitHub repo settings → Branches → Protect `main`
-  - Enable “Require status checks to pass before merging”
-  - Select the “Checkstyle” job as a required status check
-
-## Dependencies
-
-The project uses the following key dependencies:
-
 ### Core Framework
 
-- **`spring-boot-starter-web`** (3.5.4): REST API development and embedded Tomcat server
+- **`spring-boot-starter-web`** (3.5.5): REST API development and embedded Tomcat server
 - **`spring-boot-starter-data-jpa`**: JPA integration with Hibernate for data persistence
 - **`spring-boot-starter-security`**: Authentication and authorization with HTTP Basic Auth
 - **`spring-boot-starter-validation`**: Bean validation using JSR-303 annotations
 
 ### Database
 
-- **`h2`**: In-memory database for development and testing
+- **`h2`**: File-based database for development and testing
 - **`postgresql`**: Production database driver for PostgreSQL
 
 ### Documentation & Monitoring
 
-- **`springdoc-openapi-starter-webmvc-ui`** (2.8.10): OpenAPI 3.0 spec generation and Swagger UI
+- **`springdoc-openapi-starter-webmvc-ui`** (2.8.11): OpenAPI 3.0 spec generation and Swagger UI
 - **`spring-boot-starter-actuator`**: Production monitoring endpoints (health, metrics, info)
 
 ### Development Tools
@@ -278,15 +241,17 @@ The project uses the following key dependencies:
 - **`spring-boot-devtools`**: Hot reloading and development utilities
 - **`lombok`**: Reduces boilerplate code (getters, setters, constructors)
 
+### Code Quality & Formatting
+
+- **Spotless Maven Plugin** (v2.43.0): Automatic code formatting using Google Java Format
+- **Maven Checkstyle Plugin** (v3.5.0): Logic and complexity analysis (checkstyle-logic-only.xml)
+
 ### Testing
 
 - **`spring-boot-starter-test`**: Comprehensive testing stack (JUnit 5, Mockito, AssertJ)
 - **`spring-security-test`**: Security testing utilities
 
 ## Configuration Profiles
-
-The application supports two distinct profiles:
-
 ### Development Profile (`dev`) - Default
 
 - **Database**: H2 in-memory (file-based persistence in `./data/mydb`)

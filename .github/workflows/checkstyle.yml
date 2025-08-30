@@ -1,4 +1,4 @@
-name: Checkstyle
+name: Code Quality Check
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ['main']
 
 jobs:
-  checkstyle:
+  code-quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,35 +19,24 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Ensure Checkstyle jar
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -f checkstyle-11.0.0-all.jar ]; then
-            echo "JAR=checkstyle-11.0.0-all.jar" >> "$GITHUB_ENV"
-          elif [ -f checkstyle.jar ]; then
-            echo "JAR=checkstyle.jar" >> "$GITHUB_ENV"
-          else
-            curl -sSL -o checkstyle-11.0.0-all.jar https://github.com/checkstyle/checkstyle/releases/download/checkstyle-11.0.0/checkstyle-11.0.0-all.jar
-            echo "JAR=checkstyle-11.0.0-all.jar" >> "$GITHUB_ENV"
-          fi
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-      - name: Run Checkstyle
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p target
-          STATUS=0
-          java -jar "$JAR" -c checkstyle.xml -f xml -o target/checkstyle-report.xml src/main/java src/test/java || STATUS=$?
-          # Print human-readable output to logs for convenience (do not fail this step anew)
-          java -jar "$JAR" -c checkstyle.xml -f plain src/main/java src/test/java || true
-          exit $STATUS
+      - name: Check code formatting (Spotless)
+        run: ./mvnw spotless:check
+
+      - name: Run logic and complexity checks (Checkstyle)
+        run: ./mvnw checkstyle:check
 
       - name: Upload Checkstyle report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
-          path: target/checkstyle-report.xml
+          path: target/checkstyle-result.xml
 
 
