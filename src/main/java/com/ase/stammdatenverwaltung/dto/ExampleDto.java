@@ -7,9 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Data transfer object for example data.
- */
+/** Data transfer object for example data. */
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,8 +19,7 @@ public class ExampleDto {
   @NotBlank(message = "Description is required")
   private String description;
 
-  @NotNull(message = "Timestamp is required")
-  private Long timestamp;
+  @NotNull(message = "Timestamp is required") private Long timestamp;
 
   private String version;
 }

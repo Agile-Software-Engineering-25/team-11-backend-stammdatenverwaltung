@@ -16,26 +16,27 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = ExampleController.class, 
+@WebMvcTest(
+    controllers = ExampleController.class,
     excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class ExampleControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Test
   void shouldReturnGreeting() throws Exception {
-    mockMvc.perform(get("/api/v1/example"))
+    mockMvc
+        .perform(get("/api/v1/example"))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Hello from Spring Boot")));
   }
 
   @Test
   void shouldReturnExampleData() throws Exception {
-    mockMvc.perform(get("/api/v1/example/data"))
+    mockMvc
+        .perform(get("/api/v1/example/data"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("example"))
         .andExpect(jsonPath("$.description").value("This is example data"))
@@ -45,14 +46,14 @@ public class ExampleControllerTest {
 
   @Test
   void shouldCreateExampleData() throws Exception {
-    var request = CreateExampleRequest.builder()
-        .name("test-name")
-        .description("test description")
-        .build();
+    var request =
+        CreateExampleRequest.builder().name("test-name").description("test description").build();
 
-    mockMvc.perform(post("/api/v1/example")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc
+        .perform(
+            post("/api/v1/example")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("test-name"))
         .andExpect(jsonPath("$.description").value("test description"))
@@ -62,14 +63,17 @@ public class ExampleControllerTest {
 
   @Test
   void shouldRejectInvalidRequest() throws Exception {
-    var request = CreateExampleRequest.builder()
-        .name("")  // Invalid - empty name
-        .description("test description")
-        .build();
+    var request =
+        CreateExampleRequest.builder()
+            .name("") // Invalid - empty name
+            .description("test description")
+            .build();
 
-    mockMvc.perform(post("/api/v1/example")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc
+        .perform(
+            post("/api/v1/example")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
   }
 }
