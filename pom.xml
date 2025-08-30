@@ -202,6 +202,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <?m2e execute onConfiguration,onIncremental?>
                         <id>checkstyle-check</id>
                         <phase>validate</phase>
                         <goals>
