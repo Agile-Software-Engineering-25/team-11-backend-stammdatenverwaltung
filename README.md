@@ -1,10 +1,8 @@
 # 🏢 Stammdatenverwaltung
 
-[![Spring Boot General](https://img.shields.io/badge/Spring%20Boot-3.5.5-6DB33F?style=flat-square&logo=spring-boot)](https://spring.io/projects/spring-boot)
-[![Spring Boot Specifically](https://img.shields.io/badge/Spring%20Boot-3.5.5-6DB33F?style=flat-square&logo=spring-boot)](https://docs.spring.io/spring-boot/index.html)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-6DB33F?style=flat-square&logo=spring-boot)](https://docs.spring.io/spring-boot/index.html)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-C71A36?style=flat-square&logo=apache-maven)](https://maven.apache.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 > A modern Spring Boot microservice for **master data management** in the ASE (Agile Software Engineering) project. Built with enterprise-grade security, monitoring, and comprehensive API documentation.
 
