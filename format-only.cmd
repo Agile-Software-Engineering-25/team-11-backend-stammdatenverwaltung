@@ -9,5 +9,3 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     echo ❌ Code formatting failed. Please check the error messages above.
 )
-
-pause
