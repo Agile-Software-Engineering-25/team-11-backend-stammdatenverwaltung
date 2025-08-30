@@ -55,6 +55,10 @@ The project includes the following key dependencies and Maven plugins for develo
 - **spring-boot-starter-test**: Comprehensive testing with JUnit 5, Mockito, AssertJ
 - **spring-security-test**: Security-specific testing utilities
 
+### Code Quality & Formatting
+- **Spotless Maven Plugin (v2.43.0)**: Automatic code formatting using Google Java Format
+- **Maven Checkstyle Plugin (v3.5.0)**: Logic and complexity analysis (checkstyle-logic-only.xml)
+
 ### Maven Plugins
 - **spring-boot-maven-plugin**: Application packaging, Docker image building, dev server
 - **maven-compiler-plugin (v3.14.0)**: Java 21 compilation with Lombok annotation processing
@@ -80,17 +84,38 @@ Follow the established package organization under `com.ase.stammdatenverwaltung`
 - `services/` - Business logic (placeholder, add services here)
 - `components/` - Spring components (placeholder, add utilities here)
 
-## Code Style Requirements
+## Code Quality & Style Requirements
 
-Strict Checkstyle enforcement with specific rules:
+The project uses a **dual approach** for code quality:
 
-- **Indentation**: 2 spaces (no tabs), continuation indent 4 spaces
-- **Line length**: 80 characters max
-- **Braces**: Opening brace on same line (`eol`), closing brace alone (`alone`)
-- **Imports**: Ordered groups `java, javax, org, com` with static imports sorted alphabetically
+### ✨ Spotless (Automatic Formatting)
+- **Purpose**: Automatic code formatting using Google Java Format
+- **Handles**: Indentation (2 spaces), line length, import organization, braces, spacing
+- **Behavior**: Automatically fixes formatting issues
+- **Style**: Google Java Style Guide with removed unused imports and formatted annotations
+
+### 🔍 Checkstyle (Logic & Complexity)
+- **Purpose**: Code logic and complexity analysis only (no formatting rules)
+- **Focus**: Best practices, naming conventions, complexity metrics
+- **Rules**: Method length (max 50 lines), cyclomatic complexity (max 10), parameter count (max 7)
 - **Naming**: PascalCase classes, camelCase methods/variables, ALL_CAPS constants
-- **Lombok**: Use `@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor` for entities and DTOs
-- Run locally: `java -jar checkstyle-11.0.0-all.jar -c checkstyle.xml -f plain src\main\java src\test\java`
+- **Behavior**: Reports violations for manual review (warnings only, doesn't fail build)
+
+### Quick Commands
+```bash
+# Format and check (recommended workflow)
+./format-code.cmd                       # Windows
+./format-code.sh                        # Linux/Mac
+
+# Format only
+./format-only.cmd                       # Windows  
+./format-only.sh                        # Linux/Mac
+
+# Individual commands
+./mvnw.cmd spotless:apply              # Auto-format code
+./mvnw.cmd spotless:check              # Check formatting
+./mvnw.cmd checkstyle:check            # Logic/complexity checks
+```
 
 ## Development Workflow
 
@@ -105,8 +130,11 @@ Strict Checkstyle enforcement with specific rules:
 ./mvnw integration-test                 # Integration tests only (Failsafe plugin)
 ./mvnw verify                           # Full verification including integration tests
 
-# Code quality check
-java -jar checkstyle-11.0.0-all.jar -c checkstyle.xml -f plain src\main\java src\test\java
+# Code quality and formatting
+./format-code.cmd                       # Format code + logic checks (Windows)
+./format-code.sh                        # Format code + logic checks (Linux/Mac)
+./mvnw spotless:apply                   # Auto-format code only
+./mvnw checkstyle:check                 # Logic/complexity checks only
 
 # Spring Boot specific commands
 ./mvnw spring-boot:start                # Start app in background for testing
