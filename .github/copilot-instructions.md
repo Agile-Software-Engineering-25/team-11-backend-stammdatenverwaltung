@@ -31,6 +31,44 @@ The application operates in two distinct modes controlled by Spring profiles:
 - `src/main/resources/application-prod.yaml` - Production overrides
 - `src/main/java/com/ase/stammdatenverwaltung/config/SecurityConfig.java` - Profile-specific security chains
 
+## Available Dependencies & Plugins
+
+The project includes the following key dependencies and Maven plugins for development:
+
+### Core Spring Boot Starters
+- **spring-boot-starter-web**: REST API development with embedded Tomcat
+- **spring-boot-starter-data-jpa**: JPA/Hibernate for database operations
+- **spring-boot-starter-security**: Authentication and authorization
+- **spring-boot-starter-validation**: Bean validation with annotations (`@Valid`, `@NotNull`, etc.)
+- **spring-boot-starter-actuator**: Production-ready monitoring endpoints (`/actuator/health`, etc.)
+- **spring-boot-devtools**: Hot reload and development tools (dev profile only)
+
+### Database Support
+- **H2 Database**: File-based database for development (`./data/mydb`)
+- **PostgreSQL**: Production database driver
+
+### Documentation & Utilities
+- **SpringDoc OpenAPI (v2.8.11)**: Auto-generated API documentation and Swagger UI
+- **Lombok**: Reduce boilerplate code with annotations (`@Data`, `@Builder`, etc.)
+
+### Testing Framework
+- **spring-boot-starter-test**: Comprehensive testing with JUnit 5, Mockito, AssertJ
+- **spring-security-test**: Security-specific testing utilities
+
+### Maven Plugins
+- **spring-boot-maven-plugin**: Application packaging, Docker image building, dev server
+- **maven-compiler-plugin (v3.14.0)**: Java 21 compilation with Lombok annotation processing
+- **maven-surefire-plugin (v3.5.2)**: Unit test execution
+- **maven-failsafe-plugin (v3.5.2)**: Integration test execution
+
+### Development Best Practices
+- Use `@RestController` with `@RequestMapping("/api/v1")` for API endpoints
+- Leverage `@Entity` with Lombok annotations for JPA entities
+- Implement validation using Bean Validation annotations
+- Use `@Service`, `@Repository`, `@Component` for proper layering
+- Utilize Spring Security's method-level security with `@PreAuthorize`
+- Take advantage of Spring Boot's auto-configuration and conditional beans
+
 ## Package Structure
 
 Follow the established package organization under `com.ase.stammdatenverwaltung`:
@@ -51,21 +89,28 @@ Strict Checkstyle enforcement with specific rules:
 - **Braces**: Opening brace on same line (`eol`), closing brace alone (`alone`)
 - **Imports**: Ordered groups `java, javax, org, com` with static imports sorted alphabetically
 - **Naming**: PascalCase classes, camelCase methods/variables, ALL_CAPS constants
+- **Lombok**: Use `@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor` for entities and DTOs
 - Run locally: `java -jar checkstyle-11.0.0-all.jar -c checkstyle.xml -f plain src\main\java src\test\java`
 
 ## Development Workflow
 
 ```bash
-# Quick development cycle
-./mvnw spring-boot:run                    # Start dev mode
+# Quick development cycle (Spring Boot DevTools enables hot reload)
+./mvnw spring-boot:run                  # Start dev mode with auto-restart
 # Access: http://localhost:8080/swagger-ui.html (no auth)
 
 # Build and test
-./mvnw clean install                      # Full build with tests
-./mvnw test                              # Unit tests only
+./mvnw clean install                    # Full build with unit and integration tests
+./mvnw test                             # Unit tests only (Surefire plugin)
+./mvnw integration-test                 # Integration tests only (Failsafe plugin)
+./mvnw verify                           # Full verification including integration tests
 
 # Code quality check
 java -jar checkstyle-11.0.0-all.jar -c checkstyle.xml -f plain src\main\java src\test\java
+
+# Spring Boot specific commands
+./mvnw spring-boot:start                # Start app in background for testing
+./mvnw spring-boot:stop                 # Stop background app
 ```
 
 ## Security Implementation Pattern
@@ -84,17 +129,31 @@ When adding new endpoints, follow the existing security model:
 
 ## API Documentation
 
-OpenAPI 3.0 with grouped endpoints:
+OpenAPI 3.0 with SpringDoc (v2.8.11) providing enhanced Swagger UI:
 
 - All API endpoints should use `/api/v1/` prefix for automatic documentation
 - Swagger UI available at `/swagger-ui.html` (dev) or with auth (prod)
 - Three API groups configured: `public-api`, `actuator`, `all`
+- Use `@Operation`, `@ApiResponse`, `@Schema` annotations for detailed API documentation
+- Validation annotations (`@Valid`, `@NotNull`, `@Size`) automatically reflected in OpenAPI spec
 
 ## Testing Conventions
 
-- Unit tests: `**/*Test.java`, `**/*Tests.java` (Surefire plugin)
-- Integration tests: `**/*IT.java`, `**/*IntegrationTest.java` (Failsafe plugin)
-- Context loading test exists in `StammdatenverwaltungApplicationTests.java`
+Maven plugins configured for comprehensive testing:
+
+- **Unit tests**: `**/*Test.java`, `**/*Tests.java` (Surefire plugin v3.5.2)
+- **Integration tests**: `**/*IT.java`, `**/*IntegrationTest.java` (Failsafe plugin v3.5.2)
+- **Spring Boot Test Support**: Use `@SpringBootTest`, `@WebMvcTest`, `@DataJpaTest` for different test slices
+- **Security Testing**: Spring Security Test dependency available for authentication/authorization tests
+- **Test Data**: Use `@Sql`, `@TestPropertySource` for test-specific configurations
+- **Context loading test**: Exists in `StammdatenverwaltungApplicationTests.java`
+
+Run tests individually:
+```bash
+./mvnw test                              # Unit tests (Surefire)
+./mvnw integration-test                  # Integration tests (Failsafe)
+./mvnw verify                           # Both unit and integration tests
+```
 
 ## Environment Variables (Production)
 
