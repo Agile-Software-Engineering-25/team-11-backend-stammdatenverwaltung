@@ -16,8 +16,7 @@ ij_java_continuation_indent_size = 4
 ij_java_class_count_to_use_import_on_demand = 999
 ij_java_names_count_to_use_import_on_demand = 999
 # Import order to match Checkstyle groups: java, javax, org, com
-ij_java_imports_layout = import java.*; import javax.*; import org.*; import com.*; blank_line; import all other imports; blank_line; import static all other static imports
+ij_java_imports_layout = $*,java.**,javax.**,org.**,com.**,*
 
 [*.{yml,yaml}]
 indent_size = 2
-
