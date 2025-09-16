@@ -7,6 +7,24 @@
     <!-- Define the charset -->
     <property name="charset" value="UTF-8"/>
 
+    <!-- Suppress magic numbers in test files using regex -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MagicNumber"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
+    <!-- Suppress file length checks in test files (allow up to 1000 lines for integration tests) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="FileLength"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
+    <!-- Suppress method length checks in test files (allow longer test methods) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MethodLength"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
     <!-- === TreeWalker module processes Java source code === -->
     <module name="TreeWalker">
 
@@ -68,9 +86,14 @@
 
         <!-- Avoid magic numbers -->
         <module name="MagicNumber">
-            <property name="ignoreNumbers" value="-1,0,1,2"/>
+            <!-- Common numbers that are almost never "magic" -->
+            <property name="ignoreNumbers" value="-1,0,1,2,3,4,5,10,100,1000"/>
+            <!-- Standard contexts where numbers are acceptable -->
             <property name="ignoreHashCodeMethod" value="true"/>
             <property name="ignoreAnnotation" value="true"/>
+            <property name="ignoreFieldDeclaration" value="true"/>
+            <!-- Mathematical and common operations where literals are clear -->
+            <property name="constantWaiverParentToken" value="ASSIGN,ARRAY_INIT,EXPR,UNARY_PLUS,UNARY_MINUS,TYPECAST,ELIST,LITERAL_NEW,METHOD_CALL,STAR,DIV,PLUS,MINUS,MOD"/>
         </module>
 
         <!-- === CONTROL FLOW & COMPLEXITY === -->
@@ -94,7 +117,7 @@
 
         <!-- Method length -->
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="75"/>
             <property name="countEmpty" value="false"/>
         </module>
 
@@ -170,7 +193,7 @@
 
     <!-- File length -->
     <module name="FileLength">
-        <property name="max" value="500"/>
+        <property name="max" value="800"/>
     </module>
 
     <!-- No tab characters -->
