@@ -21,10 +21,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+/**
+ * Unit tests for the ExampleController REST API endpoints. Tests all CRUD operations and validation
+ * scenarios.
+ */
 @WebMvcTest(
     controllers = ExampleController.class,
     excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class ExampleControllerTest {
+
+  private static final Long NON_EXISTENT_ID = 999L;
 
   @Autowired private MockMvc mockMvc;
 
@@ -73,10 +79,10 @@ public class ExampleControllerTest {
   @Test
   void shouldReturnNotFoundForNonExistentExample() throws Exception {
     // Given
-    when(exampleService.getExampleById(999L)).thenReturn(Optional.empty());
+    when(exampleService.getExampleById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
 
     // When & Then
-    mockMvc.perform(get("/api/v1/examples/999")).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/v1/examples/" + NON_EXISTENT_ID)).andExpect(status().isNotFound());
   }
 
   @Test
