@@ -14,6 +14,7 @@ CREATE TABLE persons (
     
     -- Add constraints (H2-compatible syntax)
     CONSTRAINT chk_date_of_birth_not_future CHECK (date_of_birth <= CURRENT_DATE),
+    -- NOTE: The value 150 must match the MAX_AGE_YEARS constant in the service layer for consistency.
     CONSTRAINT chk_date_of_birth_reasonable CHECK (date_of_birth >= DATEADD('YEAR', -150, CURRENT_DATE)),
     CONSTRAINT chk_phone_number_format CHECK (phone_number IS NULL OR REGEXP_LIKE(phone_number, '^[+]?[0-9\s\-()]{7,20}$'))
 );
