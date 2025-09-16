@@ -178,6 +178,65 @@ public class PersonService {
     return personRepository.findYoungestPerson();
   }
 
+  /**
+   * Find persons within a specific age range.
+   *
+   * @param minAge the minimum age (inclusive)
+   * @param maxAge the maximum age (inclusive)
+   * @return list of persons within the age range
+   * @throws IllegalArgumentException if age parameters are invalid
+   */
+  @Transactional(readOnly = true)
+  public List<Person> findByAgeRange(int minAge, int maxAge) {
+    log.debug("Finding persons with age between {} and {}", minAge, maxAge);
+    validateAgeRange(minAge, maxAge);
+
+    LocalDate currentDate = LocalDate.now();
+    LocalDate maxBirthDate = currentDate.minusYears(minAge); // Earliest birth date for minAge
+    LocalDate minBirthDate = currentDate.minusYears(maxAge + 1); // Latest birth date for maxAge
+
+    return personRepository.findByAgeRange(minBirthDate, maxBirthDate);
+  }
+
+  /**
+   * Count persons within a specific age range.
+   *
+   * @param minAge the minimum age (inclusive)
+   * @param maxAge the maximum age (inclusive)
+   * @return count of persons within the age range
+   * @throws IllegalArgumentException if age parameters are invalid
+   */
+  @Transactional(readOnly = true)
+  public long countByAgeRange(int minAge, int maxAge) {
+    log.debug("Counting persons with age between {} and {}", minAge, maxAge);
+    validateAgeRange(minAge, maxAge);
+
+    LocalDate currentDate = LocalDate.now();
+    LocalDate maxBirthDate = currentDate.minusYears(minAge); // Earliest birth date for minAge
+    LocalDate minBirthDate = currentDate.minusYears(maxAge + 1); // Latest birth date for maxAge
+
+    return personRepository.countByAgeRange(minBirthDate, maxBirthDate);
+  }
+
+  /**
+   * Find persons with an exact age.
+   *
+   * @param age the exact age to search for
+   * @return list of persons with the exact age
+   * @throws IllegalArgumentException if age parameter is invalid
+   */
+  @Transactional(readOnly = true)
+  public List<Person> findByAge(int age) {
+    log.debug("Finding persons with exact age: {}", age);
+    validateAge(age);
+
+    LocalDate currentDate = LocalDate.now();
+    LocalDate maxBirthDate = currentDate.minusYears(age); // Earliest birth date for this age
+    LocalDate minBirthDate = currentDate.minusYears(age + 1); // Latest birth date for this age
+
+    return personRepository.findByAge(minBirthDate, maxBirthDate);
+  }
+
   // Note: Age-based counting removed due to complexity with date arithmetic in JPQL
   // Can be implemented later with native queries if needed
 
@@ -218,6 +277,43 @@ public class PersonService {
         && person.getDateOfBirth().isBefore(LocalDate.now().minusYears(MAX_AGE_YEARS))) {
       throw new IllegalArgumentException(
           "Date of birth cannot be more than " + MAX_AGE_YEARS + " years ago");
+    }
+  }
+
+  /**
+   * Validate age range parameters.
+   *
+   * @param minAge the minimum age
+   * @param maxAge the maximum age
+   * @throws IllegalArgumentException if age range is invalid
+   */
+  private void validateAgeRange(int minAge, int maxAge) {
+    if (minAge < 0) {
+      throw new IllegalArgumentException("Minimum age cannot be negative");
+    }
+    if (maxAge < 0) {
+      throw new IllegalArgumentException("Maximum age cannot be negative");
+    }
+    if (minAge > maxAge) {
+      throw new IllegalArgumentException("Minimum age cannot be greater than maximum age");
+    }
+    if (maxAge > MAX_AGE_YEARS) {
+      throw new IllegalArgumentException("Maximum age cannot exceed " + MAX_AGE_YEARS + " years");
+    }
+  }
+
+  /**
+   * Validate a single age parameter.
+   *
+   * @param age the age to validate
+   * @throws IllegalArgumentException if age is invalid
+   */
+  private void validateAge(int age) {
+    if (age < 0) {
+      throw new IllegalArgumentException("Age cannot be negative");
+    }
+    if (age > MAX_AGE_YEARS) {
+      throw new IllegalArgumentException("Age cannot exceed " + MAX_AGE_YEARS + " years");
     }
   }
 }
