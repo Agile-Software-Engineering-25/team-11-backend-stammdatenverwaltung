@@ -342,6 +342,160 @@ class PersonServiceTest {
     verify(personRepository).findYoungestPerson();
   }
 
+  @Test
+  @DisplayName("Should find persons by age range successfully")
+  void shouldFindPersonsByAgeRangeSuccessfully() {
+    // Given
+    int minAge = 25;
+    int maxAge = 40;
+    List<Person> persons = Arrays.asList(testPerson);
+    when(personRepository.findByAgeRange(any(LocalDate.class), any(LocalDate.class)))
+        .thenReturn(persons);
+
+    // When
+    List<Person> result = personService.findByAgeRange(minAge, maxAge);
+
+    // Then
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0)).isEqualTo(testPerson);
+    verify(personRepository).findByAgeRange(any(LocalDate.class), any(LocalDate.class));
+  }
+
+  @Test
+  @DisplayName("Should throw exception when minAge is negative")
+  void shouldThrowExceptionWhenMinAgeIsNegative() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAgeRange(-1, 40))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Minimum age cannot be negative");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when maxAge is negative")
+  void shouldThrowExceptionWhenMaxAgeIsNegative() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAgeRange(25, -1))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Maximum age cannot be negative");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when minAge is greater than maxAge")
+  void shouldThrowExceptionWhenMinAgeIsGreaterThanMaxAge() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAgeRange(50, 25))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Minimum age cannot be greater than maximum age");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when maxAge exceeds maximum allowed")
+  void shouldThrowExceptionWhenMaxAgeExceedsMaximumAllowed() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAgeRange(25, 151))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Maximum age cannot exceed 150 years");
+  }
+
+  @Test
+  @DisplayName("Should count persons by age range successfully")
+  void shouldCountPersonsByAgeRangeSuccessfully() {
+    // Given
+    int minAge = 25;
+    int maxAge = 40;
+    long expectedCount = 5L;
+    when(personRepository.countByAgeRange(any(LocalDate.class), any(LocalDate.class)))
+        .thenReturn(expectedCount);
+
+    // When
+    long result = personService.countByAgeRange(minAge, maxAge);
+
+    // Then
+    assertThat(result).isEqualTo(expectedCount);
+    verify(personRepository).countByAgeRange(any(LocalDate.class), any(LocalDate.class));
+  }
+
+  @Test
+  @DisplayName("Should validate age range for count method")
+  void shouldValidateAgeRangeForCountMethod() {
+    // When & Then
+    assertThatThrownBy(() -> personService.countByAgeRange(-1, 40))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Minimum age cannot be negative");
+  }
+
+  @Test
+  @DisplayName("Should find persons by exact age successfully")
+  void shouldFindPersonsByExactAgeSuccessfully() {
+    // Given
+    int age = 30;
+    List<Person> persons = Arrays.asList(testPerson);
+    when(personRepository.findByAge(any(LocalDate.class), any(LocalDate.class)))
+        .thenReturn(persons);
+
+    // When
+    List<Person> result = personService.findByAge(age);
+
+    // Then
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0)).isEqualTo(testPerson);
+    verify(personRepository).findByAge(any(LocalDate.class), any(LocalDate.class));
+  }
+
+  @Test
+  @DisplayName("Should throw exception when age is negative")
+  void shouldThrowExceptionWhenAgeIsNegative() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAge(-1))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Age cannot be negative");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when age exceeds maximum allowed")
+  void shouldThrowExceptionWhenAgeExceedsMaximumAllowed() {
+    // When & Then
+    assertThatThrownBy(() -> personService.findByAge(151))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Age cannot exceed 150 years");
+  }
+
+  @Test
+  @DisplayName("Should accept valid age range with equal min and max")
+  void shouldAcceptValidAgeRangeWithEqualMinAndMax() {
+    // Given
+    int age = 30;
+    List<Person> persons = Arrays.asList(testPerson);
+    when(personRepository.findByAgeRange(any(LocalDate.class), any(LocalDate.class)))
+        .thenReturn(persons);
+
+    // When
+    List<Person> result = personService.findByAgeRange(age, age);
+
+    // Then
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0)).isEqualTo(testPerson);
+    verify(personRepository).findByAgeRange(any(LocalDate.class), any(LocalDate.class));
+  }
+
+  @Test
+  @DisplayName("Should accept age range at boundaries")
+  void shouldAcceptAgeRangeAtBoundaries() {
+    // Given
+    int minAge = 0;
+    int maxAge = 150;
+    List<Person> persons = Arrays.asList();
+    when(personRepository.findByAgeRange(any(LocalDate.class), any(LocalDate.class)))
+        .thenReturn(persons);
+
+    // When
+    List<Person> result = personService.findByAgeRange(minAge, maxAge);
+
+    // Then
+    assertThat(result).isEmpty();
+    verify(personRepository).findByAgeRange(any(LocalDate.class), any(LocalDate.class));
+  }
+
   // Note: Age-based counting test removed due to removal of countByAgeRange method
 
   @Test
