@@ -337,6 +337,231 @@ class OrmIntegrationTest {
     verifyComplexQueries();
   }
 
+  @Test
+  @DisplayName("Should find persons by age range correctly with real database")
+  void shouldFindPersonsByAgeRangeCorrectlyWithRealDatabase() {
+    // Given - Create persons with known birth dates for age calculation
+    LocalDate currentDate = LocalDate.now();
+    Person youngPerson =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(25)) // 25 years old
+            .address("Young Person Address")
+            .phoneNumber("+49 100 100100")
+            .build();
+
+    Person middleAgedPerson =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(45)) // 45 years old
+            .address("Middle Aged Person Address")
+            .phoneNumber("+49 200 200200")
+            .build();
+
+    Person elderPerson =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(65)) // 65 years old
+            .address("Elder Person Address")
+            .phoneNumber("+49 300 300300")
+            .build();
+
+    // Save persons
+    Person savedYoung = personService.create(youngPerson);
+    Person savedMiddle = personService.create(middleAgedPerson);
+    Person savedElder = personService.create(elderPerson);
+
+    // When & Then - Test age range queries
+    List<Person> youngToMiddle = personService.findByAgeRange(20, 50);
+    assertThat(youngToMiddle).hasSize(2);
+    assertThat(youngToMiddle)
+        .extracting(Person::getId)
+        .containsExactlyInAnyOrder(savedYoung.getId(), savedMiddle.getId());
+
+    List<Person> middleToElder = personService.findByAgeRange(40, 70);
+    assertThat(middleToElder).hasSize(2);
+    assertThat(middleToElder)
+        .extracting(Person::getId)
+        .containsExactlyInAnyOrder(savedMiddle.getId(), savedElder.getId());
+
+    List<Person> onlyElder = personService.findByAgeRange(60, 70);
+    assertThat(onlyElder).hasSize(1);
+    assertThat(onlyElder.get(0).getId()).isEqualTo(savedElder.getId());
+
+    // Test count functionality
+    long countYoungToMiddle = personService.countByAgeRange(20, 50);
+    assertThat(countYoungToMiddle).isEqualTo(2);
+
+    long countAll = personService.countByAgeRange(0, 150);
+    assertThat(countAll).isEqualTo(3);
+  }
+
+  @Test
+  @DisplayName("Should find persons by exact age correctly with real database")
+  void shouldFindPersonsByExactAgeCorrectlyWithRealDatabase() {
+    // Given - Create persons with specific birth dates
+    LocalDate currentDate = LocalDate.now();
+    Person person30 =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(30)) // Exactly 30 years old
+            .address("Person 30 Address")
+            .phoneNumber("+49 400 400400")
+            .build();
+
+    Person anotherPerson30 =
+        Person.builder()
+            .dateOfBirth(
+                currentDate.minusYears(30).minusDays(100)) // Also 30 years old but different day
+            .address("Another Person 30 Address")
+            .phoneNumber("+49 500 500500")
+            .build();
+
+    Person person40 =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(40)) // 40 years old
+            .address("Person 40 Address")
+            .phoneNumber("+49 600 600600")
+            .build();
+
+    // Save persons
+    Person savedYoungFirst = personService.create(person30);
+    Person savedYoungSecond = personService.create(anotherPerson30);
+    Person savedForty = personService.create(person40);
+
+    // When & Then - Test exact age queries
+    List<Person> personsAge30 = personService.findByAge(30);
+    assertThat(personsAge30).hasSize(2);
+    assertThat(personsAge30)
+        .extracting(Person::getId)
+        .containsExactlyInAnyOrder(savedYoungFirst.getId(), savedYoungSecond.getId());
+
+    List<Person> personsAge40 = personService.findByAge(40);
+    assertThat(personsAge40).hasSize(1);
+    assertThat(personsAge40.get(0).getId()).isEqualTo(savedForty.getId());
+
+    List<Person> personsAge50 = personService.findByAge(50);
+    assertThat(personsAge50).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Should handle edge cases for age calculations with real database")
+  void shouldHandleEdgeCasesForAgeCalculationsWithRealDatabase() {
+    // Given - Create persons with edge case birth dates
+    LocalDate currentDate = LocalDate.now();
+
+    // Person born exactly one year ago today
+    Person personExactlyOneYear =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(1))
+            .address("One Year Old Address")
+            .phoneNumber("+49 700 700700")
+            .build();
+
+    // Person born one year ago but tomorrow (not yet had birthday this year)
+    Person personAlmostOneYear =
+        Person.builder()
+            .dateOfBirth(currentDate.minusYears(1).plusDays(1))
+            .address("Almost One Year Old Address")
+            .phoneNumber("+49 800 800800")
+            .build();
+
+    // Person born yesterday (0 years old)
+    Person personYesterday =
+        Person.builder()
+            .dateOfBirth(currentDate.minusDays(1))
+            .address("Born Yesterday Address")
+            .phoneNumber("+49 900 900900")
+            .build();
+
+    // Save persons
+    Person savedExactlyOne = personService.create(personExactlyOneYear);
+    Person savedAlmostOne = personService.create(personAlmostOneYear);
+    Person savedYesterday = personService.create(personYesterday);
+
+    // When & Then - Test edge cases
+    List<Person> age0 = personService.findByAge(0);
+    assertThat(age0).hasSize(2); // Both yesterday and almost-one-year should be 0
+    assertThat(age0)
+        .extracting(Person::getId)
+        .containsExactlyInAnyOrder(savedAlmostOne.getId(), savedYesterday.getId());
+
+    List<Person> age1 = personService.findByAge(1);
+    assertThat(age1).hasSize(1); // Only exactly-one-year should be 1
+    assertThat(age1.get(0).getId()).isEqualTo(savedExactlyOne.getId());
+
+    // Test count for very specific range
+    long countInfants = personService.countByAgeRange(0, 1);
+    assertThat(countInfants).isEqualTo(3); // All three persons are 0 or 1 years old
+  }
+
+  @Test
+  @DisplayName("Should work correctly with inheritance hierarchy for age queries")
+  void shouldWorkCorrectlyWithInheritanceHierarchyForAgeQueries() {
+    // Given - Create different types of persons with known ages
+    LocalDate currentDate = LocalDate.now();
+
+    Student youngStudent =
+        Student.builder()
+            .dateOfBirth(currentDate.minusYears(20))
+            .address("Young Student Address")
+            .phoneNumber("+49 111 111111")
+            .matriculationNumber("AGE001")
+            .degreeProgram("Computer Science")
+            .semester(2)
+            .studyStatus(Student.StudyStatus.ENROLLED)
+            .cohort("AGE-COHORT")
+            .build();
+
+    Employee middleEmployee =
+        Employee.builder()
+            .dateOfBirth(currentDate.minusYears(35))
+            .address("Middle Employee Address")
+            .phoneNumber("+49 222 222222")
+            .employeeNumber("AGE002")
+            .department("IT")
+            .officeNumber("AGE-101")
+            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+            .build();
+
+    Lecturer seniorLecturer =
+        Lecturer.builder()
+            .dateOfBirth(currentDate.minusYears(50))
+            .address("Senior Lecturer Address")
+            .phoneNumber("+49 333 333333")
+            .employeeNumber("AGE003")
+            .department("Computer Science")
+            .officeNumber("AGE-201")
+            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+            .fieldChair("Software Engineering")
+            .title("Prof. Dr.")
+            .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+            .build();
+
+    // Save entities
+    Student savedStudent = studentService.create(youngStudent);
+    Employee savedEmployee = employeeService.create(middleEmployee);
+    Lecturer savedLecturer = lecturerService.create(seniorLecturer);
+
+    // When & Then - Age queries should work across all person types
+    List<Person> youngAdults = personService.findByAgeRange(18, 25);
+    assertThat(youngAdults).hasSize(1);
+    assertThat(youngAdults.get(0).getId()).isEqualTo(savedStudent.getId());
+
+    List<Person> middleAged = personService.findByAgeRange(30, 40);
+    assertThat(middleAged).hasSize(1);
+    assertThat(middleAged.get(0).getId()).isEqualTo(savedEmployee.getId());
+
+    List<Person> seniors = personService.findByAgeRange(45, 55);
+    assertThat(seniors).hasSize(1);
+    assertThat(seniors.get(0).getId()).isEqualTo(savedLecturer.getId());
+
+    // Count across all inheritance types
+    long totalCount = personService.countByAgeRange(0, 150);
+    assertThat(totalCount).isEqualTo(3);
+
+    // Exact age queries
+    List<Person> exactly20 = personService.findByAge(20);
+    assertThat(exactly20).hasSize(1);
+    assertThat(exactly20.get(0).getId()).isEqualTo(savedStudent.getId());
+  }
+
   private void createComplexTestData() {
     Student enrolledStudent = createEnrolledStudent();
     Student graduatedStudent = createGraduatedStudent();
