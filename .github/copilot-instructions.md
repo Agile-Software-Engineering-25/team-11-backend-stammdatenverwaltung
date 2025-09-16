@@ -46,6 +46,7 @@ The project includes the following key dependencies and Maven plugins for develo
 ### Database Support
 - **H2 Database**: File-based database for development (`./data/mydb`)
 - **PostgreSQL**: Production database driver
+- **Flyway**: Database migration and versioning tool (v10.21.0)
 
 ### Documentation & Utilities
 - **SpringDoc OpenAPI (v2.8.11)**: Auto-generated API documentation and Swagger UI
@@ -64,6 +65,7 @@ The project includes the following key dependencies and Maven plugins for develo
 - **maven-compiler-plugin (v3.14.0)**: Java 21 compilation with Lombok annotation processing
 - **maven-surefire-plugin (v3.5.2)**: Unit test execution
 - **maven-failsafe-plugin (v3.5.2)**: Integration test execution
+- **flyway-maven-plugin**: Database migration management with H2 and PostgreSQL support (Spring Boot integration preferred)
 
 ### Development Best Practices
 - Use `@RestController` with `@RequestMapping("/api/v1")` for API endpoints
@@ -136,6 +138,11 @@ The project uses a **dual approach** for code quality:
 ./mvnw spotless:apply                   # Auto-format code only
 ./mvnw checkstyle:check                 # Logic/complexity checks only
 
+# Database migrations
+./mvnw flyway:migrate                   # Apply pending migrations
+./mvnw flyway:info                      # Show migration status
+./mvnw flyway:validate                  # Validate migrations
+
 # Spring Boot specific commands
 ./mvnw spring-boot:start                # Start app in background for testing
 ./mvnw spring-boot:stop                 # Stop background app
@@ -147,13 +154,50 @@ When adding new endpoints, follow the existing security model:
 
 - `@Profile("dev")` security chain: Allow public access to new API endpoints
 - `@Profile("prod")` security chain: Require authentication for all endpoints except health
-- Use `app.security.relaxed` property to conditionally enable features
+- Use profile-specific security configurations for different environments
+
+## Database Management & Migration Strategy
+
+The project uses **Flyway** for database schema versioning combined with **JPA/Hibernate** for object-relational mapping:
+
+### Migration-First Approach
+- **Schema Changes**: All database schema changes MUST be done through Flyway migrations
+- **JPA Configuration**: `hibernate.ddl-auto: validate` in all profiles (no auto-schema generation)
+- **Migration Location**: `src/main/resources/db/migration/`
+- **Migration Naming**: `V{version}__{description}.sql` (e.g., `V1__Create_initial_schema.sql`)
+
+### Database Workflow
+1. **Create JPA Entity**: Define your entity classes with proper annotations
+2. **Create Migration**: Write SQL migration file for schema changes
+3. **Apply Migration**: Run `./mvnw spring-boot:run` (automatic) or start the application
+4. **Validate**: Hibernate validates schema matches entity definitions
+
+### Flyway Commands
+```bash
+# Start application (runs migrations automatically)
+./mvnw spring-boot:run                 # Preferred: automatic migration
+
+# Build and test (includes migration validation)
+./mvnw clean install
+
+# Note: Maven plugin commands may have compatibility issues with Spring Boot 3.x
+# Use Spring Boot integration for reliable migration execution
+```
+
+### Migration Best Practices
+- **Version Control**: All migrations are version-controlled SQL files
+- **Incremental Changes**: Small, atomic changes per migration
+- **Naming Convention**: Use descriptive names with underscores
+- **Testing**: Test migrations on development database first
+- **Rollback Planning**: Plan for rollback scenarios (manual or Flyway Pro)
 
 ## Database Access Pattern
 
-- Development: H2 with `spring.jpa.hibernate.ddl-auto: update`
-- Production: PostgreSQL with `spring.jpa.hibernate.ddl-auto: validate`
-- Entities should be placed in `entities/` package for component scanning
+- **Development**: H2 with Flyway migrations and schema validation
+- **Production**: PostgreSQL with Flyway migrations and schema validation  
+- **Migration Execution**: Automatic on application startup or manual via Maven
+- **Schema Validation**: Hibernate validates database schema matches JPA entities
+- **Entity Placement**: All entities should be in `entities/` package for component scanning
 
 ## API Documentation
 
@@ -200,3 +244,4 @@ When making fundamental changes, update documentation files such as these:
 - `.github/copilot-instructions.md` - AI agent guidance
 - `README.md` - Project overview and getting started
 - `PROFILE_SETUP.md` - Profile-specific configuration details
+- `DATABASE_MANAGEMENT.md` - Flyway and JPA/Hibernate usage guide

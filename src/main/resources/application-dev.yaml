@@ -2,11 +2,18 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
+    hibernate:
+      ddl-auto: validate
   datasource:
     url: jdbc:h2:file:./data/mydb
     driverClassName: org.h2.Driver
     username: sa
     password: password
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
   security:
     user:
       name: dev-user
@@ -23,10 +30,5 @@ management:
 
 logging:
   level:
-    com.ase.stammdatenverwaltung: DEBUG
-    org.springframework.security: DEBUG
-
-# Development-specific settings
-app:
-  security:
-    relaxed: true
+    '[com.ase.stammdatenverwaltung]': DEBUG
+    '[org.springframework.security]': DEBUG
