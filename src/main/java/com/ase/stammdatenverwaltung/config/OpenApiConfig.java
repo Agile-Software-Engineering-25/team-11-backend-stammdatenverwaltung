@@ -17,7 +17,7 @@ public class OpenApiConfig {
   private String serverPort;
 
   @Bean
-  public OpenAPI customOpenAPI() {
+  OpenAPI customOpenAPI() {
     return new OpenAPI()
         .info(
             new Info()
@@ -33,7 +33,7 @@ public class OpenApiConfig {
   }
 
   @Bean
-  public GroupedOpenApi publicApi() {
+  GroupedOpenApi publicApi() {
     return GroupedOpenApi.builder()
         .group("public-api")
         .displayName("Public API")
@@ -42,7 +42,7 @@ public class OpenApiConfig {
   }
 
   @Bean
-  public GroupedOpenApi actuatorApi() {
+  GroupedOpenApi actuatorApi() {
     return GroupedOpenApi.builder()
         .group("actuator")
         .displayName("Actuator Endpoints")
@@ -51,7 +51,7 @@ public class OpenApiConfig {
   }
 
   @Bean
-  public GroupedOpenApi allApi() {
+  GroupedOpenApi allApi() {
     return GroupedOpenApi.builder()
         .group("all")
         .displayName("All Endpoints")

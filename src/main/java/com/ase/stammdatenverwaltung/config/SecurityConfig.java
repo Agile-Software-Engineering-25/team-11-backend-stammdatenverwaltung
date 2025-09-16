@@ -1,6 +1,5 @@
 package com.ase.stammdatenverwaltung.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -12,12 +11,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Value("${app.security.relaxed:false}")
-  private boolean relaxedSecurity;
-
   @Bean
   @Profile("dev")
-  public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             authz ->
                 authz
@@ -50,7 +46,7 @@ public class SecurityConfig {
 
   @Bean
   @Profile("prod")
-  public SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             authz ->
                 authz
