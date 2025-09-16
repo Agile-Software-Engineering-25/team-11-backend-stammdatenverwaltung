@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -73,6 +74,54 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
   @Query("SELECT p FROM Person p WHERE p.dateOfBirth = (SELECT MAX(p2.dateOfBirth) FROM Person p2)")
   Optional<Person> findYoungestPerson();
 
-  // Note: Age-based queries removed due to complexity with date arithmetic in JPQL
-  // Can be implemented later with native queries if needed
+  /**
+   * Find persons within a specific age range (inclusive). Uses database-agnostic approach by
+   * calculating birth date ranges.
+   *
+   * @param minBirthDate the minimum birth date (calculated from maxAge)
+   * @param maxBirthDate the maximum birth date (calculated from minAge)
+   * @return list of persons within the age range
+   */
+  @Query(
+      """
+    SELECT p FROM Person p
+    WHERE p.dateOfBirth <= :maxBirthDate
+    AND p.dateOfBirth >= :minBirthDate
+    """)
+  List<Person> findByAgeRange(
+      @Param("minBirthDate") LocalDate minBirthDate, @Param("maxBirthDate") LocalDate maxBirthDate);
+
+  /**
+   * Count persons within a specific age range (inclusive). Uses database-agnostic approach by
+   * calculating birth date ranges.
+   *
+   * @param minBirthDate the minimum birth date (calculated from maxAge)
+   * @param maxBirthDate the maximum birth date (calculated from minAge)
+   * @return count of persons within the age range
+   */
+  @Query(
+      """
+    SELECT COUNT(p) FROM Person p
+    WHERE p.dateOfBirth <= :maxBirthDate
+    AND p.dateOfBirth >= :minBirthDate
+    """)
+  long countByAgeRange(
+      @Param("minBirthDate") LocalDate minBirthDate, @Param("maxBirthDate") LocalDate maxBirthDate);
+
+  /**
+   * Find persons with an exact age. Uses database-agnostic approach by calculating birth date range
+   * for the specific age.
+   *
+   * @param minBirthDate the minimum birth date for the age (exclusive)
+   * @param maxBirthDate the maximum birth date for the age (inclusive)
+   * @return list of persons with the exact age
+   */
+  @Query(
+      """
+    SELECT p FROM Person p
+    WHERE p.dateOfBirth <= :maxBirthDate
+    AND p.dateOfBirth > :minBirthDate
+    """)
+  List<Person> findByAge(
+      @Param("minBirthDate") LocalDate minBirthDate, @Param("maxBirthDate") LocalDate maxBirthDate);
 }
