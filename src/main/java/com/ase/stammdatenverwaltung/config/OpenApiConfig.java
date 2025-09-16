@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for OpenAPI documentation setup. Provides custom OpenAPI configuration and
+ * grouped API definitions for the application.
+ */
 @Configuration
 public class OpenApiConfig {
 

@@ -7,6 +7,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Security configuration class that provides profile-specific security settings. Defines different
+ * security configurations for development and production environments.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
