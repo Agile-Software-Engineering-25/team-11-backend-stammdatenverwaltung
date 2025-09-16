@@ -217,6 +217,17 @@ This application supports dual-environment configuration:
 
 > 📖 **See [`PROFILE_SETUP.md`](PROFILE_SETUP.md)** for detailed profile configuration.
 
+### 🗄️ Database Management
+
+This project uses **Flyway** for database schema versioning combined with **JPA/Hibernate** for object-relational mapping:
+
+- **Schema Migrations**: All database changes managed through versioned SQL files
+- **Automatic Migration**: Flyway runs automatically on application startup
+- **Schema Validation**: Hibernate validates database schema matches JPA entities
+- **Cross-Database Support**: H2 for development, PostgreSQL for production
+
+> 📖 **See [`DATABASE_MANAGEMENT.md`](DATABASE_MANAGEMENT.md)** for complete database setup and migration guide.
+
 ## 🔧 Dependencies & Tech Stack
 
 ### Core Framework

@@ -9,6 +9,11 @@ spring:
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:password}
     driverClassName: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
   security:
     user:
       name: ${ADMIN_USERNAME}
@@ -29,10 +34,5 @@ management:
 
 logging:
   level:
-    com.ase.stammdatenverwaltung: INFO
-    org.springframework.security: WARN
-
-# Production-specific settings
-app:
-  security:
-    relaxed: false
+    '[com.ase.stammdatenverwaltung]': INFO
+    '[org.springframework.security]': WARN
