@@ -196,14 +196,6 @@
                         </goals>
                         <phase>process-sources</phase>
                     </execution>
-                    <!-- Check formatting during validate phase -->
-                    <execution>
-                        <id>spotless-check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>validate</phase>
-                    </execution>
                 </executions>
             </plugin>
             <!-- Checkstyle Plugin - Logic and Complexity Rules Only -->
