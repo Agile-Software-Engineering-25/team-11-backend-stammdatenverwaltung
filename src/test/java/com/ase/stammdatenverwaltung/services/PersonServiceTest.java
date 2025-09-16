@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PersonServiceTest {
 
   // Test constants
-  private static final int MAX_AGE_VALIDATION = 151;
+  private static final int MAX_AGE_VALIDATION = 150;
 
   @Mock private PersonRepository personRepository;
 
