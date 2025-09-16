@@ -25,6 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("PersonService Tests")
 class PersonServiceTest {
 
+  // Test constants
+  private static final int MAX_AGE_VALIDATION = 151;
+
   @Mock private PersonRepository personRepository;
 
   @InjectMocks private PersonService personService;
@@ -174,7 +177,7 @@ class PersonServiceTest {
     // Given
     Person invalidPerson =
         Person.builder()
-            .dateOfBirth(LocalDate.now().minusYears(151))
+            .dateOfBirth(LocalDate.now().minusYears(MAX_AGE_VALIDATION))
             .address("Test Address")
             .phoneNumber("+49 123 456789")
             .build();

@@ -25,6 +25,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 public class PersonService {
 
+  private static final int MAX_AGE_YEARS = 150;
+
   private final PersonRepository personRepository;
 
   /**
@@ -213,8 +215,9 @@ public class PersonService {
 
     // Additional business validation can be added here
     if (person.getDateOfBirth() != null
-        && person.getDateOfBirth().isBefore(LocalDate.now().minusYears(150))) {
-      throw new IllegalArgumentException("Date of birth cannot be more than 150 years ago");
+        && person.getDateOfBirth().isBefore(LocalDate.now().minusYears(MAX_AGE_YEARS))) {
+      throw new IllegalArgumentException(
+          "Date of birth cannot be more than " + MAX_AGE_YEARS + " years ago");
     }
   }
 }

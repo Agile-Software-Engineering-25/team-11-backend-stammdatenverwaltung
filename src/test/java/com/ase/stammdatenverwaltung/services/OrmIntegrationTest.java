@@ -331,65 +331,82 @@ class OrmIntegrationTest {
   @DisplayName("Should support complex queries with inheritance relationships")
   void shouldSupportComplexQueriesWithInheritanceRelationships() {
     // Given - Create test data
-    Student enrolledStudent =
-        Student.builder()
-            .dateOfBirth(LocalDate.of(2000, 1, 1))
-            .address("Enrolled Student Address")
-            .phoneNumber("+49 101 101101")
-            .matriculationNumber("COMPLEX001")
-            .degreeProgram("Computer Science")
-            .semester(3)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("COMPLEX-COHORT")
-            .build();
+    createComplexTestData();
 
-    Student graduatedStudent =
-        Student.builder()
-            .dateOfBirth(LocalDate.of(1999, 12, 31))
-            .address("Graduated Student Address")
-            .phoneNumber("+49 202 202202")
-            .matriculationNumber("COMPLEX002")
-            .degreeProgram("Computer Science")
-            .semester(6)
-            .studyStatus(Student.StudyStatus.GRADUATED)
-            .cohort("COMPLEX-COHORT")
-            .build();
+    // When & Then - Test complex queries
+    verifyComplexQueries();
+  }
 
-    Lecturer permanentLecturer =
-        Lecturer.builder()
-            .dateOfBirth(LocalDate.of(1975, 6, 15))
-            .address("Permanent Lecturer Address")
-            .phoneNumber("+49 303 303303")
-            .employeeNumber("COMPLEX003")
-            .department("Computer Science Department")
-            .officeNumber("COMPLEX-201")
-            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-            .fieldChair("Software Engineering")
-            .title("Prof. Dr.")
-            .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
-            .build();
-
-    Lecturer externalLecturer =
-        Lecturer.builder()
-            .dateOfBirth(LocalDate.of(1980, 8, 20))
-            .address("External Lecturer Address")
-            .phoneNumber("+49 404 404404")
-            .employeeNumber("COMPLEX004")
-            .department("Computer Science Department")
-            .officeNumber("COMPLEX-202")
-            .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
-            .fieldChair("Data Science")
-            .title("Dr.")
-            .employmentStatus(Lecturer.EmploymentStatus.EXTERNAL)
-            .build();
+  private void createComplexTestData() {
+    Student enrolledStudent = createEnrolledStudent();
+    Student graduatedStudent = createGraduatedStudent();
+    Lecturer permanentLecturer = createPermanentLecturer();
+    Lecturer externalLecturer = createExternalLecturer();
 
     // Save all entities
     studentService.create(enrolledStudent);
     studentService.create(graduatedStudent);
     lecturerService.create(permanentLecturer);
     lecturerService.create(externalLecturer);
+  }
 
-    // When & Then - Test complex queries
+  private Student createEnrolledStudent() {
+    return Student.builder()
+        .dateOfBirth(LocalDate.of(2000, 1, 1))
+        .address("Enrolled Student Address")
+        .phoneNumber("+49 101 101101")
+        .matriculationNumber("COMPLEX001")
+        .degreeProgram("Computer Science")
+        .semester(3)
+        .studyStatus(Student.StudyStatus.ENROLLED)
+        .cohort("COMPLEX-COHORT")
+        .build();
+  }
+
+  private Student createGraduatedStudent() {
+    return Student.builder()
+        .dateOfBirth(LocalDate.of(1999, 12, 31))
+        .address("Graduated Student Address")
+        .phoneNumber("+49 202 202202")
+        .matriculationNumber("COMPLEX002")
+        .degreeProgram("Computer Science")
+        .semester(6)
+        .studyStatus(Student.StudyStatus.GRADUATED)
+        .cohort("COMPLEX-COHORT")
+        .build();
+  }
+
+  private Lecturer createPermanentLecturer() {
+    return Lecturer.builder()
+        .dateOfBirth(LocalDate.of(1975, 6, 15))
+        .address("Permanent Lecturer Address")
+        .phoneNumber("+49 303 303303")
+        .employeeNumber("COMPLEX003")
+        .department("Computer Science Department")
+        .officeNumber("COMPLEX-201")
+        .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+        .fieldChair("Software Engineering")
+        .title("Prof. Dr.")
+        .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+        .build();
+  }
+
+  private Lecturer createExternalLecturer() {
+    return Lecturer.builder()
+        .dateOfBirth(LocalDate.of(1980, 8, 20))
+        .address("External Lecturer Address")
+        .phoneNumber("+49 404 404404")
+        .employeeNumber("COMPLEX004")
+        .department("Computer Science Department")
+        .officeNumber("COMPLEX-202")
+        .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
+        .fieldChair("Data Science")
+        .title("Dr.")
+        .employmentStatus(Lecturer.EmploymentStatus.EXTERNAL)
+        .build();
+  }
+
+  private void verifyComplexQueries() {
     List<Student> enrolledStudents = studentService.findByStudyStatus(Student.StudyStatus.ENROLLED);
     assertThat(enrolledStudents).hasSize(1);
 

@@ -23,6 +23,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 public class StudentService {
 
+  private static final int MAX_SEMESTER_COUNT = 20;
+
   private final StudentRepository studentRepository;
 
   /**
@@ -244,8 +246,8 @@ public class StudentService {
     if (student.getSemester() != null && student.getSemester() < 1) {
       throw new IllegalArgumentException("Semester must be positive");
     }
-    if (student.getSemester() != null && student.getSemester() > 20) {
-      throw new IllegalArgumentException("Semester cannot exceed 20");
+    if (student.getSemester() != null && student.getSemester() > MAX_SEMESTER_COUNT) {
+      throw new IllegalArgumentException("Semester cannot exceed " + MAX_SEMESTER_COUNT);
     }
   }
 }
