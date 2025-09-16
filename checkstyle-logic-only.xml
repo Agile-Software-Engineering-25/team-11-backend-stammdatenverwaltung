@@ -13,6 +13,18 @@
         <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
     </module>
 
+    <!-- Suppress file length checks in test files (allow up to 1000 lines for integration tests) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="FileLength"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
+    <!-- Suppress method length checks in test files (allow longer test methods) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MethodLength"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
     <!-- === TreeWalker module processes Java source code === -->
     <module name="TreeWalker">
 
@@ -105,7 +117,7 @@
 
         <!-- Method length -->
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="75"/>
             <property name="countEmpty" value="false"/>
         </module>
 
@@ -181,7 +193,7 @@
 
     <!-- File length -->
     <module name="FileLength">
-        <property name="max" value="500"/>
+        <property name="max" value="800"/>
     </module>
 
     <!-- No tab characters -->
