@@ -16,8 +16,9 @@ RUN chmod +x mvnw && \
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN ./mvnw dependency:go-offline -B
 
-# Copy the source code
+# Copy the source code and configuration files needed for build
 COPY src ./src
+COPY checkstyle-logic-only.xml ./
 
 # Build the application
 RUN ./mvnw clean package -DskipTests
