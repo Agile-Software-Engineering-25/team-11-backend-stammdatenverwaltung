@@ -48,7 +48,3 @@ docs/
 
 # Ignore test files for production build
 src/test/
-
-# Ignore checkstyle files (build tools, not runtime)
-checkstyle*.jar
-checkstyle.xml
