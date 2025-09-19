@@ -177,7 +177,7 @@ class PersonServiceTest {
     // Given
     Person invalidPerson =
         Person.builder()
-            .dateOfBirth(LocalDate.now().minusYears(MAX_AGE_VALIDATION))
+            .dateOfBirth(LocalDate.now().minusYears(MAX_AGE_VALIDATION).minusDays(1))
             .address("Test Address")
             .phoneNumber("+49 123 456789")
             .build();
