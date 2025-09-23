@@ -9,8 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.security.jwt")
 public class JwtSecurityProperties {
 
-  /** Expected audience in JWT tokens for API access validation. */
-  private String expectedAudience = "stammdatenverwaltung-api";
+  /** Audience in JWT tokens for API access validation. */
+  private String audience = "stammdatenverwaltung-api";
 
   /** Client ID used for extracting client-specific roles from JWT tokens. */
   private String clientId = "stammdatenverwaltung-api";
@@ -24,12 +24,12 @@ public class JwtSecurityProperties {
   /** Whether to extract client roles from JWT tokens. */
   private boolean extractClientRoles = true;
 
-  public String getExpectedAudience() {
-    return expectedAudience;
+  public String getAudience() {
+    return audience;
   }
 
-  public void setExpectedAudience(String expectedAudience) {
-    this.expectedAudience = expectedAudience;
+  public void setAudience(String audience) {
+    this.audience = audience;
   }
 
   public String getClientId() {

@@ -69,7 +69,7 @@ Production uses Keycloak JWT authentication (OAuth2 Resource Server). No Basic A
 |              | `DATABASE_USERNAME` | Database user              | `stammdaten_user`                                       |
 |              | `DATABASE_PASSWORD` | Database password          | `secure_db_password`                                    |
 | **Security** | `KEYCLOAK_ISSUER_URI`   | Keycloak realm issuer URI    | `https://your-keycloak/realms/stammdatenverwaltung`     |
-|              | `KEYCLOAK_API_AUDIENCE` | Expected JWT audience         | `stammdatenverwaltung-api`                              |
+|              | `KEYCLOAK_API_AUDIENCE` | JWT audience                  | `stammdatenverwaltung-api`                              |
 | **Optional** | `SERVER_PORT`       | Application port           | `8080`                                                  |
 
 ### 🚀 Running in Production Mode
@@ -159,5 +159,5 @@ docker run -p 8080:8080 \
 | `DATABASE_USERNAME`      | Prod only | -       | Database username       |
 | `DATABASE_PASSWORD`      | Prod only | -       | Database password       |
 | `KEYCLOAK_ISSUER_URI`    | Prod only | -       | Keycloak issuer URI     |
-| `KEYCLOAK_API_AUDIENCE`  | Prod only | -       | Expected JWT audience   |
+| `KEYCLOAK_API_AUDIENCE`  | Prod only | -       | JWT audience            |
 | `SERVER_PORT`            | No        | `8080`  | Server port             |

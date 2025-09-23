@@ -298,7 +298,7 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 | `DATABASE_PASSWORD`      | prod    | Yes      | -       | Database password         |
 | `SERVER_PORT`            | Both    | No       | `8080`  | Server port               |
 | `KEYCLOAK_ISSUER_URI`    | prod    | Yes      | -       | Keycloak realm issuer URI |
-| `KEYCLOAK_API_AUDIENCE`  | prod    | Yes      | -       | Expected JWT audience     |
+| `KEYCLOAK_API_AUDIENCE`  | prod    | Yes      | -       | JWT audience              |
 
 ## 🔐 Auth Quick Test (dev)
 

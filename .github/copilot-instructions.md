@@ -174,7 +174,7 @@ The application uses **Keycloak OAuth2 JWT authentication** with profile-specifi
 
 ### Environment Variables
 - `KEYCLOAK_ISSUER_URI`: Keycloak realm issuer URL (required for prod)
-- `KEYCLOAK_API_AUDIENCE`: Expected audience in JWT tokens (default: stammdatenverwaltung-api)
+- `KEYCLOAK_API_AUDIENCE`: Audience in JWT tokens (default: stammdatenverwaltung-api)
 
 ## Database Management & Migration Strategy
 

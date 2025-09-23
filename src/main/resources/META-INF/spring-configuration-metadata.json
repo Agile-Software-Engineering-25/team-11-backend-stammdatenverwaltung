@@ -10,7 +10,7 @@
     {
       "name": "app.security.jwt.audience",
       "type": "java.lang.String",
-      "description": "Expected audience in JWT tokens for API access validation",
+      "description": "Audience in JWT tokens for API access validation",
       "defaultValue": "stammdatenverwaltung-api"
     },
     {
