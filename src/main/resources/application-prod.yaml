@@ -40,3 +40,16 @@ logging:
   level:
     '[com.ase.stammdatenverwaltung]': INFO
     '[org.springframework.security]': WARN
+
+# Application-specific JWT configuration
+app:
+  security:
+    jwt:
+      # Validate audience claim for API access (required in production)
+      audience: ${KEYCLOAK_API_AUDIENCE}
+      # Client ID for extracting client-specific roles (required in production)
+      client-id: ${KEYCLOAK_CLIENT_ID}
+      # Extract roles from realm access (global roles)
+      extract-realm-roles: true
+      # Extract roles from resource access (client-specific roles)
+      extract-client-roles: true

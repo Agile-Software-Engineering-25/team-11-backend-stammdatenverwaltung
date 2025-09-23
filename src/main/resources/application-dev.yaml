@@ -36,3 +36,16 @@ logging:
   level:
     '[com.ase.stammdatenverwaltung]': DEBUG
     '[org.springframework.security]': DEBUG
+
+# Application-specific JWT configuration
+app:
+  security:
+    jwt:
+      # Validate audience claim for API access
+      audience: ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
+      # Client ID for extracting client-specific roles
+      client-id: ${KEYCLOAK_CLIENT_ID:stammdatenverwaltung-api}
+      # Extract roles from realm access (global roles)
+      extract-realm-roles: true
+      # Extract roles from resource access (client-specific roles)
+      extract-client-roles: true

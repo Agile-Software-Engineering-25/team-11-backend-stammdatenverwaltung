@@ -1,0 +1,41 @@
+{
+  "groups": [
+    {
+      "name": "app.security.jwt",
+      "type": "com.ase.stammdatenverwaltung.config.JwtSecurityProperties",
+      "description": "Configuration properties for JWT security settings"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.security.jwt.audience",
+      "type": "java.lang.String",
+      "description": "Expected audience in JWT tokens for API access validation",
+      "defaultValue": "stammdatenverwaltung-api"
+    },
+    {
+      "name": "app.security.jwt.client-id",
+      "type": "java.lang.String",
+      "description": "Client ID used for extracting client-specific roles from JWT tokens",
+      "defaultValue": "stammdatenverwaltung-api"
+    },
+    {
+      "name": "app.security.jwt.validate-audience",
+      "type": "java.lang.Boolean",
+      "description": "Whether to validate the audience claim in JWT tokens",
+      "defaultValue": true
+    },
+    {
+      "name": "app.security.jwt.extract-realm-roles",
+      "type": "java.lang.Boolean",
+      "description": "Whether to extract realm roles from JWT tokens",
+      "defaultValue": true
+    },
+    {
+      "name": "app.security.jwt.extract-client-roles",
+      "type": "java.lang.Boolean",
+      "description": "Whether to extract client roles from JWT tokens",
+      "defaultValue": true
+    }
+  ]
+}

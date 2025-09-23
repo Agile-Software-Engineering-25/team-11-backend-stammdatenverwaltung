@@ -2,12 +2,14 @@ package com.ase.stammdatenverwaltung;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Main application class for the Stammdatenverwaltung (Master Data Management) service. This Spring
  * Boot application provides REST APIs for managing master data.
  */
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class StammdatenverwaltungApplication {
 
   /**

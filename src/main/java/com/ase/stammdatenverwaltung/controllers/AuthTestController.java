@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1")
 public class AuthTestController {
 
+  private static final String AUTH_TYPE_JWT = "JWT";
+  private static final String AUTH_TYPE_BASIC = "Basic Auth";
+
   /**
    * Public endpoint accessible without authentication. Useful for health checks and public
    * information.
@@ -30,7 +33,7 @@ public class AuthTestController {
 
   /**
    * Protected endpoint requiring any valid authentication. Returns basic user information from the
-   * JWT token.
+   * JWT token or Basic Auth.
    */
   @GetMapping("/hello")
   public ResponseEntity<Map<String, String>> hello(
@@ -38,11 +41,14 @@ public class AuthTestController {
     Map<String, String> response = new HashMap<>();
     response.put("message", "Hello from protected endpoint!");
     response.put("user", principal.getName());
+
     if (jwt != null) {
+      response.put("authType", AUTH_TYPE_JWT);
       response.put("subject", jwt.getSubject());
-      response.put("preferredUsername", jwt.getClaimAsString("preferred_username"));
+      response.put("preferredUsername", getClaimAsString(jwt, "preferred_username"));
     } else {
-      response.put("subject", "n/a (basic auth)");
+      response.put("authType", AUTH_TYPE_BASIC);
+      response.put("subject", principal.getName());
       response.put("preferredUsername", principal.getName());
     }
     return ResponseEntity.ok(response);
@@ -56,7 +62,7 @@ public class AuthTestController {
     Map<String, Object> response = new HashMap<>();
     response.put("message", "Admin endpoint accessed successfully!");
     response.put(
-        "admin", jwt != null ? jwt.getClaimAsString("preferred_username") : principal.getName());
+        "admin", jwt != null ? getClaimAsString(jwt, "preferred_username") : principal.getName());
 
     // Safely extract realm roles
     if (jwt != null) {
@@ -81,10 +87,10 @@ public class AuthTestController {
     Map<String, String> response = new HashMap<>();
     response.put("message", "User profile accessed successfully!");
     if (jwt != null) {
-      response.put("user", jwt.getClaimAsString("preferred_username"));
-      response.put("email", jwt.getClaimAsString("email"));
-      response.put("firstName", jwt.getClaimAsString("given_name"));
-      response.put("lastName", jwt.getClaimAsString("family_name"));
+      response.put("user", getClaimAsString(jwt, "preferred_username"));
+      response.put("email", getClaimAsString(jwt, "email"));
+      response.put("firstName", getClaimAsString(jwt, "given_name"));
+      response.put("lastName", getClaimAsString(jwt, "family_name"));
     } else {
       response.put("user", principal.getName());
     }
@@ -113,5 +119,21 @@ public class AuthTestController {
       response.put("principal", principal != null ? principal.getName() : "anonymous");
     }
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Helper method to safely extract string claims from JWT tokens.
+   *
+   * @param jwt JWT token
+   * @param claimName Name of the claim to extract
+   * @return Claim value as string, or "N/A" if not present
+   */
+  private String getClaimAsString(Jwt jwt, String claimName) {
+    try {
+      String value = jwt.getClaimAsString(claimName);
+      return value != null ? value : "N/A";
+    } catch (Exception e) {
+      return "N/A";
+    }
   }
 }
