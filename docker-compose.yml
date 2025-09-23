@@ -28,8 +28,8 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
 
       # Security Configuration
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      KEYCLOAK_API_AUDIENCE: ${KEYCLOAK_API_AUDIENCE}
       
       # Server Configuration
       SERVER_PORT: 8080
