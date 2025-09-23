@@ -15,10 +15,14 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
   security:
-    user:
-      name: ${ADMIN_USERNAME}
-      password: ${ADMIN_PASSWORD}
-      roles: ADMIN
+    oauth2:
+      resourceserver:
+        jwt:
+          # Production Keycloak instance (required)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          # Validate audience claim for API access
+          audiences:
+            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
 
 server:
   port: ${SERVER_PORT:8080}

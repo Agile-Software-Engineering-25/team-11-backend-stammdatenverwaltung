@@ -15,10 +15,14 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
   security:
-    user:
-      name: dev-user
-      password: dev-password
-      roles: ADMIN
+    oauth2:
+      resourceserver:
+        jwt:
+          # Development Keycloak instance (optional, can be overridden)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/stammdatenverwaltung}
+          # Validate audience claim for API access
+          audiences:
+            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
 
 server:
   port: 8080
