@@ -122,7 +122,6 @@ public class ExampleController {
 
     return ResponseEntity.ok(examples);
   }
-
   /**
    * Create a new example.
    *
