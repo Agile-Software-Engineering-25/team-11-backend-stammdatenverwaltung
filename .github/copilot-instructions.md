@@ -20,7 +20,7 @@ The application operates in two distinct modes controlled by Spring profiles:
 
 - PostgreSQL database
 - Strict security (only `/actuator/health` public, all else requires auth)
-- Environment-driven configuration (`DATABASE_URL`, `ADMIN_USERNAME`, etc.)
+- Environment-driven configuration (`DATABASE_URL`, `KEYCLOAK_ISSUER_URI`, etc.)
 - INFO-level logging
 - Start with: `SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run`
 
@@ -150,11 +150,31 @@ The project uses a **dual approach** for code quality:
 
 ## Security Implementation Pattern
 
-When adding new endpoints, follow the existing security model:
+The application uses **Keycloak OAuth2 JWT authentication** with profile-specific configurations:
 
-- `@Profile("dev")` security chain: Allow public access to new API endpoints
-- `@Profile("prod")` security chain: Require authentication for all endpoints except health
-- Use profile-specific security configurations for different environments
+### Authentication Methods
+- **Development**: Dual support for Basic Auth (dev tools) and JWT (API testing)
+- **Production**: JWT-only authentication with strict validation
+
+### Role-Based Access Control
+- **Realm Roles**: Global roles from `realm_access.roles` token claim
+- **Client Roles**: API-specific roles from `resource_access.stammdatenverwaltung-api.roles`
+- **Spring Security**: Roles mapped to `ROLE_*` authorities for `@PreAuthorize` annotations
+
+### Security Patterns for New Endpoints
+- **Public endpoints**: Use `/api/v1/public/**` pattern, no authentication required
+- **Admin endpoints**: Use `/api/v1/admin/**` pattern, requires `ROLE_ADMIN`
+- **User endpoints**: Use `/api/v1/user/**` pattern, requires `ROLE_USER`
+- **Protected endpoints**: All other `/api/**` endpoints require valid JWT authentication
+
+### Configuration
+- **Keycloak Integration**: OAuth2 Resource Server with issuer-uri discovery
+- **JWT Validation**: Automatic signature verification, audience validation, role extraction
+- **Method Security**: Use `@PreAuthorize("hasRole('ROLE_NAME')")` for fine-grained control
+
+### Environment Variables
+- `KEYCLOAK_ISSUER_URI`: Keycloak realm issuer URL (required for prod)
+- `KEYCLOAK_API_AUDIENCE`: Audience in JWT tokens (default: stammdatenverwaltung-api)
 
 ## Database Management & Migration Strategy
 
@@ -232,10 +252,10 @@ Run tests individually:
 Essential variables for production deployment (all required):
 
 - `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
-- `ADMIN_USERNAME`, `ADMIN_PASSWORD`
+- `KEYCLOAK_ISSUER_URI`, `KEYCLOAK_API_AUDIENCE`
 - `SERVER_PORT` (optional, defaults to 8080)
 
-**Security Note**: As of commit 7ff88d1, all authentication credentials must be explicitly provided via environment variables for production deployment - no default values are used to enhance security.
+**Security Note**: Production authentication is JWT-only via Keycloak. Ensure `KEYCLOAK_ISSUER_URI` and `KEYCLOAK_API_AUDIENCE` are set via environment variables; no Basic Auth users are configured in production.
 
 ## Documentation Maintenance
 

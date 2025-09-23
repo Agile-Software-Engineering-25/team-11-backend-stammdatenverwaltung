@@ -15,10 +15,14 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
   security:
-    user:
-      name: dev-user
-      password: dev-password
-      roles: ADMIN
+    oauth2:
+      resourceserver:
+        jwt:
+          # Development Keycloak instance (optional, can be overridden)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/stammdatenverwaltung}
+          # Validate audience claim for API access
+          audiences:
+            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
 
 server:
   port: 8080
@@ -32,3 +36,16 @@ logging:
   level:
     '[com.ase.stammdatenverwaltung]': DEBUG
     '[org.springframework.security]': DEBUG
+
+# Application-specific JWT configuration
+app:
+  security:
+    jwt:
+      # Validate audience claim for API access
+      audience: ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
+      # Client ID for extracting client-specific roles
+      client-id: ${KEYCLOAK_CLIENT_ID:stammdatenverwaltung-api}
+      # Extract roles from realm access (global roles)
+      extract-realm-roles: true
+      # Extract roles from resource access (client-specific roles)
+      extract-client-roles: true
