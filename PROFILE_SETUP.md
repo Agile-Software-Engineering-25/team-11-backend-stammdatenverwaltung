@@ -6,17 +6,24 @@ This application supports two distinct profiles optimized for different deployme
 
 ## 🛠️ Development Profile (`dev`)
 
-### 🔐 Default Credentials
+### 🔐 Default Credentials (Basic Auth for dev)
 
 | Field        | Value          |
 | ------------ | -------------- |
 | **Username** | `dev-user`     |
 | **Password** | `dev-password` |
 
+Additional admin user for admin-only endpoints:
+
+| Field        | Value          |
+| ------------ | -------------- |
+| **Username** | `dev-admin`    |
+| **Password** | `dev-password` |
+
 ### ✨ Features
 
 - 🗄️ **H2 File Database**: Persistent data stored in `./data/mydb.mv.db`
-- 🔓 **Relaxed Security**: Swagger UI accessible without authentication
+- 🔓 **Relaxed Security**: Swagger/H2 and `/api/v1/public/**` are public. All other `/api/**` require Basic (dev users) or JWT
 - 📋 **Detailed Logging**: Enhanced debugging information
 - 🛠️ **H2 Console**: Direct database access and inspection
 - 🚀 **Hot Reload**: Spring Boot DevTools enabled
@@ -42,17 +49,14 @@ This application supports two distinct profiles optimized for different deployme
 
 ## 🏭 Production Profile (`prod`)
 
-### 🔐 Environment-Based Credentials
+### 🔐 Authentication
 
-| Variable         | Purpose                    | Required |
-| ---------------- | -------------------------- | -------- |
-| `ADMIN_USERNAME` | Application admin username | ✅ Yes   |
-| `ADMIN_PASSWORD` | Application admin password | ✅ Yes   |
+Production uses Keycloak JWT authentication (OAuth2 Resource Server). No Basic Auth users are configured.
 
 ### 🔒 Features
 
 - 🐘 **PostgreSQL Database**: Enterprise-grade relational database
-- 🔐 **Strict Security**: Authentication required for all endpoints except health
+- 🔐 **Strict Security**: JWT required for all `/api/**` except `/api/v1/public/**` and `/actuator/health`
 - 📊 **Production Logging**: INFO-level logging for performance
 - ⚙️ **Environment Configuration**: All settings via environment variables
 - 🛡️ **Enhanced Security**: No default credentials, explicit authentication
@@ -64,8 +68,8 @@ This application supports two distinct profiles optimized for different deployme
 | **Database** | `DATABASE_URL`      | PostgreSQL connection URL  | `jdbc:postgresql://localhost:5432/stammdatenverwaltung` |
 |              | `DATABASE_USERNAME` | Database user              | `stammdaten_user`                                       |
 |              | `DATABASE_PASSWORD` | Database password          | `secure_db_password`                                    |
-| **Security** | `ADMIN_USERNAME`    | Application admin username | `admin`                                                 |
-|              | `ADMIN_PASSWORD`    | Application admin password | `your_secure_password`                                  |
+| **Security** | `KEYCLOAK_ISSUER_URI`   | Keycloak realm issuer URI    | `https://your-keycloak/realms/stammdatenverwaltung`     |
+|              | `KEYCLOAK_API_AUDIENCE` | Expected JWT audience         | `stammdatenverwaltung-api`                              |
 | **Optional** | `SERVER_PORT`       | Application port           | `8080`                                                  |
 
 ### 🚀 Running in Production Mode
@@ -76,8 +80,8 @@ export SPRING_PROFILES_ACTIVE=prod
 export DATABASE_URL=jdbc:postgresql://localhost:5432/stammdatenverwaltung
 export DATABASE_USERNAME=db_user
 export DATABASE_PASSWORD=db_password
-export ADMIN_USERNAME=prod-admin
-export ADMIN_PASSWORD=secure-password
+export KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung
+export KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api
 
 # 🚀 Start application
 ./mvnw spring-boot:run
@@ -87,8 +91,8 @@ export ADMIN_PASSWORD=secure-password
 
 | Service             | URL                                   | Authentication |
 | ------------------- | ------------------------------------- | -------------- |
-| 🏠 **Application**  | http://localhost:8080                 | ✅ Required    |
-| 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ✅ Required    |
+| 🏠 **Application**  | http://localhost:8080                 | ✅ JWT (Keycloak) |
+| 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ✅ JWT (Keycloak) |
 | ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None        |
 
 ## 🐳 Docker Deployment
@@ -101,11 +105,11 @@ docker build -t stammdatenverwaltung .
 
 docker run -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=prod \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=your-secure-password \
   -e DATABASE_URL=jdbc:postgresql://your-db-host:5432/stammdatenverwaltung \
   -e DATABASE_USERNAME=db_user \
   -e DATABASE_PASSWORD=db_password \
+  -e KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung \
+  -e KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api \
   stammdatenverwaltung
 ```
 
@@ -135,14 +139,16 @@ docker run -p 8080:8080 \
 - Swagger UI: ✅ Public access
 - H2 Console: ✅ Public access
 - Health endpoint: ✅ Public access
-- API endpoints: ✅ Public access
+- Public API: ✅ `/api/v1/public/**`
+- Secured API: 🔒 Other `/api/**` require Basic (dev users) or JWT
 - Other actuator endpoints: 🔒 Requires authentication
 
 ### Production (prod)
 
 - Swagger UI: 🔒 Requires authentication
 - Health endpoint: ✅ Public access
-- All other endpoints: 🔒 Requires authentication
+- Public API: ✅ `/api/v1/public/**`
+- All other `/api/**`: 🔒 Requires JWT (Keycloak)
 
 ## Environment Variable Reference
 
@@ -152,6 +158,6 @@ docker run -p 8080:8080 \
 | `DATABASE_URL`           | Prod only | -       | Database connection URL |
 | `DATABASE_USERNAME`      | Prod only | -       | Database username       |
 | `DATABASE_PASSWORD`      | Prod only | -       | Database password       |
-| `ADMIN_USERNAME`         | Prod only | -       | Admin username          |
-| `ADMIN_PASSWORD`         | Prod only | -       | Admin password          |
+| `KEYCLOAK_ISSUER_URI`    | Prod only | -       | Keycloak issuer URI     |
+| `KEYCLOAK_API_AUDIENCE`  | Prod only | -       | Expected JWT audience   |
 | `SERVER_PORT`            | No        | `8080`  | Server port             |

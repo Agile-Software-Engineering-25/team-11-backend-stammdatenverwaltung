@@ -4,7 +4,7 @@
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-C71A36?style=flat-square&logo=apache-maven)](https://maven.apache.org/)
 
-> A modern Spring Boot microservice for **master data management** in the ASE (Agile Software Engineering) project. Built with enterprise-grade security, monitoring, and comprehensive API documentation.
+> A modern Spring Boot microservice for **master data management** in the ASE (Agile Software Engineering) project. Built with enterprise-grade security (Keycloak JWT), monitoring, and comprehensive API documentation.
 
 Stammdatenverwaltung provides a robust foundation for managing user-related master data with dual-profile architecture, automated code quality, and production-ready monitoring capabilities.
 
@@ -12,7 +12,7 @@ Stammdatenverwaltung provides a robust foundation for managing user-related mast
 
 - 🔧 **Multi-Profile Configuration**: Seamless switching between development (`dev`) and production (`prod`) environments
 - 🗄️ **Database Flexibility**: H2 file database for development, PostgreSQL for production
-- 🔒 **Enterprise Security**: Spring Security with profile-specific authentication and authorization
+- 🔒 **Enterprise Security**: Spring Security OAuth2 Resource Server with Keycloak JWT (dev: Basic + JWT, prod: JWT-only)
 - 📖 **API Documentation**: Interactive OpenAPI 3.0 specification with Swagger UI
 - 📊 **Production Monitoring**: Spring Boot Actuator endpoints for health checks and metrics
 - 🎨 **Code Quality**: Automated formatting with Spotless and logic validation with Checkstyle
@@ -72,7 +72,7 @@ cd team-11-backend-stammdatenverwaltung
 #### 🛠️ Development Mode (Default)
 
 ```bash
-# 🛠️ Uses H2 database, relaxed security, public Swagger UI
+# 🛠️ Uses H2 database. Swagger/H2/public API are open; other APIs secured
 ./mvnw spring-boot:run
 
 # Or explicitly specify dev profile
@@ -84,11 +84,12 @@ cd team-11-backend-stammdatenverwaltung
 ```bash
 # 🔐 Requires PostgreSQL and environment variables
 export SPRING_PROFILES_ACTIVE=prod
-export ADMIN_USERNAME=admin
-export ADMIN_PASSWORD=secure-password
 export DATABASE_URL=jdbc:postgresql://localhost:5432/stammdatenverwaltung
 export DATABASE_USERNAME=db_user
 export DATABASE_PASSWORD=db_password
+# Keycloak JWT configuration (required in prod)
+export KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung
+export KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api
 ./mvnw spring-boot:run
 ```
 
@@ -98,18 +99,26 @@ export DATABASE_PASSWORD=db_password
 
 | Service             | URL                                   | Authentication |
 | ------------------- | ------------------------------------- | -------------- |
-| 🏠 **Application**  | http://localhost:8080                 | ❌ None        |
+| 🏠 **Application**  | http://localhost:8080                 | Mixed          |
 | 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ❌ None        |
 | 🗄️ **H2 Console**   | http://localhost:8080/h2-console      | ❌ None        |
 | ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None        |
+
+- Public API: `GET /api/v1/public/**`
+- Secured API: all other ` /api/**` require auth (Basic in dev or JWT)
 
 ### 🏭 Production Environment
 
 | Service             | URL                                   | Authentication |
 | ------------------- | ------------------------------------- | -------------- |
-| 🏠 **Application**  | http://localhost:8080                 | ✅ Required    |
-| 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ✅ Required    |
+| 🏠 **Application**  | http://localhost:8080                 | ✅ JWT (Keycloak) |
+| 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ✅ JWT (Keycloak) |
 | ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None        |
+
+- Public API: `GET /api/v1/public/**`
+- Secured API: all other ` /api/**` require valid Bearer token (JWT)
+
+> Keycloak setup and testing: see `KEYCLOAK_SETUP.md`.
 
 ## 🐳 Deployment
 
@@ -138,11 +147,11 @@ docker-compose up -d
 ```bash
 docker run -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=prod \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=your-secure-password \
   -e DATABASE_URL=jdbc:postgresql://your-db:5432/stammdatenverwaltung \
   -e DATABASE_USERNAME=db_user \
   -e DATABASE_PASSWORD=db_password \
+  -e KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung \
+  -e KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api \
   stammdatenverwaltung
 ```
 
@@ -234,7 +243,8 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 
 - **`spring-boot-starter-web`** (3.5.5): REST API development and embedded Tomcat server
 - **`spring-boot-starter-data-jpa`**: JPA integration with Hibernate for data persistence
-- **`spring-boot-starter-security`**: Authentication and authorization with HTTP Basic Auth
+- **`spring-boot-starter-security`**: Core authentication/authorization
+- **`spring-boot-starter-oauth2-resource-server`**: JWT validation (Keycloak) via issuer discovery
 - **`spring-boot-starter-validation`**: Bean validation using JSR-303 annotations
 
 ### Database
@@ -265,17 +275,16 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 ## Configuration Profiles
 ### Development Profile (`dev`) - Default
 
-- **Database**: H2 in-memory (file-based persistence in `./data/mydb`)
-- **Security**: Relaxed (public access to Swagger UI, H2 console, API endpoints)
-- **Credentials**: `dev-user` / `dev-password`
+- **Database**: H2 file DB (`./data/mydb`)
+- **Security**: Dual auth (public: Swagger/H2/`/api/v1/public/**`; secured: other `/api/**` via Basic or JWT)
+- **Dev Users (Basic)**: `dev-user` / `dev-password` (ROLE_USER), `dev-admin` / `dev-password` (ROLE_ADMIN, ROLE_USER)
 - **Logging**: DEBUG level for application and security
 - **Features**: Hot reloading, detailed error messages
 
 ### Production Profile (`prod`)
 
 - **Database**: PostgreSQL (configurable via environment variables)
-- **Security**: Strict authentication required for all endpoints except health
-- **Credentials**: Configurable via `ADMIN_USERNAME` / `ADMIN_PASSWORD`
+- **Security**: JWT-only (Keycloak). Public: `/actuator/health`, `/api/v1/public/**`; all other `/api/**` secured
 - **Logging**: INFO level with security warnings
 - **Features**: Optimized for production deployment
 
@@ -287,6 +296,24 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 | `DATABASE_URL`           | prod    | Yes      | -       | PostgreSQL connection URL |
 | `DATABASE_USERNAME`      | prod    | Yes      | -       | Database username         |
 | `DATABASE_PASSWORD`      | prod    | Yes      | -       | Database password         |
-| `ADMIN_USERNAME`         | prod    | Yes      | -       | Admin username            |
-| `ADMIN_PASSWORD`         | prod    | Yes      | -       | Admin password            |
 | `SERVER_PORT`            | Both    | No       | `8080`  | Server port               |
+| `KEYCLOAK_ISSUER_URI`    | prod    | Yes      | -       | Keycloak realm issuer URI |
+| `KEYCLOAK_API_AUDIENCE`  | prod    | Yes      | -       | Expected JWT audience     |
+
+## 🔐 Auth Quick Test (dev)
+
+Without Keycloak, use Basic Auth with built-in dev users:
+
+```bash
+curl http://localhost:8080/api/v1/public/hello
+curl -u dev-user:dev-password http://localhost:8080/api/v1/hello
+curl -u dev-admin:dev-password http://localhost:8080/api/v1/admin/users
+```
+
+With Keycloak running, pass a Bearer token:
+
+```bash
+curl -H "Authorization: Bearer <JWT>" http://localhost:8080/api/v1/hello
+```
+
+> Full setup guide: `KEYCLOAK_SETUP.md`.
