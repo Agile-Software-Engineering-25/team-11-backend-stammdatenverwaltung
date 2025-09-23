@@ -118,7 +118,6 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
         .headers(
             headers -> headers.frameOptions(frame -> frame.deny()) // Security hardening
             )
