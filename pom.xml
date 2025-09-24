@@ -42,6 +42,8 @@
         <!-- Performance optimization properties -->
         <maven.compiler.maxmem>1024m</maven.compiler.maxmem>
         <maven.test.failure.ignore>false</maven.test.failure.ignore>
+        <!-- Common JVM arguments for test plugins (Surefire and Failsafe) -->
+        <test.jvm.args>-Xmx1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1</test.jvm.args>
     </properties>
     <dependencies>
         <dependency>
@@ -187,7 +189,7 @@
                     <!-- Disable parallel execution to avoid H2 database conflicts -->
                     <parallel>none</parallel>
                     <!-- Optimize JVM for tests -->
-                    <argLine>-Xmx1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1</argLine>
+                    <argLine>${test.jvm.args}</argLine>
                     <!-- Reduce startup time -->
                     <trimStackTrace>false</trimStackTrace>
                     <!-- Enable test result caching -->
@@ -210,7 +212,7 @@
                         <include>**/*IntegrationTest.java</include>
                     </includes>
                     <!-- Optimize integration test performance -->
-                    <argLine>-Xmx1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1</argLine>
+                    <argLine>${test.jvm.args}</argLine>
                     <trimStackTrace>false</trimStackTrace>
                     <!-- Use test profile with in-memory database for integration tests -->
                     <systemPropertyVariables>
