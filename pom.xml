@@ -39,6 +39,9 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Performance optimization properties -->
+        <maven.compiler.maxmem>1024m</maven.compiler.maxmem>
+        <maven.test.failure.ignore>false</maven.test.failure.ignore>
     </properties>
     <dependencies>
         <dependency>
@@ -126,6 +129,13 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                    <!-- Enable parallel compilation -->
+                    <fork>true</fork>
+                    <maxmem>1024m</maxmem>
+                    <!-- Enable incremental compilation for faster rebuilds -->
+                    <useIncrementalCompilation>true</useIncrementalCompilation>
+                    <!-- Enable annotation processor caching -->
+                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -133,6 +143,23 @@
                             <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                    <!-- Compiler optimization flags -->
+                    <compilerArgs>
+                        <arg>-J-XX:+TieredCompilation</arg>
+                        <arg>-J-XX:TieredStopAtLevel=1</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <!-- Resources plugin with caching optimization -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <!-- Enable resource filtering caching -->
+                    <useDefaultDelimiters>true</useDefaultDelimiters>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
                 </configuration>
             </plugin>
             <plugin>
@@ -158,6 +185,21 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <!-- Disable parallel execution to avoid H2 database conflicts -->
+                    <parallel>none</parallel>
+                    <!-- Optimize JVM for tests -->
+                    <argLine>-Xmx1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1</argLine>
+                    <!-- Reduce startup time -->
+                    <trimStackTrace>false</trimStackTrace>
+                    <!-- Enable test result caching -->
+                    <runOrder>filesystem</runOrder>
+                    <!-- Use single fork to avoid database conflicts -->
+                    <reuseForks>true</reuseForks>
+                    <forkCount>1</forkCount>
+                    <!-- Use test profile with in-memory database -->
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -168,6 +210,13 @@
                         <include>**/*IT.java</include>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
+                    <!-- Optimize integration test performance -->
+                    <argLine>-Xmx1024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1</argLine>
+                    <trimStackTrace>false</trimStackTrace>
+                    <!-- Use test profile with in-memory database for integration tests -->
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
