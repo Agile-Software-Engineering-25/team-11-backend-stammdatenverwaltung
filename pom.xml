@@ -137,7 +137,6 @@
                     <!-- Enable incremental compilation for faster rebuilds -->
                     <useIncrementalCompilation>true</useIncrementalCompilation>
                     <!-- Enable annotation processor caching -->
-                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
