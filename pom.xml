@@ -146,7 +146,6 @@
                     <!-- Compiler optimization flags -->
                     <compilerArgs>
                         <arg>-J-XX:+TieredCompilation</arg>
-                        <arg>-J-XX:TieredStopAtLevel=1</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
