@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  * joined table inheritance works correctly with the actual database.
  */
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 @Transactional
 @DisplayName("ORM Integration Tests")
 class OrmIntegrationTest {
