@@ -1,6 +1,6 @@
 # 🏢 Stammdatenverwaltung
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-6DB33F?style=flat-square&logo=spring-boot)](https://docs.spring.io/spring-boot/index.html)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-6DB33F?style=flat-square&logo=spring-boot)](https://docs.spring.io/spring-boot/index.html)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-C71A36?style=flat-square&logo=apache-maven)](https://maven.apache.org/)
 
@@ -71,13 +71,23 @@ cd team-11-backend-stammdatenverwaltung
 
 #### 🛠️ Development Mode (Default)
 
+**No installation required!** The application uses H2 file-based database in PostgreSQL compatibility mode.
+
 ```bash
-# 🛠️ Uses H2 database. Swagger/H2/public API are open; other APIs secured
+# 🛠️ Uses H2 file-based database. Swagger/H2/public API are open; other APIs secured
 ./mvnw spring-boot:run
 
 # Or explicitly specify dev profile
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+**Access the H2 Console** at http://localhost:8080/h2-console:
+
+- **JDBC URL**: `jdbc:h2:file:./data/devdb`
+- **Username**: `sa`
+- **Password**: `password`
+
+> 💡 The database is automatically created and migrated on startup via Flyway. Data persists across application restarts in the `./data/` directory.
 
 #### 🏭 Production Mode
 
@@ -109,11 +119,11 @@ export KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api
 
 ### 🏭 Production Environment
 
-| Service             | URL                                   | Authentication |
-| ------------------- | ------------------------------------- | -------------- |
+| Service             | URL                                   | Authentication    |
+| ------------------- | ------------------------------------- | ----------------- |
 | 🏠 **Application**  | http://localhost:8080                 | ✅ JWT (Keycloak) |
 | 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ✅ JWT (Keycloak) |
-| ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None        |
+| ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None           |
 
 - Public API: `GET /api/v1/public/**`
 - Secured API: all other ` /api/**` require valid Bearer token (JWT)
@@ -178,11 +188,13 @@ System tests will be executed on a central server with reports provided separate
 This project uses a **dual approach** for code quality:
 
 ### ✨ Spotless (Automatic Formatting)
+
 - **Purpose**: Automatic code formatting using Google Java Format
 - **Handles**: Indentation (2 spaces), line length, import organization, braces, spacing
 - **Behavior**: Automatically fixes formatting issues
 
 ### 🔍 Checkstyle (Logic & Complexity)
+
 - **Purpose**: Code logic and complexity analysis only (no formatting rules)
 - **Focus**: Best practices, naming conventions, complexity metrics
 - **Behavior**: Reports violations for manual review (warnings only, doesn't fail build)
@@ -230,10 +242,29 @@ This application supports dual-environment configuration:
 
 This project uses **Flyway** for database schema versioning combined with **JPA/Hibernate** for object-relational mapping:
 
-- **Schema Migrations**: All database changes managed through versioned SQL files
+- **Schema Migrations**: All database changes managed through versioned SQL files in `src/main/resources/db/migration/`
 - **Automatic Migration**: Flyway runs automatically on application startup
-- **Schema Validation**: Hibernate validates database schema matches JPA entities
-- **Cross-Database Support**: H2 for development, PostgreSQL for production
+- **Schema Validation**: Hibernate validates database schema matches JPA entities (`hibernate.ddl-auto: validate`)
+- **Cross-Database Support**:
+  - **Development**: H2 file-based database with PostgreSQL compatibility mode
+  - **Testing**: H2 in-memory database with PostgreSQL compatibility mode
+  - **Production**: PostgreSQL database
+
+#### Database Configuration by Profile
+
+| Profile     | Database      | Connection      | Migration Support |
+| ----------- | ------------- | --------------- | ----------------- |
+| 🛠️ **dev**  | H2 file-based | PostgreSQL mode | ✅ Yes            |
+| 🧪 **test** | H2 in-memory  | PostgreSQL mode | ✅ Yes            |
+| 🏭 **prod** | PostgreSQL    | Native          | ✅ Yes            |
+
+**Key Benefits:**
+
+- ✅ **No local PostgreSQL required** for development
+- ✅ **Persistent data** across application restarts in development
+- ✅ **Shared Flyway migrations** work on both H2 and PostgreSQL
+- ✅ **Fast test execution** with in-memory database
+- ✅ **Production-ready** PostgreSQL configuration
 
 > 📖 **See [`DATABASE_MANAGEMENT.md`](DATABASE_MANAGEMENT.md)** for complete database setup and migration guide.
 
@@ -273,13 +304,14 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 - **`spring-security-test`**: Security testing utilities
 
 ## Configuration Profiles
+
 ### Development Profile (`dev`) - Default
 
-- **Database**: H2 file DB (`./data/mydb`)
+- **Database**: H2 file-based (`./data/devdb`) with PostgreSQL compatibility mode
 - **Security**: Dual auth (public: Swagger/H2/`/api/v1/public/**`; secured: other `/api/**` via Basic or JWT)
 - **Dev Users (Basic)**: `dev-user` / `dev-password` (ROLE_USER), `dev-admin` / `dev-password` (ROLE_ADMIN, ROLE_USER)
 - **Logging**: DEBUG level for application and security
-- **Features**: Hot reloading, detailed error messages
+- **Features**: Hot reloading, detailed error messages, persistent data across restarts
 
 ### Production Profile (`prod`)
 

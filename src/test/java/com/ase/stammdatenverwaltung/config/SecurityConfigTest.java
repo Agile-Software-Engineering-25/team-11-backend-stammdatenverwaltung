@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 class SecurityConfigTest {
 
   @Autowired private MockMvc mockMvc;

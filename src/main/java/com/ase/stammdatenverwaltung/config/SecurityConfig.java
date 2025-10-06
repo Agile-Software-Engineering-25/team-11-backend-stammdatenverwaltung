@@ -94,6 +94,60 @@ public class SecurityConfig {
   }
 
   /**
+   * Test security configuration with relaxed permissions and dual authentication support (Basic
+   * Auth for testing + JWT for API testing). Similar to dev but optimized for automated tests.
+   */
+  @Bean
+  @Profile("test")
+  SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(
+            authz ->
+                authz
+                    // Allow public access to these endpoints in tests
+                    .requestMatchers("/actuator/**")
+                    .permitAll()
+                    .requestMatchers("/swagger-ui/**")
+                    .permitAll()
+                    .requestMatchers("/swagger-ui.html")
+                    .permitAll()
+                    .requestMatchers("/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/v3/api-docs/**")
+                    .permitAll()
+                    // Public API endpoints
+                    .requestMatchers("/api/v1/public/**")
+                    .permitAll()
+                    // Admin endpoints require ADMIN role
+                    .requestMatchers("/api/v1/admin/**")
+                    .hasRole("ADMIN")
+                    // All other API endpoints require authentication
+                    .requestMatchers("/api/**")
+                    .authenticated()
+                    .anyRequest()
+                    .authenticated())
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+        // Support both Basic Auth (for tests) and JWT (for API testing)
+        .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Test"))
+        .oauth2ResourceServer(
+            oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
+
+    return http.build();
+  }
+
+  // In-memory users for testing to allow Basic Auth without Keycloak
+  @Bean
+  @Profile("test")
+  UserDetailsService testInMemoryUsers() {
+    var user = User.withUsername("dev-user").password("{noop}dev-password").roles("USER").build();
+    var admin =
+        User.withUsername("dev-admin")
+            .password("{noop}dev-password")
+            .roles("ADMIN", "USER")
+            .build();
+    return new InMemoryUserDetailsManager(user, admin);
+  }
+
+  /**
    * Production security configuration with strict JWT-only authentication and role-based access
    * control.
    */

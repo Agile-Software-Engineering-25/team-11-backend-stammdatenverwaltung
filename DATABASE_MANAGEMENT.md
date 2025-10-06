@@ -2,22 +2,69 @@
 
 ## Overview
 
-This project uses **Flyway** for database schema versioning and migrations, combined with **JPA/Hibernate** for object-relational mapping. This setup provides a robust, version-controlled approach to database management while maintaining the convenience of JPA for data access.
+This project uses **Flyway** for database schema versioning and migrations, combined with **JPA/Hibernate** for object-relational mapping. The database configuration is optimized for multi-environment support with **H2 in-memory database** for development/testing and **PostgreSQL** for production.
 
 ## Architecture
 
-### Flyway + JPA Integration
+### Database + JPA Integration
 
 - **Flyway**: Handles database schema versioning, migrations, and structural changes
 - **JPA/Hibernate**: Manages entity mapping, relationships, and data access
-- **Profile-based Configuration**: Different behaviors for development and production environments
+- **Profile-based Configuration**: Different databases for development, testing, and production
+- **PostgreSQL Compatibility Mode**: H2 runs in PostgreSQL mode for consistent SQL behavior
 
-### Key Configuration Changes
+**Current Versions:**
+- Flyway: 11.7.2 (managed by Spring Boot)
+- H2 Database: Latest (for development)
+- PostgreSQL Driver: Latest (for production)
+
+### Multi-Environment Database Strategy
+
+| Profile  | Database      | Connection                                      | Use Case              |
+| -------- | ------------- | ----------------------------------------------- | --------------------- |
+| **dev**  | H2 file-based | `jdbc:h2:file:./data/devdb;MODE=PostgreSQL;...` | Local development     |
+| **test** | H2 in-memory  | `jdbc:h2:mem:testdb;MODE=PostgreSQL;...`        | Automated testing     |
+| **prod** | PostgreSQL    | `jdbc:postgresql://...`                         | Production deployment |
+
+**Key Benefits:**
+
+- ✅ **No local PostgreSQL installation required** for development
+- ✅ **Persistent data** across application restarts in development
+- ✅ **Shared Flyway migrations** work across all environments
+- ✅ **Fast test execution** with in-memory database
+- ✅ **Consistent behavior** via PostgreSQL compatibility mode
+
+### Key Configuration
 
 The project has been configured to use `hibernate.ddl-auto: validate` in all profiles, meaning:
+
 - ✅ Hibernate validates that the database schema matches the entity definitions
 - ❌ Hibernate will NOT automatically create/update database structures
 - 🔧 All schema changes must be done through Flyway migrations
+
+### H2 PostgreSQL Compatibility Mode
+
+The H2 database is configured with special parameters to behave like PostgreSQL:
+
+**Development (file-based):**
+
+```yaml
+url: jdbc:h2:file:./data/devdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+```
+
+**Testing (in-memory):**
+
+```yaml
+url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+```
+
+**Parameters explained:**
+
+- `MODE=PostgreSQL`: Enables PostgreSQL-compatible syntax and behavior
+- `DATABASE_TO_LOWER=TRUE`: Converts unquoted identifiers to lowercase (PostgreSQL default)
+- `DEFAULT_NULL_ORDERING=HIGH`: NULL values sort last (matches PostgreSQL)
+- `DB_CLOSE_DELAY=-1`: Keeps database alive as long as JVM is running (in-memory only)
+- `DB_CLOSE_ON_EXIT=FALSE`: Prevents automatic database closure (in-memory only)
 
 ## Directory Structure
 
@@ -40,6 +87,7 @@ V{version}__{description}.sql
 ```
 
 ### Examples:
+
 - `V1__Create_initial_schema.sql` - Initial database setup
 - `V2__Add_user_table.sql` - Add new table
 - `V3__Add_user_indexes.sql` - Add database indexes
@@ -47,6 +95,7 @@ V{version}__{description}.sql
 - `V5__Insert_reference_data.sql` - Add reference/master data
 
 ### Naming Rules:
+
 - **Version**: Sequential numbers (V1, V2, V3, etc.)
 - **Separator**: Double underscore `__`
 - **Description**: Descriptive name with underscores (no spaces)
@@ -128,10 +177,10 @@ When you need to modify an existing entity:
 @Table(name = "users")
 public class User {
     // ... existing fields
-    
+
     @Column(length = 50)
     private String firstName;  // New field
-    
+
     @Column(length = 50)
     private String lastName;   // New field
 }
@@ -141,7 +190,7 @@ public class User {
 
 ```sql
 -- V3__Add_user_names.sql
-ALTER TABLE users 
+ALTER TABLE users
 ADD COLUMN first_name VARCHAR(50),
 ADD COLUMN last_name VARCHAR(50);
 
@@ -154,6 +203,7 @@ CREATE INDEX idx_users_full_name ON users(first_name, last_name);
 For entity relationships, create both the entity changes and the migration:
 
 **Entity with Relationship**:
+
 ```java
 @Entity
 public class Order {
@@ -164,12 +214,13 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    
+
     // ... other fields
 }
 ```
 
 **Migration for Relationship**:
+
 ```sql
 -- V4__Create_orders_table.sql
 CREATE TABLE orders (
@@ -180,8 +231,8 @@ CREATE TABLE orders (
 );
 
 -- Add foreign key constraint
-ALTER TABLE orders 
-ADD CONSTRAINT fk_orders_user_id 
+ALTER TABLE orders
+ADD CONSTRAINT fk_orders_user_id
 FOREIGN KEY (user_id) REFERENCES users(id);
 
 -- Add index on foreign key
@@ -230,15 +281,17 @@ Spring Boot provides seamless Flyway integration that runs automatically:
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate  # Only validate, don't create/update
+      ddl-auto: validate # Only validate, don't create/update
   flyway:
     enabled: true
-    baseline-on-migrate: true  # Allow migration on existing database
+    baseline-on-migrate: true # Allow migration on existing database
     validate-on-migrate: true
 ```
 
 **Characteristics**:
-- Uses H2 file database
+
+- Uses H2 file-based database (`./data/devdb`)
+- Data persists across application restarts
 - Baseline-on-migrate allows starting Flyway on existing databases
 - Validation ensures schema matches entities
 
@@ -248,7 +301,7 @@ spring:
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate  # Strict validation only
+      ddl-auto: validate # Strict validation only
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -256,6 +309,7 @@ spring:
 ```
 
 **Characteristics**:
+
 - Uses PostgreSQL
 - Strict validation prevents unauthorized schema changes
 - All changes must go through Flyway migrations
@@ -328,12 +382,14 @@ ALTER TABLE users DROP COLUMN old_field;
 ### Common Issues
 
 1. **Migration Failed**:
+
    ```bash
    ./mvnw flyway:repair  # Fix metadata
    ./mvnw flyway:migrate # Retry
    ```
 
 2. **Schema Validation Error**:
+
    - Check if entity matches database schema
    - Verify migration was applied correctly
    - Use `./mvnw flyway:info` to check status
@@ -384,6 +440,6 @@ This setup provides:
 ✅ **Schema validation against JPA entities**  
 ✅ **Profile-specific configurations**  
 ✅ **Development and production database support**  
-✅ **Rollback and repair capabilities**  
+✅ **Rollback and repair capabilities**
 
 The combination of Flyway and JPA/Hibernate ensures that your database schema is both version-controlled and properly mapped to your Java entities, providing a robust foundation for data persistence in your Spring Boot application.

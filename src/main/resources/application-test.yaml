@@ -6,8 +6,11 @@ spring:
     hibernate:
       ddl-auto: validate
   datasource:
-    # Use in-memory database for tests to avoid file locking
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    # Use in-memory database for tests with PostgreSQL compatibility
+    # MODE=PostgreSQL: ensures migrations work the same as in production
+    # DATABASE_TO_LOWER=TRUE: converts identifiers to lowercase like PostgreSQL
+    # DEFAULT_NULL_ORDERING=HIGH: matches PostgreSQL NULL sorting behavior
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driverClassName: org.h2.Driver
     username: sa
     password: password
@@ -16,6 +19,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
+    clean-disabled: false
   security:
     oauth2:
       resourceserver:
