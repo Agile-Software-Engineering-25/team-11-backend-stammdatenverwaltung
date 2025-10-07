@@ -1,5 +1,12 @@
 # Keycloak Authentication Setup Guide
 
+> ⚠️ **Note:** Keycloak is only required for PRODUCTION deployments.
+>
+> For local development, use Basic Authentication with the built-in
+> in-memory users (`dev-user` / `dev-password`). No Keycloak setup needed!
+>
+> If you're reading this and just want to run locally—STOP—go to `DEVELOPMENT_GUIDE.md`.
+
 This document provides comprehensive instructions for setting up Keycloak authentication with the Stammdatenverwaltung Spring Boot application.
 
 ## Overview

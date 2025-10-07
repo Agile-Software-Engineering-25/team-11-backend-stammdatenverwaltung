@@ -109,13 +109,13 @@ export KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api
 
 | Service             | URL                                   | Authentication |
 | ------------------- | ------------------------------------- | -------------- |
-| 🏠 **Application**  | http://localhost:8080                 | Mixed          |
+| 🏠 **Application**  | http://localhost:8080                 | ✅ Basic Auth  |
 | 📖 **Swagger UI**   | http://localhost:8080/swagger-ui.html | ❌ None        |
 | 🗄️ **H2 Console**   | http://localhost:8080/h2-console      | ❌ None        |
 | ❤️ **Health Check** | http://localhost:8080/actuator/health | ❌ None        |
 
 - Public API: `GET /api/v1/public/**`
-- Secured API: all other ` /api/**` require auth (Basic in dev or JWT)
+- Secured API: all other ` /api/**` require Basic Auth (dev-user/dev-password)
 
 ### 🏭 Production Environment
 

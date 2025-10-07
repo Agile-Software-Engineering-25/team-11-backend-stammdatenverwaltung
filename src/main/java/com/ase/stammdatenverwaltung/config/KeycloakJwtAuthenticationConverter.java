@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
  * extraction. Supports both realm roles and client-specific roles from Keycloak token structure.
  */
 @Component
+@Profile("prod")
 public class KeycloakJwtAuthenticationConverter
     implements Converter<Jwt, AbstractAuthenticationToken> {
 

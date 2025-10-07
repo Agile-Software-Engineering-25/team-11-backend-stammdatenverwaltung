@@ -20,15 +20,6 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
     clean-disabled: false
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Test Keycloak instance (optional, can be overridden)
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/stammdatenverwaltung}
-          # Validate audience claim for API access
-          audiences:
-            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
 
 # Logging configuration for tests
 logging:
