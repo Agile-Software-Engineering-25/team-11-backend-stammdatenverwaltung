@@ -1,0 +1,32 @@
+name: Build, Publish and Deploy to K8s
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-publish-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Build and publish image
+      uses: Agile-Software-Engineering-25/build-and-publish-image@v1
+      with:
+        push: ${{ github.event_name != 'pull_request' }}
+        extra_tags: ${{ github.sha }}
+
+    - name: Deploy to Kubernetes namespace
+      if: github.event_name != 'pull_request'
+      uses: Agile-Software-Engineering-25/deploy-to-k8s@v1
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+        namespace: ${{ vars.K8S_NAMESPACE }}

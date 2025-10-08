@@ -6,7 +6,7 @@ This document provides comprehensive instructions for setting up Keycloak authen
 
 The application now supports OAuth2 JWT authentication via Keycloak, providing:
 - JWT token validation with automatic signature verification
-- Role-based access control (RBAC) using Keycloak roles
+- Role-based access control (RBAC) using Keycloak roles from the `groups` claim
 - Profile-specific configuration (dev/prod)
 - Backward compatibility with Basic Auth in development
 
@@ -112,32 +112,36 @@ The application now supports OAuth2 JWT authentication via Keycloak, providing:
    - Assign realm roles: `ADMIN` to admin user, `USER` to regular user
    - Or assign client roles from `stammdatenverwaltung-api`
 
-### Step 5: Token Mappers Configuration
+### Step 5: Groups Claim Configuration
 
-#### 5.1 Audience Mapper
+The application expects roles to be included in the JWT token's `groups` claim. Configure Keycloak to include user groups in the JWT token:
 
-1. **Create Audience Mapper**
+#### 5.1 Groups Mapper
+
+1. **Add Groups Mapper**
    - Go to Clients → stammdatenverwaltung-frontend → Client scopes → Dedicated scope
    - Add mapper:
-     - Name: `api-audience`
-     - Mapper Type: `Audience`
-     - Included Client Audience: `stammdatenverwaltung-api`
+     - Name: `groups`
+     - Mapper Type: `Group Membership`
+     - Token Claim Name: `groups`
      - Add to access token: ON
+     - Full group path: OFF (use group name only)
 
-#### 5.2 Role Mappers (if using client roles)
+#### 5.2 Alternative: Realm Roles to Groups
 
-1. **Client Role Mapper**
-   - Go to Client Scopes → Create client scope: `api-roles`
+If you prefer to use realm roles instead of groups:
+
+1. **Add Realm Roles Mapper**
+   - Go to Client scopes → Create client scope: `realm-roles`
    - Add mapper:
-     - Name: `api-client-roles`
-     - Mapper Type: `User Client Role`
-     - Client ID: `stammdatenverwaltung-api`
-     - Token Claim Name: `resource_access.stammdatenverwaltung-api.roles`
+     - Name: `realm-roles`
+     - Mapper Type: `User Realm Role`
+     - Token Claim Name: `groups`
      - Add to access token: ON
 
 2. **Assign Client Scope**
    - Go to Clients → stammdatenverwaltung-frontend → Client scopes
-   - Add the `api-roles` scope as Optional
+   - Add the `realm-roles` scope as Optional
 
 ## Spring Boot Application Configuration
 
@@ -145,14 +149,14 @@ The application now supports OAuth2 JWT authentication via Keycloak, providing:
 
 #### Development (application-dev.yaml)
 ```yaml
-KEYCLOAK_ISSUER_URI: http://localhost:8080/realms/stammdatenverwaltung
-KEYCLOAK_API_AUDIENCE: stammdatenverwaltung-api
+KEYCLOAK_ISSUER_URI: https://keycloak.sau-portal.de/realms/sau
+KEYCLOAK_JWK_SET_URI: https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs
 ```
 
 #### Production (application-prod.yaml)
 ```yaml
 KEYCLOAK_ISSUER_URI: https://your-keycloak-server.com/realms/stammdatenverwaltung
-KEYCLOAK_API_AUDIENCE: stammdatenverwaltung-api
+KEYCLOAK_JWK_SET_URI: https://your-keycloak-server.com/realms/stammdatenverwaltung/protocol/openid-connect/certs
 ```
 
 ### Testing Authentication
@@ -216,14 +220,14 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
    - Ensure token includes correct audience claim
 
 2. **Role Authorization Fails**
-   - Verify roles are correctly assigned to users
-   - Check role mappers are configured properly
-   - Ensure roles appear in token claims (`realm_access.roles` or `resource_access.stammdatenverwaltung-api.roles`)
+   - Verify roles/groups are correctly assigned to users
+   - Check groups mapper is configured properly
+   - Ensure groups appear in token `groups` claim
 
-3. **Audience Validation Fails**
-   - Verify audience mapper is configured
-   - Check token includes `aud` claim with `stammdatenverwaltung-api`
-   - Ensure client scope is assigned to calling client
+3. **Token Validation Fails**
+   - Check issuer URL is correct and accessible
+   - Verify JWK set URI is correct and accessible
+   - Ensure token is not expired
 
 ### Debug Information
 
@@ -232,19 +236,12 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
    {
      "exp": 1640995200,
      "iat": 1640994600,
-     "iss": "http://localhost:8080/realms/stammdatenverwaltung",
-     "aud": ["stammdatenverwaltung-api"],
+     "iss": "https://keycloak.sau-portal.de/realms/sau",
      "sub": "user-uuid",
      "preferred_username": "admin",
      "email": "admin@example.com",
-     "realm_access": {
-       "roles": ["ADMIN", "USER"]
-     },
-     "resource_access": {
-       "stammdatenverwaltung-api": {
-         "roles": ["ADMIN"]
-       }
-     }
+     "groups": ["admin", "user"],
+     "scope": "openid profile email"
    }
    ```
 

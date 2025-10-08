@@ -14,6 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Test controller to demonstrate Keycloak authentication and authorization. This controller
  * provides endpoints to test different security scenarios and role-based access control.
+ *
+ * <p>Based on:
+ * https://www.javacodegeeks.com/2025/07/spring-boot-keycloak-role-based-authorization.html
+ *
+ * <p>To manage access rules for these endpoints, configure SecurityConfig.java with patterns like:
+ *
+ * <ul>
+ *   <li>.requestMatchers("/api/v1/public/**").permitAll()
+ *   <li>.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+ *   <li>.requestMatchers("/api/**").authenticated()
+ * </ul>
  */
 @RestController
 @RequestMapping("/api/v1")
@@ -21,6 +32,17 @@ public class AuthTestController {
 
   private static final String AUTH_TYPE_JWT = "JWT";
   private static final String AUTH_TYPE_BASIC = "Basic Auth";
+
+  /**
+   * Simple demo endpoint for quick authentication testing. Returns a simple greeting message.
+   * Access is controlled by SecurityConfig route rules.
+   *
+   * @return simple greeting message
+   */
+  @GetMapping("/demo")
+  public ResponseEntity<String> demo() {
+    return ResponseEntity.ok("Hello from demo endpoint!");
+  }
 
   /**
    * Public endpoint accessible without authentication. Useful for health checks and public

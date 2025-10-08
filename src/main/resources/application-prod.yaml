@@ -20,9 +20,7 @@ spring:
         jwt:
           # Production Keycloak instance (required)
           issuer-uri: ${KEYCLOAK_ISSUER_URI}
-          # Validate audience claim for API access
-          audiences:
-            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -41,15 +39,5 @@ logging:
     '[com.ase.stammdatenverwaltung]': INFO
     '[org.springframework.security]': WARN
 
-# Application-specific JWT configuration
-app:
-  security:
-    jwt:
-      # Validate audience claim for API access (required in production)
-      audience: ${KEYCLOAK_API_AUDIENCE}
-      # Client ID for extracting client-specific roles (required in production)
-      client-id: ${KEYCLOAK_CLIENT_ID}
-      # Extract roles from realm access (global roles)
-      extract-realm-roles: true
-      # Extract roles from resource access (client-specific roles)
-      extract-client-roles: true
+# Note: JWT roles are extracted from the "groups" claim automatically
+# No additional JWT configuration needed for role extraction

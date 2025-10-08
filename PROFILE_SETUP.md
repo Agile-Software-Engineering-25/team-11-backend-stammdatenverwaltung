@@ -68,8 +68,8 @@ Production uses Keycloak JWT authentication (OAuth2 Resource Server). No Basic A
 | **Database** | `DATABASE_URL`      | PostgreSQL connection URL  | `jdbc:postgresql://localhost:5432/stammdatenverwaltung` |
 |              | `DATABASE_USERNAME` | Database user              | `stammdaten_user`                                       |
 |              | `DATABASE_PASSWORD` | Database password          | `secure_db_password`                                    |
-| **Security** | `KEYCLOAK_ISSUER_URI`   | Keycloak realm issuer URI    | `https://your-keycloak/realms/stammdatenverwaltung`     |
-|              | `KEYCLOAK_API_AUDIENCE` | JWT audience                  | `stammdatenverwaltung-api`                              |
+| **Security** | `KEYCLOAK_ISSUER_URI`   | Keycloak realm issuer URI    | `https://keycloak.sau-portal.de/realms/sau`             |
+|              | `KEYCLOAK_JWK_SET_URI` | JWK set URI for JWT verification | `https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs` |
 | **Optional** | `SERVER_PORT`       | Application port           | `8080`                                                  |
 
 ### 🚀 Running in Production Mode
@@ -159,5 +159,5 @@ docker run -p 8080:8080 \
 | `DATABASE_USERNAME`      | Prod only | -       | Database username       |
 | `DATABASE_PASSWORD`      | Prod only | -       | Database password       |
 | `KEYCLOAK_ISSUER_URI`    | Prod only | -       | Keycloak issuer URI     |
-| `KEYCLOAK_API_AUDIENCE`  | Prod only | -       | JWT audience            |
+| `KEYCLOAK_JWK_SET_URI`   | Prod only | -       | JWK set URI for JWT verification |
 | `SERVER_PORT`            | No        | `8080`  | Server port             |
