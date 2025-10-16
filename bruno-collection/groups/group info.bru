@@ -1,15 +1,15 @@
 meta {
-  name: group info
+  name: Get Group by Name
   type: http
-  seq: 5
+  seq: 6
 }
 
 get {
-  url: 
+  url: {{base_url}}/api/v1/group/:groupName
   body: none
   auth: inherit
 }
 
-settings {
-  encodeUrl: true
+params:path {
+  groupName: BIN-T23-F3
 }
