@@ -17,4 +17,9 @@ auth:basic {
 
 settings {
   encodeUrl: false
+  timeout: 10000
+}
+
+docs {
+  full command: curl -i -u dev-user:dev-password http://localhost:8080/api/v1/hello
 }
