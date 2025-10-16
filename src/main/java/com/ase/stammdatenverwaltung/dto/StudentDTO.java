@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO for transferring student data between layers.
- */
+/** DTO for transferring student data between layers. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
