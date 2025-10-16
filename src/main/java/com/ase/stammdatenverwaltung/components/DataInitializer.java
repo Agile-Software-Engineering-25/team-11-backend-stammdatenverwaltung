@@ -30,9 +30,7 @@ public class DataInitializer implements CommandLineRunner {
           .matriculationNumber("D161")
           .dateOfBirth(LocalDate.of(2000, 5, 15))
           .degreeProgram("Computer Science")
-          .semester(4)
-          .studyStatus(Student.StudyStatus.ENROLLED)
-          .cohort("BIN-T23 F3")
+          .cohort("BIN-T23-F3")
           .build();
     studentService.create(student1);
 
@@ -43,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
           .degreeProgram("Computer Science")
           .semester(2)
           .studyStatus(Student.StudyStatus.ENROLLED)
-          .cohort("BIN-T23 F3")
+          .cohort("BIN-T23-F3")
           .build();
     studentService.create(student2);
 
@@ -54,7 +52,7 @@ public class DataInitializer implements CommandLineRunner {
           .degreeProgram("Business Informatics")
           .semester(1)
           .studyStatus(Student.StudyStatus.ENROLLED)
-          .cohort("BIN-T24 F1")
+          .cohort("BIN-T24-F1")
           .build();
     studentService.create(student3);
 
