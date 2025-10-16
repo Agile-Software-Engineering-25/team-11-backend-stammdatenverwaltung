@@ -1,22 +1,21 @@
 package com.ase.stammdatenverwaltung.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+
 import com.ase.stammdatenverwaltung.dto.GroupDTO;
 import com.ase.stammdatenverwaltung.dto.GroupResponseDTO;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GroupServiceTest {

@@ -1,5 +1,10 @@
 package com.ase.stammdatenverwaltung.controllers;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.ase.stammdatenverwaltung.config.JwtConfigurationValidator;
 import com.ase.stammdatenverwaltung.config.JwtSecurityProperties;
 import com.ase.stammdatenverwaltung.config.KeycloakJwtAuthenticationConverter;
@@ -7,20 +12,13 @@ import com.ase.stammdatenverwaltung.dto.GroupDTO;
 import com.ase.stammdatenverwaltung.dto.GroupResponseDTO;
 import com.ase.stammdatenverwaltung.dto.StudentDTO;
 import com.ase.stammdatenverwaltung.services.GroupService;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(GroupController.class)
 class GroupControllerTest {
