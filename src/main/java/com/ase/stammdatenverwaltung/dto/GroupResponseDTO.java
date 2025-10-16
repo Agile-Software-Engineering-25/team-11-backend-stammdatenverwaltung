@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO for the response containing multiple groups.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
