@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "bruno-stammdaten",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
