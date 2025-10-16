@@ -16,6 +16,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service class for managing role tables. Provides logic for correct create query with proper
+ * columns and names.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,81 +28,57 @@ public class RoleTableService {
 
   private final JdbcTemplate jdbc;
 
-  /** Legt eine neue Tabelle in Postgres an (optional Spalten von Basistabelle übernehmen). */
+  private final int maxLength = 255;
+
+  /** Creates new table for roles (takes existing columns from given baseclass) */
   @Transactional
-  public void createRoleTable(CreateRoleTable req) {
-    final String table = sanitize(req.getRoleName());
+  public void createRoleTable(CreateRoleTable tabelle) {
+    final String table = sanitize(tabelle.getRoleName());
     log.debug("Create table requested: {}", table);
 
     ensureTableNotExists(table);
 
     final List<String> columnDefs = new ArrayList<String>();
-    if (req.getInheritsFrom() != null && !req.getInheritsFrom().trim().isEmpty()) {
-      final String base = sanitize(req.getInheritsFrom());
-      ensureTableExists(base);
-      columnDefs.addAll(readColumnDefs(base));
+    if (tabelle.getInheritsFrom() != null && !tabelle.getInheritsFrom().trim().isEmpty()) {
+      final String basistabelle = sanitize(tabelle.getInheritsFrom());
+      ensureTableExists(basistabelle);
+      columnDefs.addAll(readColumnDefs(basistabelle));
     }
 
     // zusätzliche Spalten aus Request ergänzen
-    if (req.getColumns() != null) {
-      for (int i = 0; i < req.getColumns().size(); i++) {
-        ColumnDef c = req.getColumns().get(i);
-        final String colName = sanitize(c.getName());
+    if (tabelle.getColumns() != null) {
+      for (int i = 0; i < tabelle.getColumns().size(); i++) {
+        ColumnDef spalte = tabelle.getColumns().get(i);
+        final String colName = sanitize(spalte.getName());
 
-        // Kollision vermeiden
-        for (int j = 0; j < columnDefs.size(); j++) {
-          // simple Prüfung: alles vor dem ersten Leerzeichen ist der Spaltenname
-          String existingName = columnDefs.get(j);
-          int space = existingName.indexOf(' ');
-          if (space > 0) {
-            existingName = existingName.substring(0, space);
-          }
-          if (existingName.equals(colName)) {
-            throw new IllegalArgumentException("Spalte existiert bereits: " + colName);
-          }
+        // einfachen Datentyp auf Postgres abbilden
+        DataType type = spalte.getType();
+        final String sqlType;
+
+        switch (type) {
+          case STRING:
+            {
+              Integer length = spalte.getLength();
+              sqlType = "VARCHAR(" + (length != null ? length : maxLength) + ")";
+              break;
+            }
+          case INT: sqlType = "INTEGER"; break;
+          case BOOL: sqlType = "BOOLEAN"; break;
+          case DECIMAL: sqlType = "NUMERIC(10,2)"; break;
+          default:
+            throw new IllegalArgumentException("Unbekannter Datentyp: " + type);
         }
-
-        // Postgres-SQL-Typ inline bestimmen (kein separater mapToPgType)
-        String sqlType;
-        DataType t = c.getType();
-        if (t == DataType.STRING) {
-          Integer len = c.getLength();
-          sqlType = "VARCHAR(" + (len != null ? len.intValue() : 255) + ")";
-        } else if (t == DataType.INT) {
-          sqlType = "INTEGER";
-        } else if (t == DataType.BIGINT) {
-          sqlType = "BIGINT";
-        } else if (t == DataType.BOOL) {
-          sqlType = "BOOLEAN";
-        } else if (t == DataType.DATE) {
-          sqlType = "DATE";
-        } else if (t == DataType.TIMESTAMP) {
-          sqlType = "TIMESTAMP";
-        } else if (t == DataType.DECIMAL) {
-          Integer p = (c.getPrecision() != null ? c.getPrecision() : Integer.valueOf(10));
-          Integer s = (c.getScale() != null ? c.getScale() : Integer.valueOf(2));
-          sqlType = "NUMERIC(" + p + "," + s + ")";
-        } else {
-          throw new IllegalArgumentException("Unbekannter Datentyp: " + t);
-        }
-
-        String notNull = c.isNullable() ? "" : " NOT NULL";
-        columnDefs.add(colName + " " + sqlType + notNull);
+        columnDefs.add(colName + " " + sqlType);
       }
     }
 
+    // Damit CREATE TABLE nicht leer ist
     if (columnDefs.isEmpty()) {
-      // minimal – CREATE TABLE darf nicht leer sein
       columnDefs.add("id BIGINT");
     }
 
-    // 3) DDL zusammenbauen & ausführen
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < columnDefs.size(); i++) {
-      if (i > 0) sb.append(", ");
-      sb.append(columnDefs.get(i));
-    }
-    String ddl = "CREATE TABLE " + table + " (" + sb + ")";
+    // DDL zusammenbauen & ausführen
+    String ddl = "CREATE TABLE " + table + " (" + String.join(", ", columnDefs) + ")";
     log.info("Executing DDL: {}", ddl);
 
     try {
@@ -108,9 +88,7 @@ public class RoleTableService {
     }
   }
 
-  // ---------- Helpers (Postgres only) ----------
-
-  /** prüft, dass Tabelle in public NICHT existiert. */
+  // prüft dass Tabelle nicht in Public existiert
   private void ensureTableNotExists(String table) {
     Integer cnt =
         jdbc.queryForObject(
@@ -122,7 +100,7 @@ public class RoleTableService {
     }
   }
 
-  /** prüft, dass Basistabelle existiert. */
+  // prüft, dass Basistabelle existiert.
   private void ensureTableExists(String table) {
     Integer cnt =
         jdbc.queryForObject(
@@ -134,13 +112,13 @@ public class RoleTableService {
     }
   }
 
-  /** liest bestehende Spalten (Name + typ + NOT NULL) aus Postgres (public-Schema). */
+  // liest bestehende Spalten (Name + typ + NOT NULL)
   private List<String> readColumnDefs(String table) {
     final String sql =
-        "SELECT column_name, data_type" +
-            "  FROM information_schema.columns " +
-            " WHERE table_schema='public' AND table_name=? " +
-            " ORDER BY ordinal_position";
+        "SELECT column_name, data_type"
+            + "  FROM information_schema.columns "
+            + " WHERE table_schema='public' AND table_name=? "
+            + " ORDER BY ordinal_position";
 
     return jdbc.query(
         sql,
@@ -148,10 +126,14 @@ public class RoleTableService {
           @Override
           public String mapRow(ResultSet rs, int rowNum) throws SQLException {
             String name = rs.getString("column_name");
-            if (name != null) name = name.toLowerCase(Locale.ROOT);
+            if (name != null) {
+              name = name.toLowerCase(Locale.ROOT);
+            }
 
             String dataType = rs.getString("data_type");
-            if (dataType == null) dataType = "";
+            if (dataType == null) {
+              dataType = "";
+            }
 
             return name + " " + dataType;
           }
@@ -159,7 +141,7 @@ public class RoleTableService {
         table);
   }
 
-  /** einfache Identifier-Validierung zur SQL-Injection-Prävention */
+  // einfache Identifier-Validierung zur SQL-Injection-Prävention
   private String sanitize(String ident) {
     if (ident == null || !ident.matches("^[a-z][a-z0-9_]*$")) {
       throw new IllegalArgumentException("Ungültiger Bezeichner: " + ident);
@@ -167,5 +149,3 @@ public class RoleTableService {
     return ident;
   }
 }
-
-
