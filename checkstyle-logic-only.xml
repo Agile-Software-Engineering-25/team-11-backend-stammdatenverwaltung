@@ -13,6 +13,12 @@
         <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
     </module>
 
+    <!-- Suppress magic numbers in DataInitializer (dev seed data) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MagicNumber"/>
+        <property name="files" value=".*[/\\]com[/\\]ase[/\\]stammdatenverwaltung[/\\]components[/\\]DataInitializer\.java$"/>
+    </module>
+
     <!-- Suppress file length checks in test files (allow up to 1000 lines for integration tests) -->
     <module name="SuppressionSingleFilter">
         <property name="checks" value="FileLength"/>
@@ -33,7 +39,7 @@
         <!-- =============================================== -->
 
         <!-- === NAMING CONVENTIONS === -->
-        
+
         <!-- Classes and Interfaces: PascalCase, noun phrases -->
         <module name="TypeName">
             <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>

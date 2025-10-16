@@ -38,3 +38,11 @@ build/
 
 ### H2 Database ###
 /data/
+
+### env files ###
+.env
+.env.local
+
+### coding agents ###
+.gemini
+.claude
