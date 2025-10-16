@@ -30,6 +30,8 @@ public class DataInitializer implements CommandLineRunner {
           .matriculationNumber("D161")
           .dateOfBirth(LocalDate.of(2000, 5, 15))
           .degreeProgram("Computer Science")
+          .semester(4)
+          .studyStatus(Student.StudyStatus.ENROLLED)
           .cohort("BIN-T23-F3")
           .build();
     studentService.create(student1);
