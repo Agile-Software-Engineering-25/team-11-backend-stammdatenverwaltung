@@ -62,9 +62,15 @@ public class RoleTableService {
               sqlType = "VARCHAR(" + (length != null ? length : maxLength) + ")";
               break;
             }
-          case INT: sqlType = "INTEGER"; break;
-          case BOOL: sqlType = "BOOLEAN"; break;
-          case DECIMAL: sqlType = "NUMERIC(10,2)"; break;
+          case INT:
+            sqlType = "INTEGER";
+            break;
+          case BOOL:
+            sqlType = "BOOLEAN";
+            break;
+          case DECIMAL:
+            sqlType = "NUMERIC(10,2)";
+            break;
           default:
             throw new IllegalArgumentException("Unbekannter Datentyp: " + type);
         }
