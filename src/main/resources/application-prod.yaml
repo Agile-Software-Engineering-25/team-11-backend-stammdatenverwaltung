@@ -4,8 +4,11 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: validate
+    properties:
+        hibernate:
+          '[format_sql]': true
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/stammdatenverwaltung}
+    url: ${DATABASE_URL:jdbc:postgresql://postgres.db:5432/appdb}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:password}
     driverClassName: org.postgresql.Driver
@@ -24,6 +27,12 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    # Allow overriding the application's context path from the environment.
+    # Default is '/' (root). Set SERVER_SERVLET_CONTEXT_PATH to e.g. '/api' if you
+    # want the application to serve under that base path and you do NOT use an
+    # ingress rewrite.
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/}
 
 management:
   endpoint:

@@ -2,12 +2,14 @@ package com.ase.stammdatenverwaltung.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
+import lombok.Data;
 
 /**
  * Entity representing user information extracted from JWT token. This class maps to the structure
  * of the JWT token claims from Keycloak. Field names use camelCase for Java conventions, with
  * JsonProperty annotations to map to the JWT claim names with underscores.
  */
+@Data
 public class User {
   public int exp;
   public int iat;
