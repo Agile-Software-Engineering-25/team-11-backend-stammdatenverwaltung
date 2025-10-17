@@ -61,7 +61,7 @@ public class SecurityConfig {
                     .authenticated()
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints - not needed for JWT auth
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
         .headers(
             headers -> headers.frameOptions(frame -> frame.sameOrigin()) // For H2 console
             )
@@ -121,7 +121,7 @@ public class SecurityConfig {
                     .authenticated()
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints - not needed for JWT auth
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         // Support both Basic Auth (for tests) and JWT (for API testing)
         .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Test"))
         .oauth2ResourceServer(
@@ -171,7 +171,7 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints - not needed for JWT auth
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .headers(
             headers -> headers.frameOptions(frame -> frame.deny()) // Security hardening
             )
