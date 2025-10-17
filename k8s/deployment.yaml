@@ -15,7 +15,7 @@ spec:
         app: ase-stammdaten
     spec:
       containers:
-        - name: ase-stammdaten
+        - name: app
           image: ghcr.io/agile-software-engineering-25/team-11-backend-stammdatenverwaltung:latest
           imagePullPolicy: Always
           ports:
