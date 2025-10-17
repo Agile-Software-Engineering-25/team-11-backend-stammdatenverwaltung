@@ -171,6 +171,10 @@ public class SecurityConfig {
                     // All other API endpoints require authentication
                     .requestMatchers("/api/**")
                     .authenticated()
+                    // Permit all access to actuator endpoints except health
+                    .requestMatchers(
+                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
+                    .permitAll()
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
