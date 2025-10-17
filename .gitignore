@@ -39,6 +39,10 @@ build/
 ### H2 Database ###
 /data/
 
+### k8s ###
+kube.config
+local.yaml
+
 ### env files ###
 .env
 .env.local
