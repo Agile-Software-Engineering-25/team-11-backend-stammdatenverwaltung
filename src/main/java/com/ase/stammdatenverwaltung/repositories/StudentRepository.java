@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * specific to student management. Extends JpaRepository to inherit standard database operations.
  */
 @Repository
-public interface StudentRepository extends JpaRepository<Student, Long> {
+public interface StudentRepository extends JpaRepository<Student, String> {
 
   /**
    * Find a student by their unique matriculation number.

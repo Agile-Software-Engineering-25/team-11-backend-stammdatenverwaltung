@@ -1,0 +1,30 @@
+meta {
+  name: create student
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/v1/users/students
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "dateOfBirth": "2000-05-14",
+    "address": "123 Main Street, Berlin, Germany",
+    "phoneNumber": "+49 176 12345678",
+    "photoUrl": "https://example.com/photos/student12345.jpg",
+    "matriculationNumber": "D12344",
+    "degreeProgram": "Computer Science B.Sc.",
+    "semester": 4,
+    "studyStatus": "ENROLLED",
+    "cohort": "BIN-T23-F4"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}

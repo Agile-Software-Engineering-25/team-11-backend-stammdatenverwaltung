@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * specific to lecturer management. Extends JpaRepository to inherit standard database operations.
  */
 @Repository
-public interface LecturerRepository extends JpaRepository<Lecturer, Long> {
+public interface LecturerRepository extends JpaRepository<Lecturer, String> {
 
   /**
    * Find lecturers by their field or chair.

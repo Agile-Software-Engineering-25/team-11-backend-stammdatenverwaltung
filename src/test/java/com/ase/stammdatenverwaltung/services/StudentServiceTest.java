@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,7 +36,7 @@ class StudentServiceTest {
   void setUp() {
     testStudent =
         Student.builder()
-            .id(1L)
+            .id("test-id")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Student Address 123")
             .phoneNumber("+49 123 456789")
@@ -51,41 +52,41 @@ class StudentServiceTest {
   @DisplayName("Should find student by ID when student exists")
   void shouldFindStudentByIdWhenStudentExists() {
     // Given
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+    when(studentRepository.findById("test-id")).thenReturn(Optional.of(testStudent));
 
     // When
-    Optional<Student> result = studentService.findById(1L);
+    Optional<Student> result = studentService.findById("test-id");
 
     // Then
     assertThat(result).isPresent();
     assertThat(result.get()).isEqualTo(testStudent);
-    verify(studentRepository).findById(1L);
+    verify(studentRepository).findById("test-id");
   }
 
   @Test
   @DisplayName("Should get student by ID when student exists")
   void shouldGetStudentByIdWhenStudentExists() {
     // Given
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+    when(studentRepository.findById("test-id")).thenReturn(Optional.of(testStudent));
 
     // When
-    Student result = studentService.getById(1L);
+    Student result = studentService.getById("test-id");
 
     // Then
     assertThat(result).isEqualTo(testStudent);
-    verify(studentRepository).findById(1L);
+    verify(studentRepository).findById("test-id");
   }
 
   @Test
   @DisplayName("Should throw EntityNotFoundException when getting student by non-existent ID")
   void shouldThrowEntityNotFoundExceptionWhenGettingStudentByNonExistentId() {
     // Given
-    when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+    when(studentRepository.findById("test-id")).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> studentService.getById(1L))
+    assertThatThrownBy(() -> studentService.getById("test-id"))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("Student not found with ID: 1");
+        .hasMessage("Student not found with ID: test-id");
   }
 
   @Test
@@ -110,7 +111,7 @@ class StudentServiceTest {
     // Given
     Student student2 =
         Student.builder()
-            .id(2L)
+            .id("test-id-2")
             .dateOfBirth(LocalDate.of(1999, 12, 10))
             .matriculationNumber("S2023002")
             .degreeProgram("Business Administration")
@@ -131,24 +132,22 @@ class StudentServiceTest {
   }
 
   @Test
-  @DisplayName("Should create student successfully")
-  void shouldCreateStudentSuccessfully() {
+  @DisplayName("Should create student successfully from DTO")
+  void shouldCreateStudentSuccessfullyFromDto() {
     // Given
-    Student newStudent =
-        Student.builder()
-            .dateOfBirth(LocalDate.of(2001, 4, 20))
-            .address("New Student Address 456")
-            .phoneNumber("+49 987 654321")
-            .matriculationNumber("S2023003")
-            .degreeProgram("Mathematics")
-            .semester(1)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("MATH-T-23")
-            .build();
+    CreateStudentRequest request = new CreateStudentRequest();
+    request.setDateOfBirth(LocalDate.of(2001, 4, 20));
+    request.setAddress("New Student Address 456");
+    request.setPhoneNumber("+49 987 654321");
+    request.setMatriculationNumber("S2023003");
+    request.setDegreeProgram("Mathematics");
+    request.setSemester(1);
+    request.setStudyStatus(Student.StudyStatus.ENROLLED);
+    request.setCohort("MATH-T-23");
 
     Student savedStudent =
         Student.builder()
-            .id(3L)
+            .id("test-id-3")
             .dateOfBirth(LocalDate.of(2001, 4, 20))
             .address("New Student Address 456")
             .phoneNumber("+49 987 654321")
@@ -160,35 +159,29 @@ class StudentServiceTest {
             .build();
 
     when(studentRepository.existsByMatriculationNumber("S2023003")).thenReturn(false);
-    when(studentRepository.save(newStudent)).thenReturn(savedStudent);
+    when(studentRepository.save(any(Student.class))).thenReturn(savedStudent);
 
     // When
-    Student result = studentService.create(newStudent);
+    Student result = studentService.create(request);
 
     // Then
     assertThat(result).isEqualTo(savedStudent);
-    assertThat(result.getId()).isEqualTo(3L);
+    assertThat(result.getId()).isEqualTo("test-id-3");
     verify(studentRepository).existsByMatriculationNumber("S2023003");
-    verify(studentRepository).save(newStudent);
+    verify(studentRepository).save(any(Student.class));
   }
 
   @Test
   @DisplayName("Should throw exception when creating student with duplicate matriculation number")
   void shouldThrowExceptionWhenCreatingStudentWithDuplicateMatriculationNumber() {
     // Given
-    Student newStudent =
-        Student.builder()
-            .matriculationNumber("S2023001")
-            .degreeProgram("Physics")
-            .semester(1)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("PHY-T-23")
-            .build();
+    CreateStudentRequest request = new CreateStudentRequest();
+    request.setMatriculationNumber("S2023001");
 
     when(studentRepository.existsByMatriculationNumber("S2023001")).thenReturn(true);
 
     // When & Then
-    assertThatThrownBy(() -> studentService.create(newStudent))
+    assertThatThrownBy(() -> studentService.create(request))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Student with matriculation number S2023001 already exists");
   }
@@ -197,19 +190,14 @@ class StudentServiceTest {
   @DisplayName("Should throw exception when creating student with invalid semester")
   void shouldThrowExceptionWhenCreatingStudentWithInvalidSemester() {
     // Given
-    Student invalidStudent =
-        Student.builder()
-            .matriculationNumber("S2023004")
-            .degreeProgram("Physics")
-            .semester(0) // Invalid semester
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("PHY-T-23")
-            .build();
+    CreateStudentRequest request = new CreateStudentRequest();
+    request.setMatriculationNumber("S2023004");
+    request.setSemester(0);
 
     when(studentRepository.existsByMatriculationNumber("S2023004")).thenReturn(false);
 
     // When & Then
-    assertThatThrownBy(() -> studentService.create(invalidStudent))
+    assertThatThrownBy(() -> studentService.create(request))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Semester must be positive");
   }
@@ -218,19 +206,14 @@ class StudentServiceTest {
   @DisplayName("Should throw exception when creating student with semester exceeding limit")
   void shouldThrowExceptionWhenCreatingStudentWithSemesterExceedingLimit() {
     // Given
-    Student invalidStudent =
-        Student.builder()
-            .matriculationNumber("S2023005")
-            .degreeProgram("Physics")
-            .semester(21) // Exceeds limit
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("PHY-T-23")
-            .build();
+    CreateStudentRequest request = new CreateStudentRequest();
+    request.setMatriculationNumber("S2023005");
+    request.setSemester(21);
 
     when(studentRepository.existsByMatriculationNumber("S2023005")).thenReturn(false);
 
     // When & Then
-    assertThatThrownBy(() -> studentService.create(invalidStudent))
+    assertThatThrownBy(() -> studentService.create(request))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Semester cannot exceed 20");
   }
@@ -253,7 +236,7 @@ class StudentServiceTest {
 
     Student savedStudent =
         Student.builder()
-            .id(1L)
+            .id("test-id")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Updated Student Address 999")
             .phoneNumber("+49 999 888777")
@@ -264,17 +247,17 @@ class StudentServiceTest {
             .cohort("BIN-T-23")
             .build();
 
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+    when(studentRepository.findById("test-id")).thenReturn(Optional.of(testStudent));
     when(studentRepository.save(any(Student.class))).thenReturn(savedStudent);
 
     // When
-    Student result = studentService.update(1L, updatedData);
+    Student result = studentService.update("test-id", updatedData);
 
     // Then
     assertThat(result.getDegreeProgram()).isEqualTo("Computer Science and AI");
     assertThat(result.getSemester()).isEqualTo(4);
     assertThat(result.getAddress()).isEqualTo("Updated Student Address 999");
-    verify(studentRepository).findById(1L);
+    verify(studentRepository).findById("test-id");
     verify(studentRepository).save(any(Student.class));
   }
 
@@ -282,14 +265,14 @@ class StudentServiceTest {
   @DisplayName("Should delete student by ID when student exists")
   void shouldDeleteStudentByIdWhenStudentExists() {
     // Given
-    when(studentRepository.existsById(1L)).thenReturn(true);
+    when(studentRepository.existsById("test-id")).thenReturn(true);
 
     // When
-    studentService.deleteById(1L);
+    studentService.deleteById("test-id");
 
     // Then
-    verify(studentRepository).existsById(1L);
-    verify(studentRepository).deleteById(1L);
+    verify(studentRepository).existsById("test-id");
+    verify(studentRepository).deleteById("test-id");
   }
 
   @Test
@@ -346,7 +329,7 @@ class StudentServiceTest {
     // Given
     Student updatedStudent =
         Student.builder()
-            .id(1L)
+            .id("test-id")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Student Address 123")
             .phoneNumber("+49 123 456789")
@@ -357,15 +340,15 @@ class StudentServiceTest {
             .cohort("BIN-T-23")
             .build();
 
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+    when(studentRepository.findById("test-id")).thenReturn(Optional.of(testStudent));
     when(studentRepository.save(any(Student.class))).thenReturn(updatedStudent);
 
     // When
-    Student result = studentService.updateStudyStatus(1L, Student.StudyStatus.ON_LEAVE);
+    Student result = studentService.updateStudyStatus("test-id", Student.StudyStatus.ON_LEAVE);
 
     // Then
     assertThat(result.getStudyStatus()).isEqualTo(Student.StudyStatus.ON_LEAVE);
-    verify(studentRepository).findById(1L);
+    verify(studentRepository).findById("test-id");
     verify(studentRepository).save(any(Student.class));
   }
 
@@ -375,7 +358,7 @@ class StudentServiceTest {
     // Given
     Student advancedStudent =
         Student.builder()
-            .id(1L)
+            .id("test-id")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Student Address 123")
             .phoneNumber("+49 123 456789")
@@ -386,15 +369,15 @@ class StudentServiceTest {
             .cohort("BIN-T-23")
             .build();
 
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
+    when(studentRepository.findById("test-id")).thenReturn(Optional.of(testStudent));
     when(studentRepository.save(any(Student.class))).thenReturn(advancedStudent);
 
     // When
-    Student result = studentService.advanceToNextSemester(1L);
+    Student result = studentService.advanceToNextSemester("test-id");
 
     // Then
     assertThat(result.getSemester()).isEqualTo(4);
-    verify(studentRepository).findById(1L);
+    verify(studentRepository).findById("test-id");
     verify(studentRepository).save(any(Student.class));
   }
 

@@ -1,0 +1,32 @@
+meta {
+  name: create lecture
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/v1/users/lecturers
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "dateOfBirth": "1980-03-25",
+    "address": "University Street 15, Munich, Germany",
+    "phoneNumber": "+49 89 9876543",
+    "photoUrl": "https://example.com/photos/lecturer001.jpg",
+    "employeeNumber": "EMP12345",
+    "department": "Computer Science",
+    "officeNumber": "B-204",
+    "workingTimeModel": "FULL_TIME",
+    "fieldChair": "Artificial Intelligence and Machine Learning",
+    "title": "Prof. Dr. John Doe",
+    "employmentStatus": "FULL_TIME_PERMANENT"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}
