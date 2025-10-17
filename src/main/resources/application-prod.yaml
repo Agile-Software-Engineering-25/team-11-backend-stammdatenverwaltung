@@ -4,8 +4,11 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: validate
+    properties:
+        hibernate:
+          '[format_sql]': true
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/stammdatenverwaltung}
+    url: ${DATABASE_URL:jdbc:postgresql://postgres.db:5432/appdb}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:password}
     driverClassName: org.postgresql.Driver
@@ -20,12 +23,16 @@ spring:
         jwt:
           # Production Keycloak instance (required)
           issuer-uri: ${KEYCLOAK_ISSUER_URI}
-          # Validate audience claim for API access
-          audiences:
-            - ${KEYCLOAK_API_AUDIENCE:stammdatenverwaltung-api}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
 
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    # Allow overriding the application's context path from the environment.
+    # Default is '/' (root). Set SERVER_SERVLET_CONTEXT_PATH to e.g. '/api' if you
+    # want the application to serve under that base path and you do NOT use an
+    # ingress rewrite.
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/}
 
 management:
   endpoint:
@@ -41,15 +48,5 @@ logging:
     '[com.ase.stammdatenverwaltung]': INFO
     '[org.springframework.security]': WARN
 
-# Application-specific JWT configuration
-app:
-  security:
-    jwt:
-      # Validate audience claim for API access (required in production)
-      audience: ${KEYCLOAK_API_AUDIENCE}
-      # Client ID for extracting client-specific roles (required in production)
-      client-id: ${KEYCLOAK_CLIENT_ID}
-      # Extract roles from realm access (global roles)
-      extract-realm-roles: true
-      # Extract roles from resource access (client-specific roles)
-      extract-client-roles: true
+# Note: JWT roles are extracted from the "groups" claim automatically
+# No additional JWT configuration needed for role extraction
