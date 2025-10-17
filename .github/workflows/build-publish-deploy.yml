@@ -33,3 +33,4 @@ jobs:
         namespace: ${{ vars.K8S_NAMESPACE }}
         image: ghcr.io/${{ github.repository }}
         tag: ${{ github.sha }}
+        deployment: ase-stammdaten
