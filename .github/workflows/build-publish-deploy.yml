@@ -32,4 +32,4 @@ jobs:
         kubeconfig: ${{ secrets.KUBECONFIG }}
         namespace: ${{ vars.K8S_NAMESPACE }}
         image: ghcr.io/${{ github.repository }}
-        tag: latest
+        tag: ${{ github.sha }}
