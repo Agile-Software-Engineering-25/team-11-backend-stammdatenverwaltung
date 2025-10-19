@@ -2,7 +2,8 @@ package com.ase.stammdatenverwaltung.controllers;
 
 import com.ase.stammdatenverwaltung.dto.UserFilterRequestDTO;
 import com.ase.stammdatenverwaltung.dto.UserMasterDataResponseDTO;
-import com.ase.stammdatenverwaltung.services.UserMasterDataService;
+import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.services.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
-@Tag(name = "User Data", description = "API for user master data management")
+@Tag(name = "User Data", description = "API for user data management")
 public class UserController {
 
-    private final UserMasterDataService userMasterDataService;
+  private final PersonService personService;
   private final StudentService studentService;
   private final EmployeeService employeeService;
   private final LecturerService lecturerService;
@@ -65,11 +66,11 @@ public class UserController {
                                     schema = @Schema(implementation = UserMasterDataResponseDTO.class)))
             })
     @GetMapping
-    public ResponseEntity<List<UserMasterDataResponseDTO>> getUsers(
+    public ResponseEntity<List<Person>> getUsers(
             @RequestBody(required = false) UserFilterRequestDTO filterRequest,
             @Parameter(description = "Flag to include name and email in the response", required = true)
             @RequestParam boolean also_get_name_and_email) {
-        List<UserMasterDataResponseDTO> users = userMasterDataService.getAllUsers(filterRequest, also_get_name_and_email);
+        List<Person> users = personService.findAll();
         return ResponseEntity.ok(users);
     }
   /**
@@ -96,12 +97,12 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "User not found")
             })
     @GetMapping("/{userId}")
-    public ResponseEntity<UserMasterDataResponseDTO> getUserById(
+    public ResponseEntity<Person> getUserById(
             @Parameter(description = "ID of the user to retrieve", required = true)
-            @PathVariable Long userId,
+            @PathVariable String userId,
             @Parameter(description = "Flag to include name and email in the response", required = true)
             @RequestParam boolean also_get_name_and_email) {
-        UserMasterDataResponseDTO user = userMasterDataService.getUserById(userId, also_get_name_and_email);
+        Person user = personService.getById(userId);
         return ResponseEntity.ok(user);
     }
   /**

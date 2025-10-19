@@ -26,7 +26,6 @@ import org.springframework.validation.annotation.Validated;
 public class PersonService {
 
   private static final int MAX_AGE_YEARS = 150;
-
   private final PersonRepository personRepository;
 
   /**
