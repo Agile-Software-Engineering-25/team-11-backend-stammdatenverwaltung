@@ -51,7 +51,7 @@ public class StudentService {
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of(KeycloakGroup.STUDENT.getGroupName()))
+            .groups(java.util.List.of(KeycloakGroup.STUDENT.getGroupName()))
             .build();
 
     CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
