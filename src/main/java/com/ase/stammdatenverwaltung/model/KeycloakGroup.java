@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum KeycloakGroup {
-  STUDENT("student"),
-  LECTURER("lecturer"),
-  UNIVERSITY_ADMINISTRATIVE_STAFF("university-administrative-staff");
+  STUDENT("Student"),
+  LECTURER("Lecturer"),
+  SAU_ADMIN("SAU Admin"),
+  UNIVERSITY_ADMINISTRATIVE_STAFF("University administrative staff");
 
   private final String groupName;
 }
