@@ -49,7 +49,7 @@ public class EmployeeService {
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of(KeycloakGroup.UNIVERSITY_ADMINISTRATIVE_STAFF.getGroupName()))
+            .groups(java.util.List.of(KeycloakGroup.UNIVERSITY_ADMINISTRATIVE_STAFF.getGroupName()))
             .build();
 
     CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();

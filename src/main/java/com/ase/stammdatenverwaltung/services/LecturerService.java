@@ -48,7 +48,7 @@ public class LecturerService {
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of(KeycloakGroup.LECTURER.getGroupName()))
+            .groups(java.util.List.of(KeycloakGroup.LECTURER.getGroupName()))
             .build();
 
     CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
