@@ -137,19 +137,20 @@ class StudentServiceTest {
   @DisplayName("Should create student successfully from DTO")
   void shouldCreateStudentSuccessfullyFromDto() {
     // Given
-    CreateStudentRequest request = new CreateStudentRequest();
-    request.setUsername("new.student@example.com");
-    request.setFirstName("New");
-    request.setLastName("Student");
-    request.setEmail("new.student@example.com");
-    request.setDateOfBirth(LocalDate.of(2001, 4, 20));
-    request.setAddress("New Student Address 456");
-    request.setPhoneNumber("+49 987 654321");
-    request.setMatriculationNumber("S2023003");
-    request.setDegreeProgram("Mathematics");
-    request.setSemester(1);
-    request.setStudyStatus(Student.StudyStatus.ENROLLED);
-    request.setCohort("MATH-T-23");
+    CreateStudentRequest request = CreateStudentRequest.builder()
+        .username("new.student@example.com")
+        .firstName("New")
+        .lastName("Student")
+        .email("new.student@example.com")
+        .dateOfBirth(LocalDate.of(2001, 4, 20))
+        .address("New Student Address 456")
+        .phoneNumber("+49 987 654321")
+        .matriculationNumber("S2023003")
+        .degreeProgram("Mathematics")
+        .semester(1)
+        .studyStatus(Student.StudyStatus.ENROLLED)
+        .cohort("MATH-T-23")
+        .build();
 
     // Mock Keycloak response
     com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
@@ -193,12 +194,13 @@ class StudentServiceTest {
   @DisplayName("Should throw exception when creating student with duplicate matriculation number")
   void shouldThrowExceptionWhenCreatingStudentWithDuplicateMatriculationNumber() {
     // Given
-    CreateStudentRequest request = new CreateStudentRequest();
-    request.setUsername("duplicate@example.com");
-    request.setFirstName("Duplicate");
-    request.setLastName("Student");
-    request.setEmail("duplicate@example.com");
-    request.setMatriculationNumber("S2023001");
+    CreateStudentRequest request = CreateStudentRequest.builder()
+        .username("duplicate@example.com")
+        .firstName("Duplicate")
+        .lastName("Student")
+        .email("duplicate@example.com")
+        .matriculationNumber("S2023001")
+        .build();
 
     // Mock Keycloak response
     com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
@@ -220,13 +222,14 @@ class StudentServiceTest {
   @DisplayName("Should throw exception when creating student with invalid semester")
   void shouldThrowExceptionWhenCreatingStudentWithInvalidSemester() {
     // Given
-    CreateStudentRequest request = new CreateStudentRequest();
-    request.setUsername("invalid@example.com");
-    request.setFirstName("Invalid");
-    request.setLastName("Student");
-    request.setEmail("invalid@example.com");
-    request.setMatriculationNumber("S2023004");
-    request.setSemester(0);
+    CreateStudentRequest request = CreateStudentRequest.builder()
+        .username("invalid@example.com")
+        .firstName("Invalid")
+        .lastName("Student")
+        .email("invalid@example.com")
+        .matriculationNumber("S2023004")
+        .semester(0)
+        .build();
 
     // Mock Keycloak response
     com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
@@ -248,13 +251,14 @@ class StudentServiceTest {
   @DisplayName("Should throw exception when creating student with semester exceeding limit")
   void shouldThrowExceptionWhenCreatingStudentWithSemesterExceedingLimit() {
     // Given
-    CreateStudentRequest request = new CreateStudentRequest();
-    request.setUsername("exceed@example.com");
-    request.setFirstName("Exceed");
-    request.setLastName("Student");
-    request.setEmail("exceed@example.com");
-    request.setMatriculationNumber("S2023005");
-    request.setSemester(21);
+    CreateStudentRequest request = CreateStudentRequest.builder()
+        .username("exceed@example.com")
+        .firstName("Exceed")
+        .lastName("Student")
+        .email("exceed@example.com")
+        .matriculationNumber("S2023005")
+        .semester(21)
+        .build();
 
     // Mock Keycloak response
     com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
