@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
-import com.ase.stammdatenverwaltung.dto.keycloak.KeycloakUser;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StudentService Tests")
@@ -41,8 +39,6 @@ class StudentServiceTest {
     testStudent =
         Student.builder()
             .id("test-id")
-            .firstName("Test")
-            .lastName("Student")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Student Address 123")
             .phoneNumber("+49 123 456789")
@@ -142,6 +138,10 @@ class StudentServiceTest {
   void shouldCreateStudentSuccessfullyFromDto() {
     // Given
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("new.student@example.com");
+    request.setFirstName("New");
+    request.setLastName("Student");
+    request.setEmail("new.student@example.com");
     request.setDateOfBirth(LocalDate.of(2001, 4, 20));
     request.setAddress("New Student Address 456");
     request.setPhoneNumber("+49 987 654321");
@@ -151,9 +151,19 @@ class StudentServiceTest {
     request.setStudyStatus(Student.StudyStatus.ENROLLED);
     request.setCohort("MATH-T-23");
 
+    // Mock Keycloak response
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        new com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse();
+    keycloakResponse.setId("keycloak-generated-id");
+    keycloakResponse.setUsername("new.student@example.com");
+
+    when(keycloakClient.createUser(
+            any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class)))
+        .thenReturn(reactor.core.publisher.Mono.just(keycloakResponse));
+
     Student savedStudent =
         Student.builder()
-            .id("test-id-3")
+            .id("keycloak-generated-id")
             .dateOfBirth(LocalDate.of(2001, 4, 20))
             .address("New Student Address 456")
             .phoneNumber("+49 987 654321")
@@ -172,7 +182,9 @@ class StudentServiceTest {
 
     // Then
     assertThat(result).isEqualTo(savedStudent);
-    assertThat(result.getId()).isEqualTo("test-id-3");
+    assertThat(result.getId()).isEqualTo("keycloak-generated-id");
+    verify(keycloakClient)
+        .createUser(any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class));
     verify(studentRepository).existsByMatriculationNumber("S2023003");
     verify(studentRepository).save(any(Student.class));
   }
@@ -182,8 +194,20 @@ class StudentServiceTest {
   void shouldThrowExceptionWhenCreatingStudentWithDuplicateMatriculationNumber() {
     // Given
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("duplicate@example.com");
+    request.setFirstName("Duplicate");
+    request.setLastName("Student");
+    request.setEmail("duplicate@example.com");
     request.setMatriculationNumber("S2023001");
 
+    // Mock Keycloak response
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        new com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse();
+    keycloakResponse.setId("keycloak-id");
+
+    when(keycloakClient.createUser(
+            any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class)))
+        .thenReturn(reactor.core.publisher.Mono.just(keycloakResponse));
     when(studentRepository.existsByMatriculationNumber("S2023001")).thenReturn(true);
 
     // When & Then
@@ -197,9 +221,21 @@ class StudentServiceTest {
   void shouldThrowExceptionWhenCreatingStudentWithInvalidSemester() {
     // Given
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("invalid@example.com");
+    request.setFirstName("Invalid");
+    request.setLastName("Student");
+    request.setEmail("invalid@example.com");
     request.setMatriculationNumber("S2023004");
     request.setSemester(0);
 
+    // Mock Keycloak response
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        new com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse();
+    keycloakResponse.setId("keycloak-id");
+
+    when(keycloakClient.createUser(
+            any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class)))
+        .thenReturn(reactor.core.publisher.Mono.just(keycloakResponse));
     when(studentRepository.existsByMatriculationNumber("S2023004")).thenReturn(false);
 
     // When & Then
@@ -213,9 +249,21 @@ class StudentServiceTest {
   void shouldThrowExceptionWhenCreatingStudentWithSemesterExceedingLimit() {
     // Given
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("exceed@example.com");
+    request.setFirstName("Exceed");
+    request.setLastName("Student");
+    request.setEmail("exceed@example.com");
     request.setMatriculationNumber("S2023005");
     request.setSemester(21);
 
+    // Mock Keycloak response
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        new com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse();
+    keycloakResponse.setId("keycloak-id");
+
+    when(keycloakClient.createUser(
+            any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class)))
+        .thenReturn(reactor.core.publisher.Mono.just(keycloakResponse));
     when(studentRepository.existsByMatriculationNumber("S2023005")).thenReturn(false);
 
     // When & Then

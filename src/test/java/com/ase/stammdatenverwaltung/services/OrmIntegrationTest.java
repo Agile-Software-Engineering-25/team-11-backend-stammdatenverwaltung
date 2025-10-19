@@ -1,7 +1,10 @@
 package com.ase.stammdatenverwaltung.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
@@ -21,8 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -46,12 +51,31 @@ class OrmIntegrationTest {
 
   @Autowired private LecturerService lecturerService;
 
+  @MockBean private KeycloakClient keycloakClient;
+
   @BeforeEach
   void setUp() {
     lecturerRepository.deleteAll();
     employeeRepository.deleteAll();
     studentRepository.deleteAll();
     personRepository.deleteAll();
+
+    // Mock KeycloakClient to return unique IDs without calling the actual API
+    when(keycloakClient.createUser(
+            any(com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.class)))
+        .thenAnswer(
+            invocation -> {
+              com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse response =
+                  new com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse();
+              response.setId(UUID.randomUUID().toString());
+              com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest request =
+                  invocation.getArgument(0);
+              response.setUsername(request.getUsername());
+              response.setFirstName(request.getFirstName());
+              response.setLastName(request.getLastName());
+              response.setEmail(request.getEmail());
+              return Mono.just(response);
+            });
   }
 
   @Test
@@ -60,8 +84,6 @@ class OrmIntegrationTest {
     Person person =
         Person.builder()
             .id(UUID.randomUUID().toString())
-            .firstName("John")
-            .lastName("Doe")
             .dateOfBirth(LocalDate.of(1990, 5, 15))
             .address("Test Address 123")
             .phoneNumber("+49 123 456789")
@@ -71,8 +93,6 @@ class OrmIntegrationTest {
     Person savedPerson = personService.create(person);
 
     assertThat(savedPerson.getId()).isNotNull();
-    assertThat(savedPerson.getFirstName()).isEqualTo("John");
-    assertThat(savedPerson.getLastName()).isEqualTo("Doe");
     assertThat(savedPerson.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 5, 15));
     assertThat(savedPerson.getAddress()).isEqualTo("Test Address 123");
 
@@ -85,6 +105,10 @@ class OrmIntegrationTest {
   @DisplayName("Should create and persist Student entity with inheritance")
   void shouldCreateAndPersistStudentEntityWithInheritance() {
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("test.student@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Student");
+    request.setEmail("test.student@example.com");
     request.setDateOfBirth(LocalDate.of(2000, 8, 20));
     request.setAddress("Student Address 456");
     request.setPhoneNumber("+49 987 654321");
@@ -94,7 +118,7 @@ class OrmIntegrationTest {
     request.setStudyStatus(Student.StudyStatus.ENROLLED);
     request.setCohort("BIN-T-23");
 
-    Student savedStudent = studentService.create(request, "test-student-id");
+    Student savedStudent = studentService.create(request);
 
     assertThat(savedStudent.getId()).isNotNull();
     assertThat(savedStudent.getMatriculationNumber()).isEqualTo("S2023001");
@@ -113,6 +137,10 @@ class OrmIntegrationTest {
   @DisplayName("Should create and persist Employee entity with inheritance")
   void shouldCreateAndPersistEmployeeEntityWithInheritance() {
     CreateEmployeeRequest request = new CreateEmployeeRequest();
+    request.setUsername("test.employee@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Employee");
+    request.setEmail("test.employee@example.com");
     request.setDateOfBirth(LocalDate.of(1985, 3, 10));
     request.setAddress("Employee Address 789");
     request.setPhoneNumber("+49 555 123456");
@@ -140,6 +168,10 @@ class OrmIntegrationTest {
   @DisplayName("Should create and persist Lecturer entity with multi-level inheritance")
   void shouldCreateAndPersistLecturerEntityWithMultiLevelInheritance() {
     CreateLecturerRequest request = new CreateLecturerRequest();
+    request.setUsername("test.lecturer@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Lecturer");
+    request.setEmail("test.lecturer@example.com");
     request.setDateOfBirth(LocalDate.of(1975, 11, 5));
     request.setAddress("Professor Address 999");
     request.setPhoneNumber("+49 333 777888");
@@ -179,6 +211,10 @@ class OrmIntegrationTest {
   @DisplayName("Should handle cascading deletes correctly")
   void shouldHandleCascadingDeletesCorrectly() {
     CreateLecturerRequest request = new CreateLecturerRequest();
+    request.setUsername("delete.test@example.com");
+    request.setFirstName("Delete");
+    request.setLastName("Test");
+    request.setEmail("delete.test@example.com");
     request.setDateOfBirth(LocalDate.of(1980, 6, 15));
     request.setAddress("Test Address for Deletion");
     request.setPhoneNumber("+49 111 222333");
