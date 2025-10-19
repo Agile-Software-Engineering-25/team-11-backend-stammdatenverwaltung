@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -15,6 +17,8 @@ import lombok.experimental.SuperBuilder;
  * for Keycloak user creation (username, firstName, lastName, email) which are sent to Keycloak but
  * NOT stored locally in this service's database.
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 @Data
 public abstract class PersonRequest {
