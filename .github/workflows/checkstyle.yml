@@ -1,14 +1,18 @@
-name: Code Quality Check
+name: Code Quality Check (Spotless & Checkstyle)
 permissions:
   contents: read
 
 on:
+  push:
+    branches: ['main']
   pull_request:
     branches: ['main']
 
 jobs:
   code-quality:
     runs-on: ubuntu-latest
+    # This condition will skip the workflow when a merge commit is detected
+    if: ${{ !startsWith(github.event.head_commit.message, 'Merge') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

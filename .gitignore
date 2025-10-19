@@ -41,3 +41,7 @@ build/
 
 ### env files ###
 .env
+
+### k8s ###
+kube.config
+local.yaml

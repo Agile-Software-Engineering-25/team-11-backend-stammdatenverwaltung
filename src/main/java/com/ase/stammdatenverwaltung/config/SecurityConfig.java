@@ -1,14 +1,14 @@
 package com.ase.stammdatenverwaltung.config;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -16,23 +16,13 @@ import org.springframework.security.web.SecurityFilterChain;
  * Security configuration class that provides profile-specific security settings. Defines different
  * security configurations for development and production environments with Keycloak OAuth2
  * integration.
+ *
+ * <p>Based on:
+ * https://www.javacodegeeks.com/2025/07/spring-boot-keycloak-role-based-authorization.html
  */
 @Configuration
-@EnableWebSecurity
-@EnableConfigurationProperties(JwtSecurityProperties.class)
-@EnableMethodSecurity // Enables @PreAuthorize, @PostAuthorize, etc.
+@EnableMethodSecurity
 public class SecurityConfig {
-
-  private final KeycloakJwtAuthenticationConverter jwtConverter;
-
-  /**
-   * Creates a new security configuration with the provided JWT converter.
-   *
-   * @param jwtConverter converter for processing Keycloak JWT tokens
-   */
-  public SecurityConfig(KeycloakJwtAuthenticationConverter jwtConverter) {
-    this.jwtConverter = jwtConverter;
-  }
 
   /**
    * Development security configuration with relaxed permissions and dual authentication support
@@ -41,6 +31,9 @@ public class SecurityConfig {
   @Bean
   @Profile("dev")
   SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+    JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+    jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
+
     http.authorizeHttpRequests(
             authz ->
                 authz
@@ -71,7 +64,10 @@ public class SecurityConfig {
                     .authenticated()
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/api/**"))
+        .csrf(
+            csrf ->
+                csrf.ignoringRequestMatchers(
+                    "/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
         .headers(
             headers -> headers.frameOptions(frame -> frame.sameOrigin()) // For H2 console
             )
@@ -103,6 +99,9 @@ public class SecurityConfig {
   @Bean
   @Profile("test")
   SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+    JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+    jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
+
     http.authorizeHttpRequests(
             authz ->
                 authz
@@ -131,7 +130,7 @@ public class SecurityConfig {
                     .authenticated()
                     .anyRequest()
                     .authenticated())
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         // Support both Basic Auth (for tests) and JWT (for API testing)
         .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Test"))
         .oauth2ResourceServer(
@@ -160,6 +159,9 @@ public class SecurityConfig {
   @Bean
   @Profile("prod")
   SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
+    JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+    jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
+
     http.authorizeHttpRequests(
             authz ->
                 authz
@@ -178,9 +180,14 @@ public class SecurityConfig {
                     // All other API endpoints require authentication
                     .requestMatchers("/api/**")
                     .authenticated()
+                    // Permit all access to actuator endpoints except health
+                    .requestMatchers(
+                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
+                    .permitAll()
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .headers(
             headers -> headers.frameOptions(frame -> frame.deny()) // Security hardening
             )
