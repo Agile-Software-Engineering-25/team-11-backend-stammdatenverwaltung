@@ -172,6 +172,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
                     // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    // TODO: add JWT auth protection if keycloak is integrated
                     .requestMatchers("/api/v1/users/**")
                     .permitAll()
                     // Admin endpoints require ADMIN role
