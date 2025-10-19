@@ -3,7 +3,6 @@ package com.ase.stammdatenverwaltung.clients;
 import com.ase.stammdatenverwaltung.config.KeycloakConfigProperties;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
-import com.ase.stammdatenverwaltung.dto.keycloak.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.keycloak.TokenResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,34 +42,6 @@ public class KeycloakClient {
   public KeycloakClient(WebClient webClient, KeycloakConfigProperties keycloakConfigProperties) {
     this.webClient = webClient;
     this.keycloakConfigProperties = keycloakConfigProperties;
-  }
-
-  /**
-   * Fetches user information from Keycloak for a given user ID.
-   *
-   * @param userId The ID of the user to fetch.
-   * @return A Mono emitting the KeycloakUser object.
-   */
-  public Mono<KeycloakUser> getUserInfo(String userId) {
-    return getAdminAccessToken()
-        .flatMap(
-            token ->
-                webClient
-                    .get()
-                    .uri(
-                        keycloakConfigProperties.getServerUrl()
-                            + "/admin/realms/"
-                            + keycloakConfigProperties.getRealm()
-                            + "/users/"
-                            + userId)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                    .retrieve()
-                    .bodyToMono(KeycloakUser.class)
-                    .doOnSuccess(
-                        user -> log.info("Successfully fetched user info for user ID: {}", userId))
-                    .doOnError(
-                        error ->
-                            log.error("Failed to fetch user info for user ID: {}", userId, error)));
   }
 
   /**
