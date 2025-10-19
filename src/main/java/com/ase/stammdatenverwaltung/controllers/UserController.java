@@ -13,8 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,10 +35,11 @@ public class UserController {
    * @return The created student.
    */
   @PostMapping("/students")
-  public ResponseEntity<Student> createStudent(
-      @Valid @RequestBody CreateStudentRequest request, @AuthenticationPrincipal Jwt jwt) {
-    String userId = jwt.getSubject();
-    Student createdStudent = studentService.create(request, userId);
+  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request
+      // TODO: Re-enable JWT authentication when ready
+      // @AuthenticationPrincipal Jwt jwt
+      ) {
+    Student createdStudent = studentService.create(request);
     return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
   }
 
@@ -51,8 +50,10 @@ public class UserController {
    * @return The created employee.
    */
   @PostMapping("/employees")
-  public ResponseEntity<Employee> createEmployee(
-      @Valid @RequestBody CreateEmployeeRequest request) {
+  public ResponseEntity<Employee> createEmployee(@Valid @RequestBody CreateEmployeeRequest request
+      // TODO: Re-enable JWT authentication when ready
+      // @AuthenticationPrincipal Jwt jwt
+      ) {
     Employee createdEmployee = employeeService.create(request);
     return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
   }
@@ -64,8 +65,10 @@ public class UserController {
    * @return The created lecturer.
    */
   @PostMapping("/lecturers")
-  public ResponseEntity<Lecturer> createLecturer(
-      @Valid @RequestBody CreateLecturerRequest request) {
+  public ResponseEntity<Lecturer> createLecturer(@Valid @RequestBody CreateLecturerRequest request
+      // TODO: Re-enable JWT authentication when ready
+      // @AuthenticationPrincipal Jwt jwt
+      ) {
     Lecturer createdLecturer = lecturerService.create(request);
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
   }

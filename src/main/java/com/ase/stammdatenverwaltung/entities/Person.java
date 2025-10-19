@@ -40,8 +40,6 @@ public class Person {
   @Column(name = "id")
   private String id;
 
-
-
   /** Date of birth of the person. Must be in the past. */
   @NotNull(message = "Date of birth is required") @Past(message = "Date of birth must be in the past")
   @Column(name = "date_of_birth", nullable = false)

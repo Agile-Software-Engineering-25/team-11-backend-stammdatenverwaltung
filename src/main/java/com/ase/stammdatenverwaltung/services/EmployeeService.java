@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
@@ -25,9 +26,12 @@ import org.springframework.validation.annotation.Validated;
 public class EmployeeService {
 
   private final EmployeeRepository employeeRepository;
+  private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new employee from a request DTO.
+   * Creates a new employee from a request DTO. First creates the user in Keycloak with the
+   * "university-administrative-staff" group, then stores the employee data locally using the
+   * Keycloak user ID.
    *
    * @param request The request body containing the employee data.
    * @return The created employee.
@@ -35,8 +39,28 @@ public class EmployeeService {
   public Employee create(CreateEmployeeRequest request) {
     log.debug("Creating new employee with employee number: {}", request.getEmployeeNumber());
 
+    // Create user in Keycloak with university-administrative-staff group
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
+        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .group(java.util.List.of("university-administrative-staff"))
+            .build();
+
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create employee entity with Keycloak user ID
     Employee employee =
         Employee.builder()
+            .id(keycloakResponse.getId())
             .dateOfBirth(request.getDateOfBirth())
             .address(request.getAddress())
             .phoneNumber(request.getPhoneNumber())

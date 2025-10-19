@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
@@ -25,9 +26,11 @@ import org.springframework.validation.annotation.Validated;
 public class LecturerService {
 
   private final LecturerRepository lecturerRepository;
+  private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new lecturer from a request DTO.
+   * Creates a new lecturer from a request DTO. First creates the user in Keycloak with the
+   * "lecturer" group, then stores the lecturer data locally using the Keycloak user ID.
    *
    * @param request The request body containing the lecturer data.
    * @return The created lecturer.
@@ -35,12 +38,28 @@ public class LecturerService {
   public Lecturer create(CreateLecturerRequest request) {
     log.debug("Creating new lecturer in field/chair: {}", request.getFieldChair());
 
-    // TODO: replace mockId with keucloak call
-    String mockId = "lecturer-" + System.currentTimeMillis();
+    // Create user in Keycloak with lecturer group
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
+        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .group(java.util.List.of("lecturer"))
+            .build();
 
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create lecturer entity with Keycloak user ID
     Lecturer lecturer =
         Lecturer.builder()
-            .id(mockId)
+            .id(keycloakResponse.getId())
             .dateOfBirth(request.getDateOfBirth())
             .address(request.getAddress())
             .phoneNumber(request.getPhoneNumber())

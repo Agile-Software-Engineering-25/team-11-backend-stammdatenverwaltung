@@ -2,7 +2,6 @@ package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
-import com.ase.stammdatenverwaltung.dto.keycloak.KeycloakUser;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,21 +31,38 @@ public class StudentService {
   private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new student from a request DTO.
+   * Creates a new student from a request DTO. First creates the user in Keycloak with the "student"
+   * group, then stores the student data locally using the Keycloak user ID.
    *
    * @param request The request body containing the student data.
    * @return The created student.
    */
-  public Student create(CreateStudentRequest request, String userId) {
+  public Student create(CreateStudentRequest request) {
     log.debug(
         "Creating new student with matriculation number: {}", request.getMatriculationNumber());
 
-    KeycloakUser keycloakUser = keycloakClient.getUserInfo(userId).block();
+    // Create user in Keycloak with student group
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
+        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .group(java.util.List.of("student"))
+            .build();
 
+    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
+        keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create student entity with Keycloak user ID
     Student student =
         Student.builder()
-            .id(userId)
-
+            .id(keycloakResponse.getId())
             .dateOfBirth(request.getDateOfBirth())
             .address(request.getAddress())
             .phoneNumber(request.getPhoneNumber())

@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 import com.ase.stammdatenverwaltung.config.JwtSecurityProperties;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
@@ -48,6 +47,10 @@ class UserControllerTest {
   @Test
   void createStudent() throws Exception {
     CreateStudentRequest request = new CreateStudentRequest();
+    request.setUsername("test.student@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Student");
+    request.setEmail("test.student@example.com");
     request.setDateOfBirth(LocalDate.of(2000, 1, 1));
     request.setMatriculationNumber("12345");
     request.setStudyStatus(Student.StudyStatus.ENROLLED);
@@ -56,19 +59,13 @@ class UserControllerTest {
     student.setId("test-id");
     student.setMatriculationNumber("12345");
 
-    when(studentService.create(any(CreateStudentRequest.class), any(String.class))).thenReturn(student);
-
-    Jwt mockJwt = Jwt.withTokenValue("mock-token")
-            .header("alg", "RS256")
-            .claim("sub", "test-id")
-            .build();
+    when(studentService.create(any(CreateStudentRequest.class))).thenReturn(student);
 
     mockMvc
         .perform(
             post("/api/v1/users/students")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .with(jwt().jwt(mockJwt)))
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", Matchers.is("test-id")))
         .andExpect(jsonPath("$.matriculationNumber", Matchers.is("12345")));
@@ -77,6 +74,10 @@ class UserControllerTest {
   @Test
   void createEmployee() throws Exception {
     CreateEmployeeRequest request = new CreateEmployeeRequest();
+    request.setUsername("test.employee@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Employee");
+    request.setEmail("test.employee@example.com");
     request.setDateOfBirth(LocalDate.of(1980, 1, 1));
     request.setEmployeeNumber("E12345");
 
@@ -99,6 +100,10 @@ class UserControllerTest {
   @Test
   void createLecturer() throws Exception {
     CreateLecturerRequest request = new CreateLecturerRequest();
+    request.setUsername("test.lecturer@example.com");
+    request.setFirstName("Test");
+    request.setLastName("Lecturer");
+    request.setEmail("test.lecturer@example.com");
     request.setDateOfBirth(LocalDate.of(1970, 1, 1));
     request.setEmployeeNumber("L12345");
     request.setFieldChair("Computer Science");
