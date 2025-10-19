@@ -14,7 +14,8 @@ spring:
     driverClassName: org.postgresql.Driver
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    # Common migrations first, then PostgreSQL-specific
+    locations: classpath:db/migration/common,classpath:db/migration/postgresql
     baseline-on-migrate: true
     validate-on-migrate: true
   security:
