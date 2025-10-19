@@ -60,6 +60,8 @@ class OrmIntegrationTest {
     Person person =
         Person.builder()
             .id(UUID.randomUUID().toString())
+            .firstName("John")
+            .lastName("Doe")
             .dateOfBirth(LocalDate.of(1990, 5, 15))
             .address("Test Address 123")
             .phoneNumber("+49 123 456789")
@@ -69,6 +71,8 @@ class OrmIntegrationTest {
     Person savedPerson = personService.create(person);
 
     assertThat(savedPerson.getId()).isNotNull();
+    assertThat(savedPerson.getFirstName()).isEqualTo("John");
+    assertThat(savedPerson.getLastName()).isEqualTo("Doe");
     assertThat(savedPerson.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 5, 15));
     assertThat(savedPerson.getAddress()).isEqualTo("Test Address 123");
 
@@ -90,7 +94,7 @@ class OrmIntegrationTest {
     request.setStudyStatus(Student.StudyStatus.ENROLLED);
     request.setCohort("BIN-T-23");
 
-    Student savedStudent = studentService.create(request);
+    Student savedStudent = studentService.create(request, "test-student-id");
 
     assertThat(savedStudent.getId()).isNotNull();
     assertThat(savedStudent.getMatriculationNumber()).isEqualTo("S2023001");

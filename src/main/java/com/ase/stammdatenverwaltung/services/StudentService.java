@@ -1,6 +1,8 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.KeycloakUser;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,6 +29,7 @@ public class StudentService {
   private static final int MAX_SEMESTER_COUNT = 20;
 
   private final StudentRepository studentRepository;
+  private final KeycloakClient keycloakClient;
 
   /**
    * Creates a new student from a request DTO.
@@ -34,15 +37,16 @@ public class StudentService {
    * @param request The request body containing the student data.
    * @return The created student.
    */
-  public Student create(CreateStudentRequest request) {
+  public Student create(CreateStudentRequest request, String userId) {
     log.debug(
         "Creating new student with matriculation number: {}", request.getMatriculationNumber());
-    // TODO: replace with response from Keycloak after integration
-    String mockId = "stu_" + java.util.UUID.randomUUID().toString();
+
+    KeycloakUser keycloakUser = keycloakClient.getUserInfo(userId).block();
 
     Student student =
         Student.builder()
-            .id(mockId)
+            .id(userId)
+
             .dateOfBirth(request.getDateOfBirth())
             .address(request.getAddress())
             .phoneNumber(request.getPhoneNumber())

@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,8 +37,10 @@ public class UserController {
    * @return The created student.
    */
   @PostMapping("/students")
-  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
-    Student createdStudent = studentService.create(request);
+  public ResponseEntity<Student> createStudent(
+      @Valid @RequestBody CreateStudentRequest request, @AuthenticationPrincipal Jwt jwt) {
+    String userId = jwt.getSubject();
+    Student createdStudent = studentService.create(request, userId);
     return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
   }
 

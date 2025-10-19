@@ -2,7 +2,6 @@ package com.ase.stammdatenverwaltung.dto;
 
 import com.ase.stammdatenverwaltung.entities.Employee;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

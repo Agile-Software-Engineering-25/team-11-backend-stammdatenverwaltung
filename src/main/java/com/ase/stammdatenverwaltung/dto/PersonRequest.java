@@ -7,11 +7,11 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.Data;
 
+/** Abstract base class for DTOs representing requests to create or update a Person. */
 @Data
 public abstract class PersonRequest {
 
-  @NotNull(message = "Date of birth is required")
-  @Past(message = "Date of birth must be in the past")
+  @NotNull(message = "Date of birth is required") @Past(message = "Date of birth must be in the past")
   private LocalDate dateOfBirth;
 
   @Size(max = 500, message = "Address cannot exceed 500 characters")

@@ -38,3 +38,9 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
   show-actuator: true
+
+keycloak:
+  server-url: "http://localhost:8080"
+  realm: "your-realm"
+  client-id: "your-client-id"
+  client-secret: "your-client-secret"

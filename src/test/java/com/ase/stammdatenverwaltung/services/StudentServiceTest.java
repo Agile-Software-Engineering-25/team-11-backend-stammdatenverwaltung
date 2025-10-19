@@ -6,7 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.KeycloakUser;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,12 +23,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StudentService Tests")
 class StudentServiceTest {
 
   @Mock private StudentRepository studentRepository;
+  @Mock private KeycloakClient keycloakClient;
 
   @InjectMocks private StudentService studentService;
 
@@ -37,6 +41,8 @@ class StudentServiceTest {
     testStudent =
         Student.builder()
             .id("test-id")
+            .firstName("Test")
+            .lastName("Student")
             .dateOfBirth(LocalDate.of(2000, 8, 15))
             .address("Student Address 123")
             .phoneNumber("+49 123 456789")
