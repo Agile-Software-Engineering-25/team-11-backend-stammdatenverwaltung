@@ -3,9 +3,9 @@ package com.ase.stammdatenverwaltung.controllers;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
-import com.ase.stammdatenverwaltung.entities.Person;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.services.EmployeeService;
 import com.ase.stammdatenverwaltung.services.LecturerService;
@@ -23,12 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-/** Controller for handling user-related requests. */
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -40,17 +35,8 @@ public class UserController {
   private final EmployeeService employeeService;
   private final LecturerService lecturerService;
 
-  /**
-   * Creates a new student.
-   *
-   * @param request The request body containing the student data.
-   * @return The created student.
-   */
   @PostMapping("/students")
-  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request
-      // TODO: Re-enable JWT authentication when ready
-      // @AuthenticationPrincipal Jwt jwt
-      ) {
+  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
     Student createdStudent = studentService.create(request);
     return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
   }
@@ -65,30 +51,19 @@ public class UserController {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = UserMasterDataResponseDTO.class)))
-
+                    schema = @Schema(implementation = PersonDetailsDTO.class)))
       })
   @GetMapping
-  public ResponseEntity<List<Person>> getUsers(
-      @RequestBody(required = false) UserFilterRequestDTO filterRequest,
-      @Parameter(description = "Flag to include name and email in the response", required = true)
-          @RequestParam
-          boolean also_get_name_and_email) {
-    List<Person> users = personService.findAll();
+  public ResponseEntity<List<PersonDetailsDTO>> getUsers(
+      @Parameter(description = "Flag to include details from Keycloak", required = false)
+          @RequestParam(defaultValue = "true")
+          boolean withDetails) {
+    List<PersonDetailsDTO> users = personService.findAll(withDetails);
     return ResponseEntity.ok(users);
   }
 
-  /**
-   * Creates a new employee.
-   *
-   * @param request The request body containing the employee data.
-   * @return The created employee.
-   */
   @PostMapping("/employees")
-  public ResponseEntity<Employee> createEmployee(@Valid @RequestBody CreateEmployeeRequest request
-      // TODO: Re-enable JWT authentication when ready
-      // @AuthenticationPrincipal Jwt jwt
-      ) {
+  public ResponseEntity<Employee> createEmployee(@Valid @RequestBody CreateEmployeeRequest request) {
     Employee createdEmployee = employeeService.create(request);
     return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
   }
@@ -103,31 +78,22 @@ public class UserController {
             content =
                 @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = UserMasterDataResponseDTO.class))),
+                    schema = @Schema(implementation = PersonDetailsDTO.class))),
         @ApiResponse(responseCode = "404", description = "User not found")
       })
   @GetMapping("/{userId}")
-  public ResponseEntity<Person> getUserById(
+  public ResponseEntity<PersonDetailsDTO> getUserById(
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId,
-      @Parameter(description = "Flag to include name and email in the response", required = true)
-          @RequestParam
-          boolean also_get_name_and_email) {
-    Person user = personService.getById(userId);
+      @Parameter(description = "Flag to include details from Keycloak", required = false)
+          @RequestParam(defaultValue = "true")
+          boolean withDetails) {
+    PersonDetailsDTO user = personService.findById(userId, withDetails);
     return ResponseEntity.ok(user);
   }
 
-  /**
-   * Creates a new lecturer.
-   *
-   * @param request The request body containing the lecturer data.
-   * @return The created lecturer.
-   */
   @PostMapping("/lecturers")
-  public ResponseEntity<Lecturer> createLecturer(@Valid @RequestBody CreateLecturerRequest request
-      // TODO: Re-enable JWT authentication when ready
-      // @AuthenticationPrincipal Jwt jwt
-      ) {
+  public ResponseEntity<Lecturer> createLecturer(@Valid @RequestBody CreateLecturerRequest request) {
     Lecturer createdLecturer = lecturerService.create(request);
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
   }

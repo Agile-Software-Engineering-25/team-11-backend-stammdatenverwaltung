@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.clients;
 
 import com.ase.stammdatenverwaltung.config.KeycloakConfigProperties;
+import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.dto.keycloak.TokenResponse;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -67,6 +69,39 @@ public class KeycloakClient {
                                 "Failed to create user in Keycloak for username: {}",
                                 request.getUsername(),
                                 error)));
+  }
+
+  /**
+   * Finds a user in Keycloak by their ID.
+   *
+   * @param userId The UUID of the user to find.
+   * @return A Mono emitting a list of matching users.
+   */
+  public Mono<List<KeycloakUser>> findUserById(String userId) {
+    return getAdminAccessToken()
+        .flatMap(
+            token ->
+                webClient
+                    .get()
+                    .uri(
+                        uriBuilder ->
+                            uriBuilder
+                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
+                                .queryParam("id", userId)
+                                .build())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<KeycloakUser>>() {})
+                    .doOnSuccess(
+                        users ->
+                            log.info(
+                                "Successfully fetched {} user(s) from Keycloak for ID: {}",
+                                users.size(),
+                                userId))
+                    .doOnError(
+                        error ->
+                            log.error(
+                                "Failed to fetch user from Keycloak for ID: {}", userId, error)));
   }
 
   /**
