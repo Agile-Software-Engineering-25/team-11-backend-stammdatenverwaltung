@@ -3,8 +3,6 @@ package com.ase.stammdatenverwaltung.controllers;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
-import com.ase.stammdatenverwaltung.dto.UserFilterRequestDTO;
-import com.ase.stammdatenverwaltung.dto.UserMasterDataResponseDTO;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Person;
@@ -32,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Controller for handling user-related requests. */
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "User Data", description = "API for user data management")
 public class UserController {
@@ -68,6 +66,7 @@ public class UserController {
                 @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = UserMasterDataResponseDTO.class)))
+
       })
   @GetMapping
   public ResponseEntity<List<Person>> getUsers(
