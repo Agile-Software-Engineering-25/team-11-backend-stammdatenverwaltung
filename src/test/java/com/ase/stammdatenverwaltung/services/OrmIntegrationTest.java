@@ -111,16 +111,17 @@ class OrmIntegrationTest {
   @Test
   @DisplayName("Should create and persist Student entity with inheritance")
   void shouldCreateAndPersistStudentEntityWithInheritance() {
-    CreateStudentRequest request = CreateStudentRequest.builder()
-        .dateOfBirth(LocalDate.of(2000, 8, 20))
-        .address("Student Address 456")
-        .phoneNumber("+49 987 654321")
-        .matriculationNumber("S2023001")
-        .degreeProgram("Computer Science")
-        .semester(3)
-        .studyStatus(Student.StudyStatus.ENROLLED)
-        .cohort("BIN-T-23")
-        .build();
+    CreateStudentRequest request =
+        CreateStudentRequest.builder()
+            .dateOfBirth(LocalDate.of(2000, 8, 20))
+            .address("Student Address 456")
+            .phoneNumber("+49 987 654321")
+            .matriculationNumber("S2023001")
+            .degreeProgram("Computer Science")
+            .semester(3)
+            .studyStatus(Student.StudyStatus.ENROLLED)
+            .cohort("BIN-T-23")
+            .build();
 
     Student savedStudent = studentService.create(request);
 
@@ -140,15 +141,16 @@ class OrmIntegrationTest {
   @Test
   @DisplayName("Should create and persist Employee entity with inheritance")
   void shouldCreateAndPersistEmployeeEntityWithInheritance() {
-    CreateEmployeeRequest request = CreateEmployeeRequest.builder()
-        .dateOfBirth(LocalDate.of(1985, 3, 10))
-        .address("Employee Address 789")
-        .phoneNumber("+49 555 123456")
-        .employeeNumber("E001")
-        .department("IT Support")
-        .officeNumber("A-101")
-        .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-        .build();
+    CreateEmployeeRequest request =
+        CreateEmployeeRequest.builder()
+            .dateOfBirth(LocalDate.of(1985, 3, 10))
+            .address("Employee Address 789")
+            .phoneNumber("+49 555 123456")
+            .employeeNumber("E001")
+            .department("IT Support")
+            .officeNumber("A-101")
+            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+            .build();
 
     Employee savedEmployee = employeeService.create(request);
 
@@ -168,18 +170,19 @@ class OrmIntegrationTest {
   @Test
   @DisplayName("Should create and persist Lecturer entity with multi-level inheritance")
   void shouldCreateAndPersistLecturerEntityWithMultiLevelInheritance() {
-    CreateLecturerRequest request = CreateLecturerRequest.builder()
-        .dateOfBirth(LocalDate.of(1975, 11, 5))
-        .address("Professor Address 999")
-        .phoneNumber("+49 333 777888")
-        .employeeNumber("L001")
-        .department("Computer Science Department")
-        .officeNumber("B-201")
-        .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-        .fieldChair("Software Engineering")
-        .title("Prof. Dr.")
-        .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
-        .build();
+    CreateLecturerRequest request =
+        CreateLecturerRequest.builder()
+            .dateOfBirth(LocalDate.of(1975, 11, 5))
+            .address("Professor Address 999")
+            .phoneNumber("+49 333 777888")
+            .employeeNumber("L001")
+            .department("Computer Science Department")
+            .officeNumber("B-201")
+            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+            .fieldChair("Software Engineering")
+            .title("Prof. Dr.")
+            .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+            .build();
 
     Lecturer savedLecturer = lecturerService.create(request);
 
@@ -341,8 +344,6 @@ class OrmIntegrationTest {
     // When & Then - Test complex queries
     verifyComplexQueries();
   }
-
-
 
   @Disabled("As long PersonService only usage are these test i will disable them.")
   @Test
