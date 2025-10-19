@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
  * tokens and fetching user information.
  */
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class KeycloakClient {
 
@@ -32,17 +34,6 @@ public class KeycloakClient {
   private final KeycloakConfigProperties keycloakConfigProperties;
   private String accessToken;
   private Instant tokenExpirationTime;
-
-  /**
-   * Constructs a KeycloakClient with the given WebClient and KeycloakConfigProperties.
-   *
-   * @param webClient The WebClient instance for making HTTP requests.
-   * @param keycloakConfigProperties The configuration properties for Keycloak.
-   */
-  public KeycloakClient(WebClient webClient, KeycloakConfigProperties keycloakConfigProperties) {
-    this.webClient = webClient;
-    this.keycloakConfigProperties = keycloakConfigProperties;
-  }
 
   /**
    * Creates a new user in Keycloak via the wrapped user API.
@@ -166,7 +157,8 @@ public class KeycloakClient {
       ObjectMapper mapper = new ObjectMapper();
       log.debug("About to parse with Jackson...");
       List<CreateUserResponse> list =
-          mapper.readValue(arrayJson, new TypeReference<List<CreateUserResponse>>() {});
+          mapper.readValue(arrayJson, new TypeReference<>() {
+          });
       log.debug("Successfully parsed, list size: {}", list.size());
 
       if (list.isEmpty()) {
@@ -176,11 +168,9 @@ public class KeycloakClient {
 
       // Extract the init-password from the malformed part if present
       String initPassword = extractInitPassword(afterArray);
-      CreateUserResponse response = list.get(0);
+      CreateUserResponse response = list.getFirst();
 
       if (initPassword != null && response != null) {
-        // Store the password if your CreateUserResponse has a field for it
-        // response.setInitPassword(initPassword);
         log.info("Extracted init-password from response: {}", initPassword);
       }
 
