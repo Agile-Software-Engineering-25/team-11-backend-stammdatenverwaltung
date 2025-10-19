@@ -79,7 +79,6 @@ public class KeycloakClient {
     if (isTokenValid()) {
       return Mono.just(accessToken);
     }
-    log.info(keycloakConfigProperties.getClientSecret());
 
     // Use the correct Keycloak token endpoint for sau-portal
     String tokenUrl =
@@ -169,7 +168,7 @@ public class KeycloakClient {
       CreateUserResponse response = list.getFirst();
 
       if (initPassword != null && response != null) {
-        log.info("Extracted init-password from response: {}", initPassword);
+        log.debug("Extracted init-password from response: {}", initPassword);
       }
 
       return response;
