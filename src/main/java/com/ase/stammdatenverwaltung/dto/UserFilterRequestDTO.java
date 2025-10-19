@@ -1,11 +1,10 @@
 package com.ase.stammdatenverwaltung.dto;
 
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class UserFilterRequestDTO {
-    private List<FilterCriterionDTO> filter;
-    private String role;
+  private List<FilterCriterionDTO> filter;
+  private String role;
 }

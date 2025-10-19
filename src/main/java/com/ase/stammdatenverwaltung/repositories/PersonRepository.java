@@ -16,8 +16,8 @@ import org.springframework.stereotype.Repository;
  * inheritance hierarchy.
  */
 @Repository
-public interface PersonRepository extends JpaRepository<Person, String>,
-    JpaSpecificationExecutor<Person> {
+public interface PersonRepository
+    extends JpaRepository<Person, String>, JpaSpecificationExecutor<Person> {
 
   /**
    * Find persons by phone number.
