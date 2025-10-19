@@ -2,7 +2,10 @@ package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Student;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -42,17 +45,16 @@ public class StudentService {
         "Creating new student with matriculation number: {}", request.getMatriculationNumber());
 
     // Create user in Keycloak with student group
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
-        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
             .username(request.getUsername())
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of("student"))
+            .group(java.util.List.of(KeycloakGroup.STUDENT.getGroupName()))
             .build();
 
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
-        keycloakClient.createUser(keycloakRequest).block();
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
 
     if (keycloakResponse == null || keycloakResponse.getId() == null) {
       throw new IllegalStateException(
@@ -145,12 +147,14 @@ public class StudentService {
     log.debug("Updating student with ID: {}", id);
     Student existingStudent = getById(id);
 
+    // Update student-specific fields
     existingStudent.setMatriculationNumber(updatedStudent.getMatriculationNumber());
     existingStudent.setDegreeProgram(updatedStudent.getDegreeProgram());
     existingStudent.setSemester(updatedStudent.getSemester());
     existingStudent.setStudyStatus(updatedStudent.getStudyStatus());
     existingStudent.setCohort(updatedStudent.getCohort());
 
+    // Update inherited person fields
     existingStudent.setDateOfBirth(updatedStudent.getDateOfBirth());
     existingStudent.setAddress(updatedStudent.getAddress());
     existingStudent.setPhoneNumber(updatedStudent.getPhoneNumber());

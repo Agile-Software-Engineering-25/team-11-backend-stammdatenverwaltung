@@ -2,7 +2,10 @@ package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Employee;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -40,17 +43,16 @@ public class EmployeeService {
     log.debug("Creating new employee with employee number: {}", request.getEmployeeNumber());
 
     // Create user in Keycloak with university-administrative-staff group
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
-        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
             .username(request.getUsername())
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of("university-administrative-staff"))
+            .group(java.util.List.of(KeycloakGroup.UNIVERSITY_ADMINISTRATIVE_STAFF.getGroupName()))
             .build();
 
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
-        keycloakClient.createUser(keycloakRequest).block();
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
 
     if (keycloakResponse == null || keycloakResponse.getId() == null) {
       throw new IllegalStateException(

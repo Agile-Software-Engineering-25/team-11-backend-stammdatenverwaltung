@@ -2,7 +2,10 @@ package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -39,17 +42,16 @@ public class LecturerService {
     log.debug("Creating new lecturer in field/chair: {}", request.getFieldChair());
 
     // Create user in Keycloak with lecturer group
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest keycloakRequest =
-        com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest.builder()
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
             .username(request.getUsername())
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
             .email(request.getEmail())
-            .group(java.util.List.of("lecturer"))
+            .group(java.util.List.of(KeycloakGroup.LECTURER.getGroupName()))
             .build();
 
-    com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse keycloakResponse =
-        keycloakClient.createUser(keycloakRequest).block();
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
 
     if (keycloakResponse == null || keycloakResponse.getId() == null) {
       throw new IllegalStateException(
