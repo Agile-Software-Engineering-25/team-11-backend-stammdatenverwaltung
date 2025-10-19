@@ -33,5 +33,5 @@ public class CreateUserRequest {
   @Email(message = "Email must be valid")
   private String email;
 
-  @NotNull(message = "Groups are required") private List<String> group;
+  @NotNull(message = "Groups are required") private List<String> groups;
 }
