@@ -156,9 +156,7 @@ public class KeycloakClient {
       // Parse the array
       ObjectMapper mapper = new ObjectMapper();
       log.debug("About to parse with Jackson...");
-      List<CreateUserResponse> list =
-          mapper.readValue(arrayJson, new TypeReference<>() {
-          });
+      List<CreateUserResponse> list = mapper.readValue(arrayJson, new TypeReference<>() {});
       log.debug("Successfully parsed, list size: {}", list.size());
 
       if (list.isEmpty()) {
