@@ -36,7 +36,7 @@ public class PersonService {
    * @return optional containing the person if found
    */
   @Transactional(readOnly = true)
-  public Optional<Person> findById(Long id) {
+  public Optional<Person> findById(String id) {
     log.debug("Finding person with ID: {}", id);
     return personRepository.findById(id);
   }
@@ -49,7 +49,7 @@ public class PersonService {
    * @throws EntityNotFoundException if the person is not found
    */
   @Transactional(readOnly = true)
-  public Person getById(Long id) {
+  public Person getById(String id) {
     log.debug("Getting person with ID: {}", id);
     return personRepository
         .findById(id)
@@ -89,7 +89,7 @@ public class PersonService {
    * @return the updated person entity
    * @throws EntityNotFoundException if the person is not found
    */
-  public Person update(Long id, @Valid Person updatedPerson) {
+  public Person update(String id, @Valid Person updatedPerson) {
     log.debug("Updating person with ID: {}", id);
     Person existingPerson = getById(id);
 
@@ -110,7 +110,7 @@ public class PersonService {
    * @param id the person ID to delete
    * @throws EntityNotFoundException if the person is not found
    */
-  public void deleteById(Long id) {
+  public void deleteById(String id) {
     log.debug("Deleting person with ID: {}", id);
     if (!personRepository.existsById(id)) {
       throw new EntityNotFoundException("Person not found with ID: " + id);
@@ -247,7 +247,7 @@ public class PersonService {
    * @return true if the person exists
    */
   @Transactional(readOnly = true)
-  public boolean existsById(Long id) {
+  public boolean existsById(String id) {
     return personRepository.existsById(id);
   }
 

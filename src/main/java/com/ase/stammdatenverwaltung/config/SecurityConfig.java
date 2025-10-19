@@ -53,6 +53,9 @@ public class SecurityConfig {
                     // Public API endpoints (adjust as needed)
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    .requestMatchers("/api/v1/users/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
@@ -116,6 +119,9 @@ public class SecurityConfig {
                     // Public API endpoints
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    .requestMatchers("/api/v1/users/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
@@ -164,6 +170,10 @@ public class SecurityConfig {
                     .permitAll()
                     // Public API endpoints (adjust as needed)
                     .requestMatchers("/api/v1/public/**")
+                    .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    // TODO: add JWT auth protection if keycloak is integrated
+                    .requestMatchers("/api/v1/users/**")
                     .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")

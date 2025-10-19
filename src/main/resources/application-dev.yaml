@@ -5,14 +5,14 @@ spring:
     hibernate:
       ddl-auto: validate
     properties:
-        hibernate:
-          '[format_sql]': true
+      hibernate:
+        '[format_sql]': true
   datasource:
     # H2 file-based database with PostgreSQL compatibility mode
     # MODE=PostgreSQL: enables PostgreSQL-compatible syntax
     # DATABASE_TO_LOWER=TRUE: converts unquoted identifiers to lowercase (PostgreSQL behavior)
     # DEFAULT_NULL_ORDERING=HIGH: NULL values sort last (PostgreSQL default)
-    url: jdbc:h2:file:./data/devdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    url: jdbc:h2:mem:./data/devdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driverClassName: org.h2.Driver
     username: sa
     password: password

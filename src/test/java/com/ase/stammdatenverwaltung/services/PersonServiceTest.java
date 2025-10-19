@@ -38,7 +38,7 @@ class PersonServiceTest {
   void setUp() {
     testPerson =
         Person.builder()
-            .id(1L)
+            .id("test-id")
             .dateOfBirth(LocalDate.of(1990, 5, 15))
             .address("Test Address 123")
             .phoneNumber("+49 123 456789")
@@ -50,55 +50,55 @@ class PersonServiceTest {
   @DisplayName("Should find person by ID when person exists")
   void shouldFindPersonByIdWhenPersonExists() {
     // Given
-    when(personRepository.findById(1L)).thenReturn(Optional.of(testPerson));
+    when(personRepository.findById("test-id")).thenReturn(Optional.of(testPerson));
 
     // When
-    Optional<Person> result = personService.findById(1L);
+    Optional<Person> result = personService.findById("test-id");
 
     // Then
     assertThat(result).isPresent();
     assertThat(result.get()).isEqualTo(testPerson);
-    verify(personRepository).findById(1L);
+    verify(personRepository).findById("test-id");
   }
 
   @Test
   @DisplayName("Should return empty optional when person not found by ID")
   void shouldReturnEmptyOptionalWhenPersonNotFoundById() {
     // Given
-    when(personRepository.findById(1L)).thenReturn(Optional.empty());
+    when(personRepository.findById("test-id")).thenReturn(Optional.empty());
 
     // When
-    Optional<Person> result = personService.findById(1L);
+    Optional<Person> result = personService.findById("test-id");
 
     // Then
     assertThat(result).isEmpty();
-    verify(personRepository).findById(1L);
+    verify(personRepository).findById("test-id");
   }
 
   @Test
   @DisplayName("Should get person by ID when person exists")
   void shouldGetPersonByIdWhenPersonExists() {
     // Given
-    when(personRepository.findById(1L)).thenReturn(Optional.of(testPerson));
+    when(personRepository.findById("test-id")).thenReturn(Optional.of(testPerson));
 
     // When
-    Person result = personService.getById(1L);
+    Person result = personService.getById("test-id");
 
     // Then
     assertThat(result).isEqualTo(testPerson);
-    verify(personRepository).findById(1L);
+    verify(personRepository).findById("test-id");
   }
 
   @Test
   @DisplayName("Should throw EntityNotFoundException when getting person by non-existent ID")
   void shouldThrowEntityNotFoundExceptionWhenGettingPersonByNonExistentId() {
     // Given
-    when(personRepository.findById(1L)).thenReturn(Optional.empty());
+    when(personRepository.findById("test-id")).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> personService.getById(1L))
+    assertThatThrownBy(() -> personService.getById("test-id"))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("Person not found with ID: 1");
+        .hasMessage("Person not found with ID: test-id");
   }
 
   @Test
@@ -107,7 +107,7 @@ class PersonServiceTest {
     // Given
     Person person2 =
         Person.builder()
-            .id(2L)
+            .id("test-id-2")
             .dateOfBirth(LocalDate.of(1985, 10, 20))
             .address("Another Address 456")
             .phoneNumber("+49 987 654321")
@@ -130,27 +130,19 @@ class PersonServiceTest {
     // Given
     Person newPerson =
         Person.builder()
+            .id("test-id-3")
             .dateOfBirth(LocalDate.of(1995, 3, 10))
             .address("New Address 789")
             .phoneNumber("+49 555 123456")
             .build();
 
-    Person savedPerson =
-        Person.builder()
-            .id(3L)
-            .dateOfBirth(LocalDate.of(1995, 3, 10))
-            .address("New Address 789")
-            .phoneNumber("+49 555 123456")
-            .build();
-
-    when(personRepository.save(newPerson)).thenReturn(savedPerson);
+    when(personRepository.save(newPerson)).thenReturn(newPerson);
 
     // When
     Person result = personService.create(newPerson);
 
     // Then
-    assertThat(result).isEqualTo(savedPerson);
-    assertThat(result.getId()).isEqualTo(3L);
+    assertThat(result).isEqualTo(newPerson);
     verify(personRepository).save(newPerson);
   }
 
@@ -202,24 +194,24 @@ class PersonServiceTest {
 
     Person savedPerson =
         Person.builder()
-            .id(1L)
+            .id("1")
             .dateOfBirth(LocalDate.of(1990, 5, 15))
             .address("Updated Address 999")
             .phoneNumber("+49 999 888777")
             .photoUrl("http://example.com/new-photo.jpg")
             .build();
 
-    when(personRepository.findById(1L)).thenReturn(Optional.of(testPerson));
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
     when(personRepository.save(any(Person.class))).thenReturn(savedPerson);
 
     // When
-    Person result = personService.update(1L, updatedData);
+    Person result = personService.update("1", updatedData);
 
     // Then
     assertThat(result.getAddress()).isEqualTo("Updated Address 999");
     assertThat(result.getPhoneNumber()).isEqualTo("+49 999 888777");
     assertThat(result.getPhotoUrl()).isEqualTo("http://example.com/new-photo.jpg");
-    verify(personRepository).findById(1L);
+    verify(personRepository).findById("1");
     verify(personRepository).save(any(Person.class));
   }
 
@@ -228,10 +220,10 @@ class PersonServiceTest {
   void shouldThrowEntityNotFoundExceptionWhenUpdatingNonExistentPerson() {
     // Given
     Person updatedData = Person.builder().address("Updated Address").build();
-    when(personRepository.findById(1L)).thenReturn(Optional.empty());
+    when(personRepository.findById("1")).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> personService.update(1L, updatedData))
+    assertThatThrownBy(() -> personService.update("1", updatedData))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Person not found with ID: 1");
   }
@@ -240,24 +232,24 @@ class PersonServiceTest {
   @DisplayName("Should delete person by ID when person exists")
   void shouldDeletePersonByIdWhenPersonExists() {
     // Given
-    when(personRepository.existsById(1L)).thenReturn(true);
+    when(personRepository.existsById("1")).thenReturn(true);
 
     // When
-    personService.deleteById(1L);
+    personService.deleteById("1");
 
     // Then
-    verify(personRepository).existsById(1L);
-    verify(personRepository).deleteById(1L);
+    verify(personRepository).existsById("1");
+    verify(personRepository).deleteById("1");
   }
 
   @Test
   @DisplayName("Should throw EntityNotFoundException when deleting non-existent person")
   void shouldThrowEntityNotFoundExceptionWhenDeletingNonExistentPerson() {
     // Given
-    when(personRepository.existsById(1L)).thenReturn(false);
+    when(personRepository.existsById("1")).thenReturn(false);
 
     // When & Then
-    assertThatThrownBy(() -> personService.deleteById(1L))
+    assertThatThrownBy(() -> personService.deleteById("1"))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Person not found with ID: 1");
   }
@@ -502,13 +494,13 @@ class PersonServiceTest {
   @DisplayName("Should check if person exists by ID")
   void shouldCheckIfPersonExistsById() {
     // Given
-    when(personRepository.existsById(1L)).thenReturn(true);
+    when(personRepository.existsById("1")).thenReturn(true);
 
     // When
-    boolean result = personService.existsById(1L);
+    boolean result = personService.existsById("1");
 
     // Then
     assertThat(result).isTrue();
-    verify(personRepository).existsById(1L);
+    verify(personRepository).existsById("1");
   }
 }

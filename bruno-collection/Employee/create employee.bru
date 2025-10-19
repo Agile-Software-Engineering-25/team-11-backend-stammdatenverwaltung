@@ -1,0 +1,34 @@
+meta {
+  name: create employee
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/v1/users/employees
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "Firstname",
+    "lastName": "Lastname",
+    "username": "test-user-team-11-count2@example.org", // increment count to avoid conflict
+    "email": "test-user-team-11-count2@example.org",
+    "dateOfBirth": "1990-07-12",
+    "address": "Company Avenue 42, Berlin, Germany",
+    "phoneNumber": "+49 30 123456789",
+    "photoUrl": "https://example.com/photos/employee98765.jpg",
+    "employeeNumber": "EMP98765",
+    "department": "Finance",
+    "officeNumber": "A-105",
+    "workingTimeModel": "PART_TIME"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
