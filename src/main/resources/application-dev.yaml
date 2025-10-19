@@ -4,6 +4,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        '[format_sql]': true
   datasource:
     # H2 file-based database with PostgreSQL compatibility mode
     # MODE=PostgreSQL: enables PostgreSQL-compatible syntax
