@@ -7,8 +7,10 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 /** Data transfer object for creating a new student. */
+@SuperBuilder
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CreateStudentRequest extends PersonRequest {

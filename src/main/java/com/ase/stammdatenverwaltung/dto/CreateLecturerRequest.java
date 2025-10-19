@@ -4,8 +4,10 @@ import com.ase.stammdatenverwaltung.entities.Lecturer;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 /** Data transfer object for creating a new lecturer. */
+@SuperBuilder
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CreateLecturerRequest extends CreateEmployeeRequest {

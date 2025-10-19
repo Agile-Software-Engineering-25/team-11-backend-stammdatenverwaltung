@@ -8,12 +8,14 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Abstract base class for DTOs representing requests to create or update a Person. Contains fields
  * for Keycloak user creation (username, firstName, lastName, email) which are sent to Keycloak but
  * NOT stored locally in this service's database.
  */
+@SuperBuilder
 @Data
 public abstract class PersonRequest {
 
