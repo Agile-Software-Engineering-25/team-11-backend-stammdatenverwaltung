@@ -5,6 +5,9 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: validate
+    properties:
+        hibernate:
+          '[format_sql]': true
   datasource:
     # Use in-memory database for tests with PostgreSQL compatibility
     # MODE=PostgreSQL: ensures migrations work the same as in production

@@ -38,3 +38,13 @@ build/
 
 ### H2 Database ###
 /data/
+
+### env files ###
+.env
+
+### agent configs ###
+.gemini
+
+### k8s ###
+kube.config
+local.yaml

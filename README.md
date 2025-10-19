@@ -19,6 +19,13 @@ Stammdatenverwaltung provides a robust foundation for managing user-related mast
 - 🚀 **Hot Reload**: Spring Boot DevTools for rapid development cycles
 - 🐳 **Containerization**: Docker support with multi-stage builds
 
+## 📚 Documentation
+
+- **[Profile Setup](PROFILE_SETUP.md)** - Development vs Production configuration
+- **[Database Management](DATABASE_MANAGEMENT.md)** - Flyway migrations and schema management
+- **[Formatting Setup](FORMATTING_SETUP.md)** - Code quality tools configuration
+- **[Keycloak Setup](KEYCLOAK_SETUP.md)** - JWT authentication configuration
+
 ## 🏗️ Project Structure
 
 ```
@@ -98,8 +105,8 @@ export DATABASE_URL=jdbc:postgresql://localhost:5432/stammdatenverwaltung
 export DATABASE_USERNAME=db_user
 export DATABASE_PASSWORD=db_password
 # Keycloak JWT configuration (required in prod)
-export KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung
-export KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api
+export KEYCLOAK_ISSUER_URI=https://keycloak.sau-portal.de/realms/sau
+export KEYCLOAK_JWK_SET_URI=https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs
 ./mvnw spring-boot:run
 ```
 
@@ -160,8 +167,8 @@ docker run -p 8080:8080 \
   -e DATABASE_URL=jdbc:postgresql://your-db:5432/stammdatenverwaltung \
   -e DATABASE_USERNAME=db_user \
   -e DATABASE_PASSWORD=db_password \
-  -e KEYCLOAK_ISSUER_URI=https://your-keycloak/realms/stammdatenverwaltung \
-  -e KEYCLOAK_API_AUDIENCE=stammdatenverwaltung-api \
+  -e KEYCLOAK_ISSUER_URI=https://keycloak.sau-portal.de/realms/sau \
+  -e KEYCLOAK_JWK_SET_URI=https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs \
   stammdatenverwaltung
 ```
 
@@ -322,15 +329,15 @@ This project uses **Flyway** for database schema versioning combined with **JPA/
 
 ## Environment Variables
 
-| Variable                 | Profile | Required | Default | Description               |
-| ------------------------ | ------- | -------- | ------- | ------------------------- |
-| `SPRING_PROFILES_ACTIVE` | Both    | No       | `dev`   | Active Spring profile     |
-| `DATABASE_URL`           | prod    | Yes      | -       | PostgreSQL connection URL |
-| `DATABASE_USERNAME`      | prod    | Yes      | -       | Database username         |
-| `DATABASE_PASSWORD`      | prod    | Yes      | -       | Database password         |
-| `SERVER_PORT`            | Both    | No       | `8080`  | Server port               |
-| `KEYCLOAK_ISSUER_URI`    | prod    | Yes      | -       | Keycloak realm issuer URI |
-| `KEYCLOAK_API_AUDIENCE`  | prod    | Yes      | -       | JWT audience              |
+| Variable                 | Profile | Required | Default | Description                      |
+| ------------------------ | ------- | -------- | ------- | -------------------------------- |
+| `SPRING_PROFILES_ACTIVE` | Both    | No       | `dev`   | Active Spring profile            |
+| `DATABASE_URL`           | prod    | Yes      | -       | PostgreSQL connection URL        |
+| `DATABASE_USERNAME`      | prod    | Yes      | -       | Database username                |
+| `DATABASE_PASSWORD`      | prod    | Yes      | -       | Database password                |
+| `SERVER_PORT`            | Both    | No       | `8080`  | Server port                      |
+| `KEYCLOAK_ISSUER_URI`    | prod    | Yes      | -       | Keycloak realm issuer URI        |
+| `KEYCLOAK_JWK_SET_URI`   | prod    | Yes      | -       | JWK set URI for JWT verification |
 
 ## 🔐 Auth Quick Test (dev)
 

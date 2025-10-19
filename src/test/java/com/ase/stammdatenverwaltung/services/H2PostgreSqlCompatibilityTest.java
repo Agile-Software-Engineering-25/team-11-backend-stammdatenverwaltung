@@ -288,9 +288,17 @@ class H2PostgreSqlCompatibilityTest {
   void shouldHandleStringCaseSensitivityLikePostgreSQL() {
     // Given - Create test data
     Person person1 =
-        Person.builder().dateOfBirth(LocalDate.of(1990, 1, 1)).address("Berlin").build();
+        Person.builder()
+            .id(UUID.randomUUID().toString())
+            .dateOfBirth(LocalDate.of(1990, 1, 1))
+            .address("Berlin")
+            .build();
     Person person2 =
-        Person.builder().dateOfBirth(LocalDate.of(1990, 1, 1)).address("berlin").build();
+        Person.builder()
+            .id(UUID.randomUUID().toString())
+            .dateOfBirth(LocalDate.of(1990, 1, 1))
+            .address("berlin")
+            .build();
 
     personService.create(person1);
     personService.create(person2);
