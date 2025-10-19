@@ -9,7 +9,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,7 @@ public class PersonService {
     log.debug("Finding all persons");
     List<Person> persons = personRepository.findAll();
     if (withDetails) {
-      return persons.stream()
-          .map(this::enrichPersonWithKeycloakData)
-          .collect(Collectors.toList());
+      return persons.stream().map(this::enrichPersonWithKeycloakData).collect(Collectors.toList());
     }
     return persons.stream().map(PersonDetailsDTO::new).collect(Collectors.toList());
   }

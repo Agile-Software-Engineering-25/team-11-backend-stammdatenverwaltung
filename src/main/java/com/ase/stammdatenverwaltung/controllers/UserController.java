@@ -63,7 +63,8 @@ public class UserController {
   }
 
   @PostMapping("/employees")
-  public ResponseEntity<Employee> createEmployee(@Valid @RequestBody CreateEmployeeRequest request) {
+  public ResponseEntity<Employee> createEmployee(
+      @Valid @RequestBody CreateEmployeeRequest request) {
     Employee createdEmployee = employeeService.create(request);
     return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
   }
@@ -93,7 +94,8 @@ public class UserController {
   }
 
   @PostMapping("/lecturers")
-  public ResponseEntity<Lecturer> createLecturer(@Valid @RequestBody CreateLecturerRequest request) {
+  public ResponseEntity<Lecturer> createLecturer(
+      @Valid @RequestBody CreateLecturerRequest request) {
     Lecturer createdLecturer = lecturerService.create(request);
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
   }
