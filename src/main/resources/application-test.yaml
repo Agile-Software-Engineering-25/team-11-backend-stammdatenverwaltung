@@ -40,3 +40,6 @@ logging:
     '[org.springframework.security]': DEBUG
     '[com.ase.stammdatenverwaltung]': DEBUG
     '[org.flywaydb]': INFO
+
+cors:
+  allowed-origins: "http://localhost:5173"
