@@ -101,6 +101,36 @@ public class KeycloakClient {
                                 "Failed to fetch user from Keycloak for ID: {}", userId, error)));
   }
 
+
+  /**
+   * Finds a user in Keycloak by their email.
+   *
+   * @param email The email of the user to find.
+   * @return A Mono emitting a list of matching users.
+   */
+  public Mono<List<KeycloakUser>> findUserByEmail(String email) {
+    return getAdminAccessToken()
+        .flatMap(
+            token ->
+                webClient
+                    .get()
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?email={email}", email)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseFindUserByIdResponse)
+                    .doOnSuccess(
+                        users ->
+                            log.info(
+                                "Successfully fetched {} user(s) from Keycloak for email: {}",
+                                users.size(),
+                                email))
+                    .doOnError(
+                        error ->
+                            log.error(
+                                "Failed to fetch user from Keycloak for email: {}", email, error)));
+  }
+
   private List<KeycloakUser> parseFindUserByIdResponse(String raw) {
     try {
       ObjectMapper mapper = new ObjectMapper();
@@ -111,6 +141,7 @@ public class KeycloakClient {
       return Collections.emptyList();
     }
   }
+
 
   /**
    * Obtains an admin access token from Keycloak using client credentials. The token is cached and
