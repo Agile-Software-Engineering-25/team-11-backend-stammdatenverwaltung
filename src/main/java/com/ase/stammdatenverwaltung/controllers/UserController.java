@@ -24,6 +24,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller for handling user-related requests. Provides endpoints for creating and retrieving
+ *
+ * <p>different types of users (students, employees, lecturers).
+ */
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -31,13 +36,24 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final PersonService personService;
+
   private final StudentService studentService;
+
   private final EmployeeService employeeService;
+
   private final LecturerService lecturerService;
 
+  /**
+   * Creates a new student.
+   *
+   * @param request The request body containing the student data.
+   * @return The created student.
+   */
   @PostMapping("/students")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
+
     Student createdStudent = studentService.create(request);
+
     return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
   }
 
@@ -48,24 +64,35 @@ public class UserController {
         @ApiResponse(
             responseCode = "200",
             description = "Successfully retrieved user data",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = PersonDetailsDTO.class)))
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = PersonDetailsDTO.class))
+            })
       })
   @GetMapping
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
           boolean withDetails) {
+
     List<PersonDetailsDTO> users = personService.findAll(withDetails);
+
     return ResponseEntity.ok(users);
   }
 
+  /**
+   * Creates a new employee.
+   *
+   * @param request The request body containing the employee data.
+   * @return The created employee.
+   */
   @PostMapping("/employees")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
+
     Employee createdEmployee = employeeService.create(request);
+
     return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
   }
 
@@ -76,10 +103,11 @@ public class UserController {
         @ApiResponse(
             responseCode = "200",
             description = "Successfully retrieved user data",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = PersonDetailsDTO.class))),
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = PersonDetailsDTO.class))
+            }),
         @ApiResponse(responseCode = "404", description = "User not found")
       })
   @GetMapping("/{userId}")
@@ -89,14 +117,24 @@ public class UserController {
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
           boolean withDetails) {
+
     PersonDetailsDTO user = personService.findById(userId, withDetails);
+
     return ResponseEntity.ok(user);
   }
 
+  /**
+   * Creates a new lecturer.
+   *
+   * @param request The request body containing the lecturer data.
+   * @return The created lecturer.
+   */
   @PostMapping("/lecturers")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
+
     Lecturer createdLecturer = lecturerService.create(request);
+
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
   }
 }

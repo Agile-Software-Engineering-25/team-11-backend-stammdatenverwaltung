@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Service class for managing Person entities. Provides business logic for person-specific CRUD
+ * operations and for enriching person data with information from Keycloak.
+ */
 @Service
 @Transactional
 @Validated
@@ -27,6 +31,12 @@ public class PersonService {
   private final PersonRepository personRepository;
   private final KeycloakClient keycloakClient;
 
+  /**
+   * Finds all persons and optionally enriches them with data from Keycloak.
+   *
+   * @param withDetails If true, enriches the person data with details from Keycloak.
+   * @return A list of persons as DTOs.
+   */
   @Transactional(readOnly = true)
   public List<PersonDetailsDTO> findAll(boolean withDetails) {
     log.debug("Finding all persons");
@@ -37,6 +47,13 @@ public class PersonService {
     return persons.stream().map(PersonDetailsDTO::new).collect(Collectors.toList());
   }
 
+  /**
+   * Finds a person by their ID and optionally enriches them with data from Keycloak.
+   *
+   * @param id The ID of the person to find.
+   * @param withDetails If true, enriches the person data with details from Keycloak.
+   * @return The person as a DTO.
+   */
   @Transactional(readOnly = true)
   public PersonDetailsDTO findById(String id, boolean withDetails) {
     log.debug("Getting person with ID: {}", id);
@@ -68,6 +85,12 @@ public class PersonService {
     return dto;
   }
 
+  /**
+   * Creates a new person.
+   *
+   * @param person The person to create.
+   * @return The created person.
+   */
   public Person create(@Valid Person person) {
     log.debug("Creating new person");
     validatePersonForCreation(person);
@@ -76,6 +99,13 @@ public class PersonService {
     return savedPerson;
   }
 
+  /**
+   * Updates an existing person.
+   *
+   * @param id The ID of the person to update.
+   * @param updatedPerson The updated person data.
+   * @return The updated person.
+   */
   public Person update(String id, @Valid Person updatedPerson) {
     log.debug("Updating person with ID: {}", id);
     Person existingPerson =
@@ -93,6 +123,11 @@ public class PersonService {
     return savedPerson;
   }
 
+  /**
+   * Deletes a person by their ID.
+   *
+   * @param id The ID of the person to delete.
+   */
   public void deleteById(String id) {
     log.debug("Deleting person with ID: {}", id);
     if (!personRepository.existsById(id)) {

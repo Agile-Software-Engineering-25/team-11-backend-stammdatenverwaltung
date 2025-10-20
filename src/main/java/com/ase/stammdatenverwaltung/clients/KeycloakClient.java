@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -101,7 +100,6 @@ public class KeycloakClient {
                                 "Failed to fetch user from Keycloak for ID: {}", userId, error)));
   }
 
-
   /**
    * Finds a user in Keycloak by their email.
    *
@@ -141,7 +139,6 @@ public class KeycloakClient {
       return Collections.emptyList();
     }
   }
-
 
   /**
    * Obtains an admin access token from Keycloak using client credentials. The token is cached and
