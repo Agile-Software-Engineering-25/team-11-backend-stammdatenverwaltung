@@ -11,8 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentDTO {
+  private String uuid;
   private String firstName;
   private String lastName;
+  private String username;
+  private String email;
   private String matriculationNumber;
   private String degreeProgram;
   private Integer semester;

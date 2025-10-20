@@ -26,8 +26,13 @@ public class GroupController {
       summary = "Get all student groups",
       description = "Returns a list of all active student groups and their student counts.")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved all groups")
-  public GroupResponseDTO getAllGroups() {
-    return groupService.getAllGroups();
+  public GroupResponseDTO getAllGroups(
+      @io.swagger.v3.oas.annotations.Parameter(
+              description = "Flag to include details from Keycloak",
+              required = false)
+          @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
+          boolean withDetails) {
+    return groupService.getAllGroups(withDetails);
   }
 
   @GetMapping("/{groupName}")
@@ -36,7 +41,13 @@ public class GroupController {
       description = "Returns information for a specific student group.")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved group information")
   @ApiResponse(responseCode = "404", description = "Group not found")
-  public GroupDTO getGroupByName(@PathVariable String groupName) {
-    return groupService.getGroupByName(groupName);
+  public GroupDTO getGroupByName(
+      @PathVariable String groupName,
+      @io.swagger.v3.oas.annotations.Parameter(
+              description = "Flag to include details from Keycloak",
+              required = false)
+          @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
+          boolean withDetails) {
+    return groupService.getGroupByName(groupName, withDetails);
   }
 }
