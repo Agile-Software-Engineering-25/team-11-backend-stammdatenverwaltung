@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.repositories.PersonRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,8 @@ class H2PostgreSqlCompatibilityTest {
   @Autowired private DataSource dataSource;
 
   @Autowired private PersonService personService;
+
+  @Autowired private PersonRepository personRepository;
 
   private JdbcTemplate jdbcTemplate;
 
@@ -305,10 +308,10 @@ class H2PostgreSqlCompatibilityTest {
 
     // When - Query with case-sensitive LIKE (PostgreSQL behavior)
     List<Person> berlinResults =
-        personService.findAll().stream().filter(p -> "Berlin".equals(p.getAddress())).toList();
+        personRepository.findAll().stream().filter(p -> "Berlin".equals(p.getAddress())).toList();
 
     List<Person> lowercaseResults =
-        personService.findAll().stream().filter(p -> "berlin".equals(p.getAddress())).toList();
+        personRepository.findAll().stream().filter(p -> "berlin".equals(p.getAddress())).toList();
 
     // Then - Should distinguish between cases
     assertThat(berlinResults).hasSize(1);
