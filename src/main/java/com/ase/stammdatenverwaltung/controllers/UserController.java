@@ -74,10 +74,13 @@ public class UserController {
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
-          boolean withDetails) {
-
-    List<PersonDetailsDTO> users = personService.findAll(withDetails);
-
+          boolean withDetails,
+      @Parameter(
+              description = "Filter by user type (student, lecturer, employee)",
+              required = false)
+          @RequestParam(required = false)
+          String userType) {
+    List<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
     return ResponseEntity.ok(users);
   }
 

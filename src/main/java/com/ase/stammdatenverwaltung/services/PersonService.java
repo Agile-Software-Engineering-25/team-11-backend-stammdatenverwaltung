@@ -4,10 +4,14 @@ import com.ase.stammdatenverwaltung.clients.KeycloakClient;
 import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
+import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
+import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -29,18 +33,36 @@ public class PersonService {
 
   private static final int MAX_AGE_YEARS = 150;
   private final PersonRepository personRepository;
+  private final StudentRepository studentRepository;
+  private final LecturerRepository lecturerRepository;
+  private final EmployeeRepository employeeRepository;
   private final KeycloakClient keycloakClient;
 
   /**
    * Finds all persons and optionally enriches them with data from Keycloak.
    *
    * @param withDetails If true, enriches the person data with details from Keycloak.
+   * @param userType Optional filter by user type (student, lecturer, employee).
    * @return A list of persons as DTOs.
    */
   @Transactional(readOnly = true)
-  public List<PersonDetailsDTO> findAll(boolean withDetails) {
-    log.debug("Finding all persons");
-    List<Person> persons = personRepository.findAll();
+  public List<PersonDetailsDTO> findAll(boolean withDetails, String userType) {
+    log.debug("Finding all persons with userType: {}", userType);
+    List<? extends Person> persons;
+    if (userType != null) {
+      if ("student".equalsIgnoreCase(userType)) {
+        persons = studentRepository.findAll();
+      } else if ("lecturer".equalsIgnoreCase(userType)) {
+        persons = lecturerRepository.findAll();
+      } else if ("employee".equalsIgnoreCase(userType)) {
+        persons = employeeRepository.findAll();
+      } else {
+        persons = Collections.emptyList();
+      }
+    } else {
+      persons = personRepository.findAll();
+    }
+
     if (withDetails) {
       return persons.stream().map(this::enrichPersonWithKeycloakData).collect(Collectors.toList());
     }
