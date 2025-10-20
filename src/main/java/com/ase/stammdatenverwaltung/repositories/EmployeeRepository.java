@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * specific to employee management. Extends JpaRepository to inherit standard database operations.
  */
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
   /**
    * Find an employee by their employee number.

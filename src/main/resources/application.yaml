@@ -38,3 +38,11 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
   show-actuator: true
+
+keycloak:
+  server-url: "https://keycloak.sau-portal.de"
+  realm: "sau"
+  client-id: "team-11"
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  grant_type: "client_credentials"
+  user-api-url: "https://sau-portal.de/userapi"

@@ -91,7 +91,7 @@ export SPRING_PROFILES_ACTIVE=prod DATABASE_URL=jdbc:postgresql://... KEYCLOAK_I
 
 ### Validation Constants
 - Define age/semester limits in service layer (e.g., `MAX_AGE_YEARS = 150` in `PersonService`)
-- **Must match** DB constraints (e.g., `CHECK (date_of_birth >= DATEADD('YEAR', -150, ...))`)
+- **Must match** DB constraints (must be compatible with H2 and PostgreSQL syntax)
 - Document this alignment in SQL migration comments
 
 ### OpenAPI Configuration

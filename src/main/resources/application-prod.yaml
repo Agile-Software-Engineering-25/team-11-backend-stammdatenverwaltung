@@ -14,7 +14,8 @@ spring:
     driverClassName: org.postgresql.Driver
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    # Common migrations first, then PostgreSQL-specific
+    locations: classpath:db/migration/common,classpath:db/migration/postgresql
     baseline-on-migrate: true
     validate-on-migrate: true
   security:
@@ -50,3 +51,11 @@ logging:
 
 # Note: JWT roles are extracted from the "groups" claim automatically
 # No additional JWT configuration needed for role extraction
+
+cors:
+  allowed-origins: "https://sau-portal.de/"
+
+openapi:
+  server:
+    url: https://sau-portal.de/team-11-api
+    description: Production Server

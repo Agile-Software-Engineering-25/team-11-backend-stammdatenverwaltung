@@ -1,6 +1,11 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -24,6 +29,60 @@ import org.springframework.validation.annotation.Validated;
 public class LecturerService {
 
   private final LecturerRepository lecturerRepository;
+  private final KeycloakClient keycloakClient;
+
+  /**
+   * Creates a new lecturer from a request DTO. First creates the user in Keycloak with the
+   * "lecturer" group, then stores the lecturer data locally using the Keycloak user ID.
+   *
+   * @param request The request body containing the lecturer data.
+   * @return The created lecturer.
+   */
+  public Lecturer create(CreateLecturerRequest request) {
+    log.debug("Creating new lecturer in field/chair: {}", request.getFieldChair());
+
+    // Create user in Keycloak with lecturer group
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .groups(java.util.List.of(KeycloakGroup.LECTURER.getGroupName()))
+            .build();
+
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create lecturer entity with Keycloak user ID
+    Lecturer lecturer =
+        Lecturer.builder()
+            .id(keycloakResponse.getId())
+            .dateOfBirth(request.getDateOfBirth())
+            .address(request.getAddress())
+            .phoneNumber(request.getPhoneNumber())
+            .photoUrl(request.getPhotoUrl())
+            .employeeNumber(request.getEmployeeNumber())
+            .department(request.getDepartment())
+            .officeNumber(request.getOfficeNumber())
+            .workingTimeModel(request.getWorkingTimeModel())
+            .fieldChair(request.getFieldChair())
+            .title(request.getTitle())
+            .employmentStatus(request.getEmploymentStatus())
+            .build();
+
+    validateLecturerForCreation(lecturer);
+    Lecturer savedLecturer = lecturerRepository.save(lecturer);
+    log.info(
+        "Successfully created lecturer with ID: {} in field/chair: {}",
+        savedLecturer.getId(),
+        savedLecturer.getFieldChair());
+    return savedLecturer;
+  }
 
   /**
    * Find a lecturer by their ID.
@@ -32,7 +91,7 @@ public class LecturerService {
    * @return optional containing the lecturer if found
    */
   @Transactional(readOnly = true)
-  public Optional<Lecturer> findById(Long id) {
+  public Optional<Lecturer> findById(String id) {
     log.debug("Finding lecturer with ID: {}", id);
     return lecturerRepository.findById(id);
   }
@@ -45,7 +104,7 @@ public class LecturerService {
    * @throws EntityNotFoundException if the lecturer is not found
    */
   @Transactional(readOnly = true)
-  public Lecturer getById(Long id) {
+  public Lecturer getById(String id) {
     log.debug("Getting lecturer with ID: {}", id);
     return lecturerRepository
         .findById(id)
@@ -64,23 +123,6 @@ public class LecturerService {
   }
 
   /**
-   * Create a new lecturer.
-   *
-   * @param lecturer the lecturer entity to create
-   * @return the created lecturer entity
-   */
-  public Lecturer create(@Valid Lecturer lecturer) {
-    log.debug("Creating new lecturer in field/chair: {}", lecturer.getFieldChair());
-    validateLecturerForCreation(lecturer);
-    Lecturer savedLecturer = lecturerRepository.save(lecturer);
-    log.info(
-        "Successfully created lecturer with ID: {} in field/chair: {}",
-        savedLecturer.getId(),
-        savedLecturer.getFieldChair());
-    return savedLecturer;
-  }
-
-  /**
    * Update an existing lecturer.
    *
    * @param id the lecturer ID to update
@@ -88,22 +130,19 @@ public class LecturerService {
    * @return the updated lecturer entity
    * @throws EntityNotFoundException if the lecturer is not found
    */
-  public Lecturer update(Long id, @Valid Lecturer updatedLecturer) {
+  public Lecturer update(String id, @Valid Lecturer updatedLecturer) {
     log.debug("Updating lecturer with ID: {}", id);
     Lecturer existingLecturer = getById(id);
 
-    // Update lecturer-specific fields
     existingLecturer.setFieldChair(updatedLecturer.getFieldChair());
     existingLecturer.setTitle(updatedLecturer.getTitle());
     existingLecturer.setEmploymentStatus(updatedLecturer.getEmploymentStatus());
 
-    // Update inherited employee fields
     existingLecturer.setEmployeeNumber(updatedLecturer.getEmployeeNumber());
     existingLecturer.setDepartment(updatedLecturer.getDepartment());
     existingLecturer.setOfficeNumber(updatedLecturer.getOfficeNumber());
     existingLecturer.setWorkingTimeModel(updatedLecturer.getWorkingTimeModel());
 
-    // Update inherited person fields
     existingLecturer.setDateOfBirth(updatedLecturer.getDateOfBirth());
     existingLecturer.setAddress(updatedLecturer.getAddress());
     existingLecturer.setPhoneNumber(updatedLecturer.getPhoneNumber());
@@ -120,7 +159,7 @@ public class LecturerService {
    * @param id the lecturer ID to delete
    * @throws EntityNotFoundException if the lecturer is not found
    */
-  public void deleteById(Long id) {
+  public void deleteById(String id) {
     log.debug("Deleting lecturer with ID: {}", id);
     if (!lecturerRepository.existsById(id)) {
       throw new EntityNotFoundException("Lecturer not found with ID: " + id);
@@ -206,7 +245,7 @@ public class LecturerService {
    * @return the updated lecturer
    * @throws EntityNotFoundException if the lecturer is not found
    */
-  public Lecturer updateEmploymentStatus(Long id, Lecturer.EmploymentStatus newStatus) {
+  public Lecturer updateEmploymentStatus(String id, Lecturer.EmploymentStatus newStatus) {
     log.debug("Updating employment status for lecturer ID: {} to {}", id, newStatus);
     Lecturer lecturer = getById(id);
     lecturer.setEmploymentStatus(newStatus);
@@ -223,7 +262,7 @@ public class LecturerService {
    * @return the updated lecturer
    * @throws EntityNotFoundException if the lecturer is not found
    */
-  public Lecturer updateTitle(Long id, String newTitle) {
+  public Lecturer updateTitle(String id, String newTitle) {
     log.debug("Updating title for lecturer ID: {} to {}", id, newTitle);
     Lecturer lecturer = getById(id);
     lecturer.setTitle(newTitle);
@@ -240,7 +279,7 @@ public class LecturerService {
    * @return the updated lecturer
    * @throws EntityNotFoundException if the lecturer is not found
    */
-  public Lecturer updateFieldChair(Long id, String newFieldChair) {
+  public Lecturer updateFieldChair(String id, String newFieldChair) {
     log.debug("Updating field/chair for lecturer ID: {} to {}", id, newFieldChair);
     Lecturer lecturer = getById(id);
     lecturer.setFieldChair(newFieldChair);
@@ -271,25 +310,11 @@ public class LecturerService {
     return lecturerRepository.countByFieldChairContainingIgnoreCase(fieldChair);
   }
 
-  /**
-   * Validate lecturer data for creation.
-   *
-   * @param lecturer the lecturer to validate
-   * @throws IllegalArgumentException if validation fails
-   */
   private void validateLecturerForCreation(Lecturer lecturer) {
     validateLecturerData(lecturer);
   }
 
-  /**
-   * Validate lecturer data for business rules.
-   *
-   * @param lecturer the lecturer to validate
-   * @throws IllegalArgumentException if validation fails
-   */
   private void validateLecturerData(Lecturer lecturer) {
-    // Additional business validation can be added here
-    // For example, validate title format, field/chair restrictions, etc.
     if (lecturer.getTitle() != null
         && lecturer.getTitle().contains("Prof")
         && lecturer.getEmploymentStatus() == Lecturer.EmploymentStatus.EXTERNAL) {

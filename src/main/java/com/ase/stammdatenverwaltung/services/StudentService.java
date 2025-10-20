@@ -1,6 +1,11 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Student;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -26,6 +31,59 @@ public class StudentService {
   private static final int MAX_SEMESTER_COUNT = 20;
 
   private final StudentRepository studentRepository;
+  private final KeycloakClient keycloakClient;
+
+  /**
+   * Creates a new student from a request DTO. First creates the user in Keycloak with the "student"
+   * group, then stores the student data locally using the Keycloak user ID.
+   *
+   * @param request The request body containing the student data.
+   * @return The created student.
+   */
+  public Student create(CreateStudentRequest request) {
+    log.debug(
+        "Creating new student with matriculation number: {}", request.getMatriculationNumber());
+
+    // Create user in Keycloak with student group
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .groups(java.util.List.of(KeycloakGroup.STUDENT.getGroupName()))
+            .build();
+
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create student entity with Keycloak user ID
+    Student student =
+        Student.builder()
+            .id(keycloakResponse.getId())
+            .dateOfBirth(request.getDateOfBirth())
+            .address(request.getAddress())
+            .phoneNumber(request.getPhoneNumber())
+            .photoUrl(request.getPhotoUrl())
+            .matriculationNumber(request.getMatriculationNumber())
+            .degreeProgram(request.getDegreeProgram())
+            .semester(request.getSemester())
+            .studyStatus(request.getStudyStatus())
+            .cohort(request.getCohort())
+            .build();
+
+    validateStudentForCreation(student);
+    Student savedStudent = studentRepository.save(student);
+    log.info(
+        "Successfully created student with ID: {} and matriculation number: {}",
+        savedStudent.getId(),
+        savedStudent.getMatriculationNumber());
+    return savedStudent;
+  }
 
   /**
    * Find a student by their ID.
@@ -34,7 +92,7 @@ public class StudentService {
    * @return optional containing the student if found
    */
   @Transactional(readOnly = true)
-  public Optional<Student> findById(Long id) {
+  public Optional<Student> findById(String id) {
     log.debug("Finding student with ID: {}", id);
     return studentRepository.findById(id);
   }
@@ -47,7 +105,7 @@ public class StudentService {
    * @throws EntityNotFoundException if the student is not found
    */
   @Transactional(readOnly = true)
-  public Student getById(Long id) {
+  public Student getById(String id) {
     log.debug("Getting student with ID: {}", id);
     return studentRepository
         .findById(id)
@@ -78,25 +136,6 @@ public class StudentService {
   }
 
   /**
-   * Create a new student.
-   *
-   * @param student the student entity to create
-   * @return the created student entity
-   * @throws IllegalArgumentException if matriculation number already exists
-   */
-  public Student create(@Valid Student student) {
-    log.debug(
-        "Creating new student with matriculation number: {}", student.getMatriculationNumber());
-    validateStudentForCreation(student);
-    Student savedStudent = studentRepository.save(student);
-    log.info(
-        "Successfully created student with ID: {} and matriculation number: {}",
-        savedStudent.getId(),
-        savedStudent.getMatriculationNumber());
-    return savedStudent;
-  }
-
-  /**
    * Update an existing student.
    *
    * @param id the student ID to update
@@ -104,7 +143,7 @@ public class StudentService {
    * @return the updated student entity
    * @throws EntityNotFoundException if the student is not found
    */
-  public Student update(Long id, @Valid Student updatedStudent) {
+  public Student update(String id, @Valid Student updatedStudent) {
     log.debug("Updating student with ID: {}", id);
     Student existingStudent = getById(id);
 
@@ -132,7 +171,7 @@ public class StudentService {
    * @param id the student ID to delete
    * @throws EntityNotFoundException if the student is not found
    */
-  public void deleteById(Long id) {
+  public void deleteById(String id) {
     log.debug("Deleting student with ID: {}", id);
     if (!studentRepository.existsById(id)) {
       throw new EntityNotFoundException("Student not found with ID: " + id);
@@ -184,7 +223,7 @@ public class StudentService {
    * @return the updated student
    * @throws EntityNotFoundException if the student is not found
    */
-  public Student updateStudyStatus(Long id, Student.StudyStatus newStatus) {
+  public Student updateStudyStatus(String id, Student.StudyStatus newStatus) {
     log.debug("Updating study status for student ID: {} to {}", id, newStatus);
     Student student = getById(id);
     student.setStudyStatus(newStatus);
@@ -200,7 +239,7 @@ public class StudentService {
    * @return the updated student
    * @throws EntityNotFoundException if the student is not found
    */
-  public Student advanceToNextSemester(Long id) {
+  public Student advanceToNextSemester(String id) {
     log.debug("Advancing student ID: {} to next semester", id);
     Student student = getById(id);
     student.setSemester(student.getSemester() + 1);

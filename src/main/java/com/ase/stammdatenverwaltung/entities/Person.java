@@ -2,8 +2,6 @@ package com.ase.stammdatenverwaltung.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -39,9 +37,8 @@ public class Person {
    * across systems.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
-  private Long id;
+  private String id;
 
   /** Date of birth of the person. Must be in the past. */
   @NotNull(message = "Date of birth is required") @Past(message = "Date of birth must be in the past")

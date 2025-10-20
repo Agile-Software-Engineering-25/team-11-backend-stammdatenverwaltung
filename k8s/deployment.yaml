@@ -15,7 +15,7 @@ spec:
         app: ase-stammdaten
     spec:
       containers:
-        - name: ase-stammdaten
+        - name: app
           image: ghcr.io/agile-software-engineering-25/team-11-backend-stammdatenverwaltung:latest
           imagePullPolicy: Always
           ports:
@@ -29,13 +29,13 @@ spec:
               cpu: "300m"
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /team-11-api/actuator/health
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /team-11-api/actuator/health
               port: 8080
             initialDelaySeconds: 120
             periodSeconds: 20
@@ -45,7 +45,7 @@ spec:
             - name: SERVER_PORT
               value: "8080"
             - name: SERVER_SERVLET_CONTEXT_PATH
-              value: "/"
+              value: "/team-11-api"
             - name: DATABASE_URL
               value: "jdbc:postgresql://postgres.db:5432/appdb"
             - name: DATABASE_USERNAME
@@ -68,6 +68,11 @@ spec:
                 secretKeyRef:
                   name: keycloak-secret
                   key: KEYCLOAK_JWK_SET_URI
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: KEYCLOAK_CLIENT_SECRET
             # NOTE: The Ingress in this overlay contains a rewrite-target annotation
             # (traefik.ingress.kubernetes.io/rewrite-target: /) which rewrites requests
             # from /api -> /. Because of that, the application will receive requests

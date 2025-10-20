@@ -1,6 +1,11 @@
 package com.ase.stammdatenverwaltung.services;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
+import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.entities.Employee;
+import com.ase.stammdatenverwaltung.model.KeycloakGroup;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -24,6 +29,58 @@ import org.springframework.validation.annotation.Validated;
 public class EmployeeService {
 
   private final EmployeeRepository employeeRepository;
+  private final KeycloakClient keycloakClient;
+
+  /**
+   * Creates a new employee from a request DTO. First creates the user in Keycloak with the
+   * "university-administrative-staff" group, then stores the employee data locally using the
+   * Keycloak user ID.
+   *
+   * @param request The request body containing the employee data.
+   * @return The created employee.
+   */
+  public Employee create(CreateEmployeeRequest request) {
+    log.debug("Creating new employee with employee number: {}", request.getEmployeeNumber());
+
+    // Create user in Keycloak with university-administrative-staff group
+    CreateUserRequest keycloakRequest =
+        CreateUserRequest.builder()
+            .username(request.getUsername())
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .email(request.getEmail())
+            .groups(java.util.List.of(KeycloakGroup.UNIVERSITY_ADMINISTRATIVE_STAFF.getGroupName()))
+            .build();
+
+    CreateUserResponse keycloakResponse = keycloakClient.createUser(keycloakRequest).block();
+
+    if (keycloakResponse == null || keycloakResponse.getId() == null) {
+      throw new IllegalStateException(
+          "Failed to create user in Keycloak for username: " + request.getUsername());
+    }
+
+    // Create employee entity with Keycloak user ID
+    Employee employee =
+        Employee.builder()
+            .id(keycloakResponse.getId())
+            .dateOfBirth(request.getDateOfBirth())
+            .address(request.getAddress())
+            .phoneNumber(request.getPhoneNumber())
+            .photoUrl(request.getPhotoUrl())
+            .employeeNumber(request.getEmployeeNumber())
+            .department(request.getDepartment())
+            .officeNumber(request.getOfficeNumber())
+            .workingTimeModel(request.getWorkingTimeModel())
+            .build();
+
+    validateEmployeeForCreation(employee);
+    Employee savedEmployee = employeeRepository.save(employee);
+    log.info(
+        "Successfully created employee with ID: {} and employee number: {}",
+        savedEmployee.getId(),
+        savedEmployee.getEmployeeNumber());
+    return savedEmployee;
+  }
 
   /**
    * Find an employee by their ID.
@@ -32,7 +89,7 @@ public class EmployeeService {
    * @return optional containing the employee if found
    */
   @Transactional(readOnly = true)
-  public Optional<Employee> findById(Long id) {
+  public Optional<Employee> findById(String id) {
     log.debug("Finding employee with ID: {}", id);
     return employeeRepository.findById(id);
   }
@@ -45,7 +102,7 @@ public class EmployeeService {
    * @throws EntityNotFoundException if the employee is not found
    */
   @Transactional(readOnly = true)
-  public Employee getById(Long id) {
+  public Employee getById(String id) {
     log.debug("Getting employee with ID: {}", id);
     return employeeRepository
         .findById(id)
@@ -76,24 +133,6 @@ public class EmployeeService {
   }
 
   /**
-   * Create a new employee.
-   *
-   * @param employee the employee entity to create
-   * @return the created employee entity
-   * @throws IllegalArgumentException if employee number already exists
-   */
-  public Employee create(@Valid Employee employee) {
-    log.debug("Creating new employee with employee number: {}", employee.getEmployeeNumber());
-    validateEmployeeForCreation(employee);
-    Employee savedEmployee = employeeRepository.save(employee);
-    log.info(
-        "Successfully created employee with ID: {} and employee number: {}",
-        savedEmployee.getId(),
-        savedEmployee.getEmployeeNumber());
-    return savedEmployee;
-  }
-
-  /**
    * Update an existing employee.
    *
    * @param id the employee ID to update
@@ -101,17 +140,15 @@ public class EmployeeService {
    * @return the updated employee entity
    * @throws EntityNotFoundException if the employee is not found
    */
-  public Employee update(Long id, @Valid Employee updatedEmployee) {
+  public Employee update(String id, @Valid Employee updatedEmployee) {
     log.debug("Updating employee with ID: {}", id);
     Employee existingEmployee = getById(id);
 
-    // Update employee-specific fields
     existingEmployee.setEmployeeNumber(updatedEmployee.getEmployeeNumber());
     existingEmployee.setDepartment(updatedEmployee.getDepartment());
     existingEmployee.setOfficeNumber(updatedEmployee.getOfficeNumber());
     existingEmployee.setWorkingTimeModel(updatedEmployee.getWorkingTimeModel());
 
-    // Update inherited person fields
     existingEmployee.setDateOfBirth(updatedEmployee.getDateOfBirth());
     existingEmployee.setAddress(updatedEmployee.getAddress());
     existingEmployee.setPhoneNumber(updatedEmployee.getPhoneNumber());
@@ -128,7 +165,7 @@ public class EmployeeService {
    * @param id the employee ID to delete
    * @throws EntityNotFoundException if the employee is not found
    */
-  public void deleteById(Long id) {
+  public void deleteById(String id) {
     log.debug("Deleting employee with ID: {}", id);
     if (!employeeRepository.existsById(id)) {
       throw new EntityNotFoundException("Employee not found with ID: " + id);
@@ -192,7 +229,7 @@ public class EmployeeService {
    * @return the updated employee
    * @throws EntityNotFoundException if the employee is not found
    */
-  public Employee updateWorkingTimeModel(Long id, Employee.WorkingTimeModel newWorkingTimeModel) {
+  public Employee updateWorkingTimeModel(String id, Employee.WorkingTimeModel newWorkingTimeModel) {
     log.debug("Updating working time model for employee ID: {} to {}", id, newWorkingTimeModel);
     Employee employee = getById(id);
     employee.setWorkingTimeModel(newWorkingTimeModel);
@@ -212,7 +249,7 @@ public class EmployeeService {
    * @return the updated employee
    * @throws EntityNotFoundException if the employee is not found
    */
-  public Employee updateDepartment(Long id, String newDepartment) {
+  public Employee updateDepartment(String id, String newDepartment) {
     log.debug("Updating department for employee ID: {} to {}", id, newDepartment);
     Employee employee = getById(id);
     employee.setDepartment(newDepartment);
@@ -243,12 +280,6 @@ public class EmployeeService {
     return employeeRepository.countByWorkingTimeModel(workingTimeModel);
   }
 
-  /**
-   * Validate employee data for creation.
-   *
-   * @param employee the employee to validate
-   * @throws IllegalArgumentException if validation fails
-   */
   private void validateEmployeeForCreation(Employee employee) {
     if (employee.getEmployeeNumber() != null
         && employeeRepository.existsByEmployeeNumber(employee.getEmployeeNumber())) {
@@ -258,14 +289,5 @@ public class EmployeeService {
     validateEmployeeData(employee);
   }
 
-  /**
-   * Validate employee data for business rules.
-   *
-   * @param employee the employee to validate
-   * @throws IllegalArgumentException if validation fails
-   */
-  private void validateEmployeeData(Employee employee) {
-    // Additional business validation can be added here
-    // For example, validate office number format, department codes, etc.
-  }
+  private void validateEmployeeData(Employee employee) {}
 }

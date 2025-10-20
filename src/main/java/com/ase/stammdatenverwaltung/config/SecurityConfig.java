@@ -53,6 +53,9 @@ public class SecurityConfig {
                     // Public API endpoints (adjust as needed)
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    .requestMatchers("/api/v1/users/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
@@ -116,6 +119,9 @@ public class SecurityConfig {
                     // Public API endpoints
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    .requestMatchers("/api/v1/users/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
@@ -165,12 +171,20 @@ public class SecurityConfig {
                     // Public API endpoints (adjust as needed)
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
+                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    // TODO: add JWT auth protection if keycloak is integrated
+                    .requestMatchers("/api/v1/users/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
                     // All other API endpoints require authentication
                     .requestMatchers("/api/**")
                     .authenticated()
+                    // Permit all access to actuator endpoints except health
+                    .requestMatchers(
+                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
+                    .permitAll()
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())

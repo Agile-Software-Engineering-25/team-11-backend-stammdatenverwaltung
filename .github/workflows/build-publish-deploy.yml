@@ -31,3 +31,6 @@ jobs:
       with:
         kubeconfig: ${{ secrets.KUBECONFIG }}
         namespace: ${{ vars.K8S_NAMESPACE }}
+        image: ghcr.io/agile-software-engineering-25/team-11-backend-stammdatenverwaltung
+        tag: ${{ github.sha }}
+        deployment: ase-stammdaten
