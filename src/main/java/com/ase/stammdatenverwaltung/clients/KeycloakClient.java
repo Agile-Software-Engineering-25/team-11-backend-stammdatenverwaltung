@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,15 +84,11 @@ public class KeycloakClient {
             token ->
                 webClient
                     .get()
-                    .uri(
-                        uriBuilder ->
-                            uriBuilder
-                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
-                                .queryParam("id", userId)
-                                .build())
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?id={id}", userId)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<KeycloakUser>>() {})
+                    .bodyToMono(String.class)
+                    .map(this::parseFindUserByIdResponse)
                     .doOnSuccess(
                         users ->
                             log.info(
@@ -102,6 +99,17 @@ public class KeycloakClient {
                         error ->
                             log.error(
                                 "Failed to fetch user from Keycloak for ID: {}", userId, error)));
+  }
+
+  private List<KeycloakUser> parseFindUserByIdResponse(String raw) {
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(raw, new TypeReference<List<KeycloakUser>>() {});
+    } catch (Exception e) {
+      log.error("Failed to parse Keycloak user find by id response", e);
+      log.error("Raw response: {}", raw);
+      return Collections.emptyList();
+    }
   }
 
   /**
