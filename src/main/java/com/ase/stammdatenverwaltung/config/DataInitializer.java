@@ -10,6 +10,7 @@ import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -60,6 +61,11 @@ public class DataInitializer implements CommandLineRunner {
   }
 
   private void createPredefinedUsers() {
+    // Collect predefined entities and save in bulk
+    List<Student> students = new ArrayList<>();
+    List<Lecturer> lecturers = new ArrayList<>();
+    List<Employee> employees = new ArrayList<>();
+
     // test-stud - b7acb825-4e70-49e4-84a1-bf5dc7c8f509 - Student
     Student student =
         Student.builder()
@@ -73,7 +79,7 @@ public class DataInitializer implements CommandLineRunner {
             .studyStatus(Student.StudyStatus.ENROLLED)
             .cohort("2023")
             .build();
-    studentRepository.save(student);
+    students.add(student);
 
     // test-doz - fc6ac29a-b9dd-4b35-889f-2baff71f3be1 - Lecturer
     Lecturer lecturer =
@@ -87,7 +93,7 @@ public class DataInitializer implements CommandLineRunner {
             .title("Dr.")
             .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
             .build();
-    lecturerRepository.save(lecturer);
+    lecturers.add(lecturer);
 
     // test-sau-admin - 4f6bf355-6a63-45c5-8839-2f4b571cb478 - SAU Admin
     Employee sauAdmin =
@@ -101,7 +107,7 @@ public class DataInitializer implements CommandLineRunner {
             .officeNumber("A101")
             .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
             .build();
-    employeeRepository.save(sauAdmin);
+    employees.add(sauAdmin);
 
     // test-hochschulverwaltung - 471fb05c-e3c5-4bd1-9c41-dc355885811c - University administrative
     // staff
@@ -116,29 +122,44 @@ public class DataInitializer implements CommandLineRunner {
             .officeNumber("B202")
             .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
             .build();
-    employeeRepository.save(adminStaff);
+    employees.add(adminStaff);
+
+    // Save predefined entities in bulk (lists contain the predefined entries above)
+    studentRepository.saveAll(students);
+    lecturerRepository.saveAll(lecturers);
+    employeeRepository.saveAll(employees);
   }
 
   private void createGeneratedStudents() {
+    List<Student> studentsToSave = new ArrayList<>();
     for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
-      createStudentForGroup1(i);
+      Student s = createStudentForGroup1(i);
+      if (s != null) {
+        studentsToSave.add(s);
+      }
     }
     for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
-      createStudentForGroup2(i);
+      Student s = createStudentForGroup2(i);
+      if (s != null) {
+        studentsToSave.add(s);
+      }
+    }
+    if (!studentsToSave.isEmpty()) {
+      studentRepository.saveAll(studentsToSave);
     }
   }
 
-  private void createStudentForGroup1(int i) {
+  private Student createStudentForGroup1(int i) {
     String email = "student_g1_" + i + "@test.com";
     List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
     if (existingUsers == null || existingUsers.isEmpty()) {
-      return;
+      return null;
     }
-    KeycloakUser keycloakUser = existingUsers.get(0);
+    KeycloakUser keycloakUser = existingUsers.stream().findFirst().get();
     if (studentRepository.existsById(keycloakUser.getId())) {
-      return;
+      return null;
     }
-    Student student =
+    return
         Student.builder()
             .id(keycloakUser.getId())
             .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
@@ -150,18 +171,17 @@ public class DataInitializer implements CommandLineRunner {
             .studyStatus(Student.StudyStatus.ENROLLED)
             .cohort("BIN-T23-F4")
             .build();
-    studentRepository.save(student);
   }
 
-  private void createStudentForGroup2(int i) {
+  private Student createStudentForGroup2(int i) {
     String email = "student_g2_" + i + "@test.com";
     List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
     if (existingUsers == null || existingUsers.isEmpty()) {
-      return;
+      return null;
     }
-    KeycloakUser keycloakUser = existingUsers.get(0);
+    KeycloakUser keycloakUser = existingUsers.stream().findFirst().get();
     if (studentRepository.existsById(keycloakUser.getId())) {
-      return;
+      return null;
     }
     String cohort;
     if (i <= COHORT_F1_END) {
@@ -171,7 +191,7 @@ public class DataInitializer implements CommandLineRunner {
     } else {
       cohort = "F3";
     }
-    Student student =
+    return
         Student.builder()
             .id(keycloakUser.getId())
             .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
@@ -183,15 +203,15 @@ public class DataInitializer implements CommandLineRunner {
             .studyStatus(Student.StudyStatus.ENROLLED)
             .cohort(cohort)
             .build();
-    studentRepository.save(student);
   }
 
   private void createGeneratedLecturers() {
+    List<Lecturer> lecturersToSave = new ArrayList<>();
     for (int i = 1; i <= 4; i++) {
       String email = "lecturer_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
       if (existingUsers != null && !existingUsers.isEmpty()) {
-        KeycloakUser keycloakUser = existingUsers.get(0);
+        KeycloakUser keycloakUser = existingUsers.stream().findFirst().get();
         if (!lecturerRepository.existsById(keycloakUser.getId())) {
           Lecturer lecturer =
               Lecturer.builder()
@@ -207,18 +227,22 @@ public class DataInitializer implements CommandLineRunner {
                   .title("Prof. Dr.")
                   .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
                   .build();
-          lecturerRepository.save(lecturer);
+          lecturersToSave.add(lecturer);
         }
       }
+    }
+    if (!lecturersToSave.isEmpty()) {
+      lecturerRepository.saveAll(lecturersToSave);
     }
   }
 
   private void createGeneratedEmployees() {
+    List<Employee> employeesToSave = new ArrayList<>();
     for (int i = 1; i <= 2; i++) {
       String email = "admin_staff_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
       if (existingUsers != null && !existingUsers.isEmpty()) {
-        KeycloakUser keycloakUser = existingUsers.get(0);
+        KeycloakUser keycloakUser = existingUsers.stream().findFirst().get();
         if (!employeeRepository.existsById(keycloakUser.getId())) {
           Employee employee =
               Employee.builder()
@@ -231,9 +255,12 @@ public class DataInitializer implements CommandLineRunner {
                   .officeNumber("D" + i)
                   .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
                   .build();
-          employeeRepository.save(employee);
+          employeesToSave.add(employee);
         }
       }
+    }
+    if (!employeesToSave.isEmpty()) {
+      employeeRepository.saveAll(employeesToSave);
     }
   }
 }

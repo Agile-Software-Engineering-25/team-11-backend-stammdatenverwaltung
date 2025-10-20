@@ -7,6 +7,11 @@ spring:
     properties:
       hibernate:
         '[format_sql]': true
+        jdbc:
+          batch_size: 50
+          batch_versioned_data: true
+          order_inserts: true
+          order_updates: true
   datasource:
     # H2 file-based database with PostgreSQL compatibility mode
     # MODE=PostgreSQL: enables PostgreSQL-compatible syntax
