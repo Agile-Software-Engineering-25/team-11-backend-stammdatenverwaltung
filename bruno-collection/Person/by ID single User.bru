@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/api/v1/user/123?also_get_name_and_email=true
+  url: http://localhost:8080/api/v1/user/123?with_deatils=true
   body: none
   auth: inherit
 }
 
 params:query {
-  also_get_name_and_email: true
+  with_deatils: true
 }
 
 headers {
@@ -20,4 +20,5 @@ headers {
 
 settings {
   encodeUrl: false
+  timeout: 0
 }
