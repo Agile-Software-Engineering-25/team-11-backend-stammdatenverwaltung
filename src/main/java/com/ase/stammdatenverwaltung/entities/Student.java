@@ -8,6 +8,7 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -56,6 +57,7 @@ public class Student extends Person {
    * program variant.
    */
   @Size(max = 50, message = "Cohort identifier cannot exceed 50 characters")
+  @Pattern(regexp = "\\S+", message = "Cohort cannot contain whitespaces")
   @Column(name = "cohort", length = 50)
   private String cohort;
 

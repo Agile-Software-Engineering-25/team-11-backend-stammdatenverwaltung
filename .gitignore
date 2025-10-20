@@ -48,3 +48,11 @@ build/
 ### k8s ###
 kube.config
 local.yaml
+
+### env files ###
+.env
+.env.local
+
+### coding agents ###
+.gemini
+.claude

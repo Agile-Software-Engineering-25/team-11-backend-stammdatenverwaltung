@@ -121,4 +121,13 @@ public interface StudentRepository extends JpaRepository<Student, String> {
    */
   @Query("SELECT s FROM Student s WHERE s.semester >= :minSemester AND s.studyStatus = 'ENROLLED'")
   List<Student> findStudentsReadyForGraduation(@Param("minSemester") Integer minSemester);
+
+  /**
+   * Counts students per cohort.
+   *
+   * @return A list of object arrays, where each array contains the cohort name and the student
+   *     count.
+   */
+  @Query("SELECT s.cohort, COUNT(s) FROM Student s GROUP BY s.cohort ORDER BY s.cohort")
+  List<Object[]> countStudentsByCohort();
 }
