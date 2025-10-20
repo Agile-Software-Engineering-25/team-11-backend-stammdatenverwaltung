@@ -1,0 +1,19 @@
+meta {
+  name: Single Group by Name
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:8080/api/v1/group/:groupName?withDetails=false
+  body: none
+  auth: inherit
+}
+
+params:query {
+  withDetails: false
+}
+
+params:path {
+  groupName: BIN-T23-F4
+}
