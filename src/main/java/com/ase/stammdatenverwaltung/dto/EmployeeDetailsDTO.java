@@ -21,7 +21,16 @@ public class EmployeeDetailsDTO extends PersonDetailsDTO {
    * @param employee The Employee entity.
    */
   public EmployeeDetailsDTO(Employee employee) {
-    super(employee);
+    // map base Person fields using the new static mapper
+    PersonDetailsDTO base = PersonDetailsDTO.fromEntity(employee);
+    if (base != null) {
+      this.setId(base.getId());
+      this.setDateOfBirth(base.getDateOfBirth());
+      this.setAddress(base.getAddress());
+      this.setPhoneNumber(base.getPhoneNumber());
+      this.setPhotoUrl(base.getPhotoUrl());
+    }
+
     this.employeeNumber = employee.getEmployeeNumber();
     this.department = employee.getDepartment();
     this.officeNumber = employee.getOfficeNumber();

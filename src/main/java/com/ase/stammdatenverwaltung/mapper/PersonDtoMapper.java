@@ -34,7 +34,8 @@ public class PersonDtoMapper {
     } else if (person instanceof Student) {
       return new StudentDetailsDTO((Student) person);
     } else {
-      return new PersonDetailsDTO(person);
+      // map generic Person to DTO via static mapper
+      return PersonDetailsDTO.fromEntity(person);
     }
   }
 }

@@ -22,7 +22,16 @@ public class StudentDetailsDTO extends PersonDetailsDTO {
    * @param student The Student entity.
    */
   public StudentDetailsDTO(Student student) {
-    super(student);
+    // map base Person fields using the new static mapper
+    PersonDetailsDTO base = PersonDetailsDTO.fromEntity(student);
+    if (base != null) {
+      this.setId(base.getId());
+      this.setDateOfBirth(base.getDateOfBirth());
+      this.setAddress(base.getAddress());
+      this.setPhoneNumber(base.getPhoneNumber());
+      this.setPhotoUrl(base.getPhotoUrl());
+    }
+
     this.matriculationNumber = student.getMatriculationNumber();
     this.degreeProgram = student.getDegreeProgram();
     this.semester = student.getSemester();
