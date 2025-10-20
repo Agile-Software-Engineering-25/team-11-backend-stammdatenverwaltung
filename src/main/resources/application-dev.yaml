@@ -54,3 +54,8 @@ logging:
 
 cors:
   allowed-origins: "http://localhost:5173"
+
+openapi:
+  server:
+    url: http://localhost:8080
+    description: Development Server
