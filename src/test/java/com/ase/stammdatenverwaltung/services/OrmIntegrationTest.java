@@ -280,7 +280,7 @@ class OrmIntegrationTest {
     Employee savedEmployee = employeeService.create(employee);
 
     // When - Query all persons (should include all types)
-    List<Person> allPersons = personService.findAll();
+    List<Person> allPersons = personRepository.findAll();
 
     // Then - Should find all entities as persons
     assertThat(allPersons).hasSize(3);
@@ -379,17 +379,18 @@ class OrmIntegrationTest {
     Person savedForty = personService.create(person40);
 
     // When & Then - Test exact age queries
-    List<Person> personsAge30 = personService.findByAge(30);
+    LocalDate now = LocalDate.now();
+    List<Person> personsAge30 = personRepository.findByAge(now.minusYears(31), now.minusYears(30));
     assertThat(personsAge30).hasSize(2);
     assertThat(personsAge30)
         .extracting(Person::getId)
         .containsExactlyInAnyOrder(savedYoungFirst.getId(), savedYoungSecond.getId());
 
-    List<Person> personsAge40 = personService.findByAge(40);
+    List<Person> personsAge40 = personRepository.findByAge(now.minusYears(41), now.minusYears(40));
     assertThat(personsAge40).hasSize(1);
-    assertThat(personsAge40.get(0).getId()).isEqualTo(savedForty.getId());
+    assertThat(personsAge40.getFirst().getId()).isEqualTo(savedForty.getId());
 
-    List<Person> personsAge50 = personService.findByAge(50);
+    List<Person> personsAge50 = personRepository.findByAge(now.minusYears(51), now.minusYears(50));
     assertThat(personsAge50).isEmpty();
   }
 
@@ -430,18 +431,19 @@ class OrmIntegrationTest {
     Person savedYesterday = personService.create(personYesterday);
 
     // When & Then - Test edge cases
-    List<Person> age0 = personService.findByAge(0);
+    LocalDate now = LocalDate.now();
+    List<Person> age0 = personRepository.findByAge(now.minusYears(1), now.minusYears(0));
     assertThat(age0).hasSize(2); // Both yesterday and almost-one-year should be 0
     assertThat(age0)
         .extracting(Person::getId)
         .containsExactlyInAnyOrder(savedAlmostOne.getId(), savedYesterday.getId());
 
-    List<Person> age1 = personService.findByAge(1);
+    List<Person> age1 = personRepository.findByAge(now.minusYears(2), now.minusYears(1));
     assertThat(age1).hasSize(1); // Only exactly-one-year should be 1
     assertThat(age1.get(0).getId()).isEqualTo(savedExactlyOne.getId());
 
     // Test count for very specific range
-    long countInfants = personService.countByAgeRange(0, 1);
+    long countInfants = personRepository.countByAgeRange(now.minusYears(1), now.minusYears(0));
     assertThat(countInfants).isEqualTo(3); // All three persons are 0 or 1 years old
   }
 
@@ -494,24 +496,27 @@ class OrmIntegrationTest {
     Lecturer savedLecturer = lecturerService.create(seniorLecturer);
 
     // When & Then - Age queries should work across all person types
-    List<Person> youngAdults = personService.findByAgeRange(18, 25);
+    LocalDate now = LocalDate.now();
+    List<Person> youngAdults =
+        personRepository.findByAgeRange(now.minusYears(25), now.minusYears(18));
     assertThat(youngAdults).hasSize(1);
     assertThat(youngAdults.get(0).getId()).isEqualTo(savedStudent.getId());
 
-    List<Person> middleAged = personService.findByAgeRange(30, 40);
+    List<Person> middleAged =
+        personRepository.findByAgeRange(now.minusYears(40), now.minusYears(30));
     assertThat(middleAged).hasSize(1);
     assertThat(middleAged.get(0).getId()).isEqualTo(savedEmployee.getId());
 
-    List<Person> seniors = personService.findByAgeRange(45, 55);
+    List<Person> seniors = personRepository.findByAgeRange(now.minusYears(55), now.minusYears(45));
     assertThat(seniors).hasSize(1);
     assertThat(seniors.get(0).getId()).isEqualTo(savedLecturer.getId());
 
     // Count across all inheritance types
-    long totalCount = personService.countByAgeRange(0, 150);
+    long totalCount = personRepository.countByAgeRange(now.minusYears(150), now.minusYears(0));
     assertThat(totalCount).isEqualTo(3);
 
     // Exact age queries
-    List<Person> exactly20 = personService.findByAge(20);
+    List<Person> exactly20 = personRepository.findByAge(now.minusYears(21), now.minusYears(20));
     assertThat(exactly20).hasSize(1);
     assertThat(exactly20.get(0).getId()).isEqualTo(savedStudent.getId());
   }
@@ -601,7 +606,7 @@ class OrmIntegrationTest {
     List<Employee> csEmployees = employeeService.findByDepartment("Computer Science");
     assertThat(csEmployees).hasSize(2); // Both lecturers are employees
 
-    List<Person> allPersons = personService.findAll();
+    List<Person> allPersons = personRepository.findAll();
     assertThat(allPersons).hasSize(4); // All entities are persons
   }
 }

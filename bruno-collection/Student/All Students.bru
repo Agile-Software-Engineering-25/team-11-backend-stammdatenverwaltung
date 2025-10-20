@@ -1,0 +1,21 @@
+meta {
+  name: All Students
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/api/v1/users?withDetails=false&userType=student
+  body: none
+  auth: inherit
+}
+
+params:query {
+  withDetails: false
+  userType: student
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

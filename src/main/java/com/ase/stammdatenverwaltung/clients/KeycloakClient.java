@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.clients;
 
 import com.ase.stammdatenverwaltung.config.KeycloakConfigProperties;
+import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.dto.keycloak.TokenResponse;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +69,75 @@ public class KeycloakClient {
                                 "Failed to create user in Keycloak for username: {}",
                                 request.getUsername(),
                                 error)));
+  }
+
+  /**
+   * Finds a user in Keycloak by their ID.
+   *
+   * @param userId The UUID of the user to find.
+   * @return A Mono emitting a list of matching users.
+   */
+  public Mono<List<KeycloakUser>> findUserById(String userId) {
+    return getAdminAccessToken()
+        .flatMap(
+            token ->
+                webClient
+                    .get()
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?id={id}", userId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseFindUserByIdResponse)
+                    .doOnSuccess(
+                        users ->
+                            log.info(
+                                "Successfully fetched {} user(s) from Keycloak for ID: {}",
+                                users.size(),
+                                userId))
+                    .doOnError(
+                        error ->
+                            log.error(
+                                "Failed to fetch user from Keycloak for ID: {}", userId, error)));
+  }
+
+  /**
+   * Finds a user in Keycloak by their email.
+   *
+   * @param email The email of the user to find.
+   * @return A Mono emitting a list of matching users.
+   */
+  public Mono<List<KeycloakUser>> findUserByEmail(String email) {
+    return getAdminAccessToken()
+        .flatMap(
+            token ->
+                webClient
+                    .get()
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?email={email}", email)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::parseFindUserByIdResponse)
+                    .doOnSuccess(
+                        users ->
+                            log.info(
+                                "Successfully fetched {} user(s) from Keycloak for email: {}",
+                                users.size(),
+                                email))
+                    .doOnError(
+                        error ->
+                            log.error(
+                                "Failed to fetch user from Keycloak for email: {}", email, error)));
+  }
+
+  private List<KeycloakUser> parseFindUserByIdResponse(String raw) {
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(raw, new TypeReference<List<KeycloakUser>>() {});
+    } catch (Exception e) {
+      log.error("Failed to parse Keycloak user find by id response", e);
+      log.error("Raw response: {}", raw);
+      return Collections.emptyList();
+    }
   }
 
   /**
