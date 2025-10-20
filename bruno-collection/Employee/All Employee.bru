@@ -1,0 +1,21 @@
+meta {
+  name: All Employee
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/api/v1/users?withDetails=true&userType=employee
+  body: none
+  auth: inherit
+}
+
+params:query {
+  withDetails: true
+  userType: employee
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
