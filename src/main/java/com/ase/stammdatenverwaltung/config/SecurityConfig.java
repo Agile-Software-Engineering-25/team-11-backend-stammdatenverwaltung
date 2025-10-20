@@ -175,6 +175,10 @@ public class SecurityConfig {
                     // TODO: add JWT auth protection if keycloak is integrated
                     .requestMatchers("/api/v1/users/**")
                     .permitAll()
+                    // Group endpoints - temporarily public until JWT auth is re-enabled
+                    // TODO: add JWT auth protection if keycloak is integrated
+                    .requestMatchers("api/v1/group/**")
+                    .permitAll()
                     // Admin endpoints require ADMIN role
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
