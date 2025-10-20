@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.ase.stammdatenverwaltung.config.JwtConfigurationValidator;
-import com.ase.stammdatenverwaltung.config.JwtSecurityProperties;
-import com.ase.stammdatenverwaltung.config.KeycloakJwtAuthenticationConverter;
 import com.ase.stammdatenverwaltung.dto.GroupDTO;
 import com.ase.stammdatenverwaltung.dto.GroupResponseDTO;
 import com.ase.stammdatenverwaltung.dto.StudentDTO;
@@ -27,10 +25,6 @@ class GroupControllerTest {
 
   @MockBean private GroupService groupService;
 
-  @MockBean private JwtSecurityProperties jwtSecurityProperties;
-
-  @MockBean private KeycloakJwtAuthenticationConverter keycloakJwtAuthenticationConverter;
-
   @MockBean private JwtConfigurationValidator jwtConfigurationValidator;
 
   @Test
@@ -40,7 +34,7 @@ class GroupControllerTest {
     StudentDTO student1 = new StudentDTO();
     GroupDTO group1 = new GroupDTO("BIN-T23 F3", 1, Collections.singletonList(student1));
     GroupResponseDTO response = new GroupResponseDTO(1, Collections.singletonList(group1));
-    when(groupService.getAllGroups()).thenReturn(response);
+    when(groupService.getAllGroups(false)).thenReturn(response);
 
     // When & Then
     mockMvc
@@ -59,7 +53,7 @@ class GroupControllerTest {
     String groupName = "BIN-T23 F3";
     StudentDTO student1 = new StudentDTO();
     GroupDTO group = new GroupDTO(groupName, 1, Collections.singletonList(student1));
-    when(groupService.getGroupByName(groupName)).thenReturn(group);
+    when(groupService.getGroupByName(groupName, false)).thenReturn(group);
 
     // When & Then
     mockMvc
@@ -75,7 +69,7 @@ class GroupControllerTest {
   void getGroupByNameShouldReturnNotFound() throws Exception {
     // Given
     String groupName = "NonExistentGroup";
-    when(groupService.getGroupByName(groupName)).thenReturn(null);
+    when(groupService.getGroupByName(groupName, false)).thenReturn(null);
 
     // When & Then
     mockMvc.perform(get("/api/v1/group/{groupName}", groupName)).andExpect(status().isOk());

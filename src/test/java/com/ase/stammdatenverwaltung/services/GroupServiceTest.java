@@ -33,7 +33,7 @@ class GroupServiceTest {
     when(studentRepository.findAll()).thenReturn(students);
 
     // When
-    GroupResponseDTO result = groupService.getAllGroups();
+    GroupResponseDTO result = groupService.getAllGroups(false);
 
     // Then
     assertEquals(2, result.getGroupCount());
@@ -49,7 +49,7 @@ class GroupServiceTest {
     when(studentRepository.findByCohort(groupName)).thenReturn(students);
 
     // When
-    GroupDTO result = groupService.getGroupByName(groupName);
+    GroupDTO result = groupService.getGroupByName(groupName, false);
 
     // Then
     assertEquals(groupName, result.getName());
@@ -63,7 +63,7 @@ class GroupServiceTest {
     when(studentRepository.findByCohort(groupName)).thenReturn(Collections.emptyList());
 
     // When
-    GroupDTO result = groupService.getGroupByName(groupName);
+    GroupDTO result = groupService.getGroupByName(groupName, false);
 
     // Then
     assertNull(result);
