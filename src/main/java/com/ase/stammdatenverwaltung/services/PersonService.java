@@ -1,9 +1,15 @@
 package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.dto.EmployeeDetailsDTO;
 import com.ase.stammdatenverwaltung.dto.KeycloakUser;
+import com.ase.stammdatenverwaltung.dto.LecturerDetailsDTO;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
+import com.ase.stammdatenverwaltung.dto.StudentDetailsDTO;
+import com.ase.stammdatenverwaltung.entities.Employee;
+import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
@@ -66,7 +72,20 @@ public class PersonService {
     if (withDetails) {
       return persons.stream().map(this::enrichPersonWithKeycloakData).collect(Collectors.toList());
     }
-    return persons.stream().map(PersonDetailsDTO::new).collect(Collectors.toList());
+    return persons.stream()
+        .map(
+            p -> {
+              if (p instanceof Lecturer) {
+                return new LecturerDetailsDTO((Lecturer) p);
+              } else if (p instanceof Employee) {
+                return new EmployeeDetailsDTO((Employee) p);
+              } else if (p instanceof Student) {
+                return new StudentDetailsDTO((Student) p);
+              } else {
+                return new PersonDetailsDTO(p);
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   /**
@@ -87,11 +106,30 @@ public class PersonService {
     if (withDetails) {
       return enrichPersonWithKeycloakData(person);
     }
-    return new PersonDetailsDTO(person);
+
+    if (person instanceof Lecturer) {
+      return new LecturerDetailsDTO((Lecturer) person);
+    } else if (person instanceof Employee) {
+      return new EmployeeDetailsDTO((Employee) person);
+    } else if (person instanceof Student) {
+      return new StudentDetailsDTO((Student) person);
+    } else {
+      return new PersonDetailsDTO(person);
+    }
   }
 
   private PersonDetailsDTO enrichPersonWithKeycloakData(Person person) {
-    PersonDetailsDTO dto = new PersonDetailsDTO(person);
+    PersonDetailsDTO dto;
+    if (person instanceof Lecturer) {
+      dto = new LecturerDetailsDTO((Lecturer) person);
+    } else if (person instanceof Employee) {
+      dto = new EmployeeDetailsDTO((Employee) person);
+    } else if (person instanceof Student) {
+      dto = new StudentDetailsDTO((Student) person);
+    } else {
+      dto = new PersonDetailsDTO(person);
+    }
+
     try {
       List<KeycloakUser> keycloakUsers = keycloakClient.findUserById(person.getId()).block();
       if (keycloakUsers != null && !keycloakUsers.isEmpty()) {

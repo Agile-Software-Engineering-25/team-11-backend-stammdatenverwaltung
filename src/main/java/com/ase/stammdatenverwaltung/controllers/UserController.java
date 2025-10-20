@@ -70,19 +70,21 @@ public class UserController {
                   schema = @Schema(implementation = PersonDetailsDTO.class))
             })
       })
-  @GetMapping
-  public ResponseEntity<List<PersonDetailsDTO>> getUsers(
-      @Parameter(description = "Flag to include details from Keycloak", required = false)
-          @RequestParam(defaultValue = "true")
-          boolean withDetails,
-      @Parameter(
-              description = "Filter by user type (student, lecturer, employee)",
-              required = false)
-          @RequestParam(required = false)
-          String userType) {
-    List<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
-    return ResponseEntity.ok(users);
-  }
+    @GetMapping
+    public ResponseEntity<List<PersonDetailsDTO>> getUsers(
+        @Parameter(description = "Flag to include details from Keycloak", required = false)
+            @RequestParam(defaultValue = "true")
+            boolean withDetails,
+        @Parameter(description = "Filter by user type (student, lecturer, employee)",
+            required = false)
+            @RequestParam(required = false)
+            String userType,
+        @Parameter(description = "Filter by cohort", required = false)
+            @RequestParam(required = false)
+            String cohort) {
+      List<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
+      return ResponseEntity.ok(users);
+    }
 
   /**
    * Creates a new employee.
