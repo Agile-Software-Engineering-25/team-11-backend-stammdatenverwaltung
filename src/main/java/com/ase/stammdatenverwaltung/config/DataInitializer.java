@@ -33,6 +33,8 @@ public class DataInitializer implements CommandLineRunner {
   private static final int PHONE_NUM_G2_START = 40;
   private static final int PHONE_NUM_LECTURER_START = 70;
   private static final int PHONE_NUM_EMPLOYEE_START = 80;
+  private static final int COHORT_F1_END = 10;
+  private static final int COHORT_F2_END = 20;
 
   private final PersonRepository personRepository;
   private final StudentRepository studentRepository;
@@ -117,58 +119,71 @@ public class DataInitializer implements CommandLineRunner {
     employeeRepository.save(adminStaff);
   }
 
- private void createGeneratedStudents() {
+  private void createGeneratedStudents() {
     for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
-      String email = "student_g1_" + i + "@test.com";
-      List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers != null && !existingUsers.isEmpty()) {
-        KeycloakUser keycloakUser = existingUsers.get(0);
-        if (!studentRepository.existsById(keycloakUser.getId())) {
-          Student student = Student.builder()
-              .id(keycloakUser.getId())
-              .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
-              .address("Some Address")
-              .phoneNumber("+49151000000" + (PHONE_NUM_G1_START + i))
-              .matriculationNumber("m_g1_" + i)
-              .degreeProgram("Computer Science")
-              .semester(2)
-              .studyStatus(Student.StudyStatus.ENROLLED)
-              .cohort("BIN-T23-F4")
-              .build();
-          studentRepository.save(student);
-        }
-      }
+      createStudentForGroup1(i);
     }
+    for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
+      createStudentForGroup2(i);
+    }
+  }
 
-    for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
-      String email = "student_g2_" + i + "@test.com";
-      List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers != null && !existingUsers.isEmpty()) {
-        KeycloakUser keycloakUser = existingUsers.get(0);
-        if (!studentRepository.existsById(keycloakUser.getId())) {
-            String cohort;
-            if (i <= 10) {
-                cohort = "F1";
-            } else if (i <= 20) {
-                cohort = "F2";
-            } else {
-                cohort = "F3";
-            }
-            Student student = Student.builder()
-                .id(keycloakUser.getId())
-                .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
-                .address("Some other Address")
-                .phoneNumber("+49151000000" + (PHONE_NUM_G2_START + i))
-                .matriculationNumber("m_g2_" + i)
-                .degreeProgram("Business Informatics")
-                .semester(4)
-                .studyStatus(Student.StudyStatus.ENROLLED)
-                .cohort(cohort)
-                .build();
-            studentRepository.save(student);
-        }
-      }
+  private void createStudentForGroup1(int i) {
+    String email = "student_g1_" + i + "@test.com";
+    List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
+    if (existingUsers == null || existingUsers.isEmpty()) {
+      return;
     }
+    KeycloakUser keycloakUser = existingUsers.get(0);
+    if (studentRepository.existsById(keycloakUser.getId())) {
+      return;
+    }
+    Student student =
+        Student.builder()
+            .id(keycloakUser.getId())
+            .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
+            .address("Some Address")
+            .phoneNumber("+49151000000" + (PHONE_NUM_G1_START + i))
+            .matriculationNumber("m_g1_" + i)
+            .degreeProgram("Computer Science")
+            .semester(2)
+            .studyStatus(Student.StudyStatus.ENROLLED)
+            .cohort("BIN-T23-F4")
+            .build();
+    studentRepository.save(student);
+  }
+
+  private void createStudentForGroup2(int i) {
+    String email = "student_g2_" + i + "@test.com";
+    List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
+    if (existingUsers == null || existingUsers.isEmpty()) {
+      return;
+    }
+    KeycloakUser keycloakUser = existingUsers.get(0);
+    if (studentRepository.existsById(keycloakUser.getId())) {
+      return;
+    }
+    String cohort;
+    if (i <= COHORT_F1_END) {
+      cohort = "F1";
+    } else if (i <= COHORT_F2_END) {
+      cohort = "F2";
+    } else {
+      cohort = "F3";
+    }
+    Student student =
+        Student.builder()
+            .id(keycloakUser.getId())
+            .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
+            .address("Some other Address")
+            .phoneNumber("+49151000000" + (PHONE_NUM_G2_START + i))
+            .matriculationNumber("m_g2_" + i)
+            .degreeProgram("Business Informatics")
+            .semester(4)
+            .studyStatus(Student.StudyStatus.ENROLLED)
+            .cohort(cohort)
+            .build();
+    studentRepository.save(student);
   }
 
   private void createGeneratedLecturers() {
@@ -178,20 +193,21 @@ public class DataInitializer implements CommandLineRunner {
       if (existingUsers != null && !existingUsers.isEmpty()) {
         KeycloakUser keycloakUser = existingUsers.get(0);
         if (!lecturerRepository.existsById(keycloakUser.getId())) {
-            Lecturer lecturer = Lecturer.builder()
-                .id(keycloakUser.getId())
-                .dateOfBirth(LocalDate.of(LECTURER_YEAR, 1, 1))
-                .address("Lecturer Address")
-                .phoneNumber("+49151000000" + (PHONE_NUM_LECTURER_START + i))
-                .employeeNumber("L-00" + i)
-                .department("IT")
-                .officeNumber("C" + i)
-                .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-                .fieldChair("Field " + i)
-                .title("Prof. Dr.")
-                .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
-                .build();
-            lecturerRepository.save(lecturer);
+          Lecturer lecturer =
+              Lecturer.builder()
+                  .id(keycloakUser.getId())
+                  .dateOfBirth(LocalDate.of(LECTURER_YEAR, 1, 1))
+                  .address("Lecturer Address")
+                  .phoneNumber("+49151000000" + (PHONE_NUM_LECTURER_START + i))
+                  .employeeNumber("L-00" + i)
+                  .department("IT")
+                  .officeNumber("C" + i)
+                  .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+                  .fieldChair("Field " + i)
+                  .title("Prof. Dr.")
+                  .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+                  .build();
+          lecturerRepository.save(lecturer);
         }
       }
     }
@@ -204,17 +220,18 @@ public class DataInitializer implements CommandLineRunner {
       if (existingUsers != null && !existingUsers.isEmpty()) {
         KeycloakUser keycloakUser = existingUsers.get(0);
         if (!employeeRepository.existsById(keycloakUser.getId())) {
-            Employee employee = Employee.builder()
-                .id(keycloakUser.getId())
-                .dateOfBirth(LocalDate.of(EMPLOYEE_YEAR, 1, 1))
-                .address("Admin Address")
-                .phoneNumber("+49151000000" + (PHONE_NUM_EMPLOYEE_START + i))
-                .employeeNumber("E-00" + i)
-                .department("University Administration")
-                .officeNumber("D" + i)
-                .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-                .build();
-            employeeRepository.save(employee);
+          Employee employee =
+              Employee.builder()
+                  .id(keycloakUser.getId())
+                  .dateOfBirth(LocalDate.of(EMPLOYEE_YEAR, 1, 1))
+                  .address("Admin Address")
+                  .phoneNumber("+49151000000" + (PHONE_NUM_EMPLOYEE_START + i))
+                  .employeeNumber("E-00" + i)
+                  .department("University Administration")
+                  .officeNumber("D" + i)
+                  .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+                  .build();
+          employeeRepository.save(employee);
         }
       }
     }

@@ -79,7 +79,9 @@ public class UserController {
               description = "Filter by user type (student, lecturer, employee)",
               required = false)
           @RequestParam(required = false)
-          String userType) {
+          String userType,
+      @Parameter(description = "Filter by cohort", required = false) @RequestParam(required = false)
+          String cohort) {
     List<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
     return ResponseEntity.ok(users);
   }
