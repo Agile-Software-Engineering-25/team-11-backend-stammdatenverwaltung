@@ -14,12 +14,13 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Service class for managing Person entities. Provides business logic for person-specific CRUD
@@ -48,7 +49,7 @@ public class PersonService {
    * @return A list of persons as DTOs.
    */
   @Transactional(readOnly = true)
-  public List<PersonDetailsDTO> findAll(boolean withDetails, String userType) {
+  public Flux<PersonDetailsDTO> findAll(boolean withDetails, String userType) {
     log.debug("Finding all persons with userType: {}", userType);
     List<? extends Person> persons;
     if (userType != null) {
@@ -66,9 +67,10 @@ public class PersonService {
     }
 
     if (withDetails) {
-      return persons.stream().map(this::enrichPersonWithKeycloakData).collect(Collectors.toList());
+      return Flux.fromIterable(persons)
+          .flatMap(this::enrichPersonWithKeycloakData); // run enrichments concurrently
     }
-    return persons.stream().map(personDtoMapper::map).collect(Collectors.toList());
+    return Flux.fromIterable(persons).map(personDtoMapper::map);
   }
 
   /**
@@ -79,7 +81,7 @@ public class PersonService {
    * @return The person as a DTO.
    */
   @Transactional(readOnly = true)
-  public PersonDetailsDTO findById(String id, boolean withDetails) {
+  public Mono<PersonDetailsDTO> findById(String id, boolean withDetails) {
     log.debug("Getting person with ID: {}", id);
     Person person =
         personRepository
@@ -90,25 +92,31 @@ public class PersonService {
       return enrichPersonWithKeycloakData(person);
     }
 
-    return personDtoMapper.map(person);
+    return Mono.just(personDtoMapper.map(person));
   }
 
-  private PersonDetailsDTO enrichPersonWithKeycloakData(Person person) {
-    PersonDetailsDTO dto = personDtoMapper.map(person);
-
+  private Mono<PersonDetailsDTO> enrichPersonWithKeycloakData(Person person) {
     try {
-      List<KeycloakUser> keycloakUsers = keycloakClient.findUserById(person.getId()).block();
-      if (keycloakUsers != null && !keycloakUsers.isEmpty()) {
-        KeycloakUser keycloakUser = keycloakUsers.getFirst();
-        dto.setUsername(keycloakUser.getUsername());
-        dto.setFirstName(keycloakUser.getFirstName());
-        dto.setLastName(keycloakUser.getLastName());
-        dto.setEmail(keycloakUser.getEmail());
-      }
+      Mono<PersonDetailsDTO> keycloakUsers =
+          keycloakClient
+              .findUserById(person.getId())
+              .map(
+                  keycloakUsers1 -> {
+                    PersonDetailsDTO dto = personDtoMapper.map(person);
+                    if (keycloakUsers1 != null && !keycloakUsers1.isEmpty()) {
+                      KeycloakUser keycloakUser = keycloakUsers1.getFirst();
+                      dto.setUsername(keycloakUser.getUsername());
+                      dto.setFirstName(keycloakUser.getFirstName());
+                      dto.setLastName(keycloakUser.getLastName());
+                      dto.setEmail(keycloakUser.getEmail());
+                    }
+                    return dto;
+                  });
+      return keycloakUsers;
     } catch (Exception e) {
       log.error("Failed to fetch user details from Keycloak for person ID: {}", person.getId(), e);
+      return Mono.just(personDtoMapper.map(person));
     }
-    return dto;
   }
 
   /**

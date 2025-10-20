@@ -56,7 +56,7 @@ class PersonServiceTest {
     when(personRepository.findById("test-id")).thenReturn(Optional.of(testPerson));
 
     // When
-    PersonDetailsDTO result = personService.findById("test-id", false);
+    PersonDetailsDTO result = personService.findById("test-id", false).block();
 
     // Then
     assertThat(result).isNotNull();
@@ -94,7 +94,7 @@ class PersonServiceTest {
     when(personRepository.findAll()).thenReturn(persons);
 
     // When
-    List<PersonDetailsDTO> result = personService.findAll(false, null);
+    List<PersonDetailsDTO> result = personService.findAll(false, null).collectList().block();
 
     // Then
     assertThat(result).hasSize(2);
