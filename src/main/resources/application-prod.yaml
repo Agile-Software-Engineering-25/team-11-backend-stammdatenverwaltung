@@ -54,3 +54,8 @@ logging:
 
 cors:
   allowed-origins: "https://sau-portal.de/"
+
+openapi:
+  server:
+    url: https://sau-portal.de/team-11-api
+    description: Production Server

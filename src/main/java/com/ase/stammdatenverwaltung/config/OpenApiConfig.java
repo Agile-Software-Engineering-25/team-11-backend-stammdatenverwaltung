@@ -20,6 +20,12 @@ public class OpenApiConfig {
   @Value("${server.port:8080}")
   private String serverPort;
 
+  @Value("${openapi.server.url:http://localhost:8080}")
+  private String serverUrl;
+
+  @Value("${openapi.server.description:Development Server}")
+  private String serverDescription;
+
   @Bean
   OpenAPI customOpenAPI() {
     return new OpenAPI()
@@ -29,11 +35,7 @@ public class OpenApiConfig {
                 .version("1.0.0")
                 .description("ASE Project - User Service für die Verwaltung von Stammdaten")
                 .contact(new Contact().name("ASE Team 11")))
-        .servers(
-            List.of(
-                new Server()
-                    .url("http://localhost:" + serverPort)
-                    .description("Development Server")));
+        .servers(List.of(new Server().url(serverUrl).description(serverDescription)));
   }
 
   @Bean
