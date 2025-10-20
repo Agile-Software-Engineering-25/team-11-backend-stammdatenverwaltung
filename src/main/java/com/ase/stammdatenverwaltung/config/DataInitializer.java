@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-/** Initializes the database with test data on application startup if the database is empty. */
+/** Initializes the database with test data on application startup. */
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -45,9 +45,7 @@ public class DataInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    if (personRepository.count() == 0) {
-      createUsers();
-    }
+    createUsers();
   }
 
   private void createUsers() {
@@ -77,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
             .degreeProgram("Computer Science")
             .semester(1)
             .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("2023")
+            .cohort("BIN-T23-F4")
             .build();
     students.add(student);
 
@@ -184,11 +182,11 @@ public class DataInitializer implements CommandLineRunner {
     }
     String cohort;
     if (i <= COHORT_F1_END) {
-      cohort = "F1";
+      cohort = "BIN-T23-F1";
     } else if (i <= COHORT_F2_END) {
-      cohort = "F2";
+      cohort = "BIN-T23-F2";
     } else {
-      cohort = "F3";
+      cohort = "BIN-T23-F3";
     }
     return Student.builder()
         .id(keycloakUser.getId())
