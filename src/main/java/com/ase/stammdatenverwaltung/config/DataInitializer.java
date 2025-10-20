@@ -1,9 +1,6 @@
 package com.ase.stammdatenverwaltung.config;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
-import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
-import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
-import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
 import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
@@ -12,9 +9,6 @@ import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
-import com.ase.stammdatenverwaltung.services.EmployeeService;
-import com.ase.stammdatenverwaltung.services.LecturerService;
-import com.ase.stammdatenverwaltung.services.StudentService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -44,22 +38,23 @@ public class DataInitializer implements CommandLineRunner {
   private final StudentRepository studentRepository;
   private final LecturerRepository lecturerRepository;
   private final EmployeeRepository employeeRepository;
-  private final StudentService studentService;
-  private final LecturerService lecturerService;
-  private final EmployeeService employeeService;
   private final KeycloakClient keycloakClient;
 
   @Override
   public void run(String... args) throws Exception {
     if (personRepository.count() == 0) {
-      // Predefined users
-      createPredefinedUsers();
-
-      // Generated users
-      createGeneratedStudents();
-      createGeneratedLecturers();
-      createGeneratedEmployees();
+      createUsers();
     }
+  }
+
+  private void createUsers() {
+    // Predefined users
+    createPredefinedUsers();
+
+    // Generated users
+    createGeneratedStudents();
+    createGeneratedLecturers();
+    createGeneratedEmployees();
   }
 
   private void createPredefinedUsers() {
@@ -122,46 +117,56 @@ public class DataInitializer implements CommandLineRunner {
     employeeRepository.save(adminStaff);
   }
 
-  private void createGeneratedStudents() {
+ private void createGeneratedStudents() {
     for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
       String email = "student_g1_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers == null || existingUsers.isEmpty()) {
-        CreateStudentRequest request = new CreateStudentRequest();
-        request.setUsername(email);
-        request.setFirstName("FirstNameG1");
-        request.setLastName("LastName" + i);
-        request.setEmail(email);
-        request.setDateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1));
-        request.setAddress("Some Address");
-        request.setPhoneNumber("+49151000000" + (PHONE_NUM_G1_START + i));
-        request.setMatriculationNumber("m_g1_" + i);
-        request.setDegreeProgram("Computer Science");
-        request.setSemester(2);
-        request.setStudyStatus(Student.StudyStatus.ENROLLED);
-        request.setCohort("G1");
-        studentService.create(request);
+      if (existingUsers != null && !existingUsers.isEmpty()) {
+        KeycloakUser keycloakUser = existingUsers.get(0);
+        if (!studentRepository.existsById(keycloakUser.getId())) {
+          Student student = Student.builder()
+              .id(keycloakUser.getId())
+              .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
+              .address("Some Address")
+              .phoneNumber("+49151000000" + (PHONE_NUM_G1_START + i))
+              .matriculationNumber("m_g1_" + i)
+              .degreeProgram("Computer Science")
+              .semester(2)
+              .studyStatus(Student.StudyStatus.ENROLLED)
+              .cohort("BIN-T23-F4")
+              .build();
+          studentRepository.save(student);
+        }
       }
     }
 
     for (int i = 1; i <= NUM_STUDENTS_PER_GROUP; i++) {
       String email = "student_g2_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers == null || existingUsers.isEmpty()) {
-        CreateStudentRequest request = new CreateStudentRequest();
-        request.setUsername(email);
-        request.setFirstName("FirstNameG2");
-        request.setLastName("LastName" + i);
-        request.setEmail(email);
-        request.setDateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1));
-        request.setAddress("Some other Address");
-        request.setPhoneNumber("+49151000000" + (PHONE_NUM_G2_START + i));
-        request.setMatriculationNumber("m_g2_" + i);
-        request.setDegreeProgram("Business Informatics");
-        request.setSemester(4);
-        request.setStudyStatus(Student.StudyStatus.ENROLLED);
-        request.setCohort("G2");
-        studentService.create(request);
+      if (existingUsers != null && !existingUsers.isEmpty()) {
+        KeycloakUser keycloakUser = existingUsers.get(0);
+        if (!studentRepository.existsById(keycloakUser.getId())) {
+            String cohort;
+            if (i <= 10) {
+                cohort = "F1";
+            } else if (i <= 20) {
+                cohort = "F2";
+            } else {
+                cohort = "F3";
+            }
+            Student student = Student.builder()
+                .id(keycloakUser.getId())
+                .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
+                .address("Some other Address")
+                .phoneNumber("+49151000000" + (PHONE_NUM_G2_START + i))
+                .matriculationNumber("m_g2_" + i)
+                .degreeProgram("Business Informatics")
+                .semester(4)
+                .studyStatus(Student.StudyStatus.ENROLLED)
+                .cohort(cohort)
+                .build();
+            studentRepository.save(student);
+        }
       }
     }
   }
@@ -170,23 +175,24 @@ public class DataInitializer implements CommandLineRunner {
     for (int i = 1; i <= 4; i++) {
       String email = "lecturer_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers == null || existingUsers.isEmpty()) {
-        CreateLecturerRequest request = new CreateLecturerRequest();
-        request.setUsername(email);
-        request.setFirstName("LecturerFirstName");
-        request.setLastName("LastName" + i);
-        request.setEmail(email);
-        request.setDateOfBirth(LocalDate.of(LECTURER_YEAR, 1, 1));
-        request.setAddress("Lecturer Address");
-        request.setPhoneNumber("+49151000000" + (PHONE_NUM_LECTURER_START + i));
-        request.setEmployeeNumber("L-00" + i);
-        request.setDepartment("IT");
-        request.setOfficeNumber("C" + i);
-        request.setWorkingTimeModel(Employee.WorkingTimeModel.FULL_TIME);
-        request.setFieldChair("Field " + i);
-        request.setTitle("Prof. Dr.");
-        request.setEmploymentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT);
-        lecturerService.create(request);
+      if (existingUsers != null && !existingUsers.isEmpty()) {
+        KeycloakUser keycloakUser = existingUsers.get(0);
+        if (!lecturerRepository.existsById(keycloakUser.getId())) {
+            Lecturer lecturer = Lecturer.builder()
+                .id(keycloakUser.getId())
+                .dateOfBirth(LocalDate.of(LECTURER_YEAR, 1, 1))
+                .address("Lecturer Address")
+                .phoneNumber("+49151000000" + (PHONE_NUM_LECTURER_START + i))
+                .employeeNumber("L-00" + i)
+                .department("IT")
+                .officeNumber("C" + i)
+                .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+                .fieldChair("Field " + i)
+                .title("Prof. Dr.")
+                .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+                .build();
+            lecturerRepository.save(lecturer);
+        }
       }
     }
   }
@@ -195,20 +201,21 @@ public class DataInitializer implements CommandLineRunner {
     for (int i = 1; i <= 2; i++) {
       String email = "admin_staff_" + i + "@test.com";
       List<KeycloakUser> existingUsers = keycloakClient.findUserByEmail(email).block();
-      if (existingUsers == null || existingUsers.isEmpty()) {
-        CreateEmployeeRequest request = new CreateEmployeeRequest();
-        request.setUsername(email);
-        request.setFirstName("AdminFirstName");
-        request.setLastName("LastName" + i);
-        request.setEmail(email);
-        request.setDateOfBirth(LocalDate.of(EMPLOYEE_YEAR, 1, 1));
-        request.setAddress("Admin Address");
-        request.setPhoneNumber("+49151000000" + (PHONE_NUM_EMPLOYEE_START + i));
-        request.setEmployeeNumber("E-00" + i);
-        request.setDepartment("University Administration");
-        request.setOfficeNumber("D" + i);
-        request.setWorkingTimeModel(Employee.WorkingTimeModel.FULL_TIME);
-        employeeService.create(request);
+      if (existingUsers != null && !existingUsers.isEmpty()) {
+        KeycloakUser keycloakUser = existingUsers.get(0);
+        if (!employeeRepository.existsById(keycloakUser.getId())) {
+            Employee employee = Employee.builder()
+                .id(keycloakUser.getId())
+                .dateOfBirth(LocalDate.of(EMPLOYEE_YEAR, 1, 1))
+                .address("Admin Address")
+                .phoneNumber("+49151000000" + (PHONE_NUM_EMPLOYEE_START + i))
+                .employeeNumber("E-00" + i)
+                .department("University Administration")
+                .officeNumber("D" + i)
+                .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+                .build();
+            employeeRepository.save(employee);
+        }
       }
     }
   }
