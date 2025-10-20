@@ -5,13 +5,17 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/api/v1/user/123
+  url: http://localhost:8080/api/v1/users/:userId
   body: none
   auth: inherit
 }
 
 params:query {
   ~withDetails: false
+}
+
+params:path {
+  userId: b7acb825-4e70-49e4-84a1-bf5dc7c8f509
 }
 
 headers {
