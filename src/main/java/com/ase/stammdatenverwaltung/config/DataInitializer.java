@@ -159,18 +159,17 @@ public class DataInitializer implements CommandLineRunner {
     if (studentRepository.existsById(keycloakUser.getId())) {
       return null;
     }
-    return
-        Student.builder()
-            .id(keycloakUser.getId())
-            .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
-            .address("Some Address")
-            .phoneNumber("+49151000000" + (PHONE_NUM_G1_START + i))
-            .matriculationNumber("m_g1_" + i)
-            .degreeProgram("Computer Science")
-            .semester(2)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("BIN-T23-F4")
-            .build();
+    return Student.builder()
+        .id(keycloakUser.getId())
+        .dateOfBirth(LocalDate.of(STUDENT_G1_YEAR, 1, 1))
+        .address("Some Address")
+        .phoneNumber("+49151000000" + (PHONE_NUM_G1_START + i))
+        .matriculationNumber("m_g1_" + i)
+        .degreeProgram("Computer Science")
+        .semester(2)
+        .studyStatus(Student.StudyStatus.ENROLLED)
+        .cohort("BIN-T23-F4")
+        .build();
   }
 
   private Student createStudentForGroup2(int i) {
@@ -191,18 +190,17 @@ public class DataInitializer implements CommandLineRunner {
     } else {
       cohort = "F3";
     }
-    return
-        Student.builder()
-            .id(keycloakUser.getId())
-            .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
-            .address("Some other Address")
-            .phoneNumber("+49151000000" + (PHONE_NUM_G2_START + i))
-            .matriculationNumber("m_g2_" + i)
-            .degreeProgram("Business Informatics")
-            .semester(4)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort(cohort)
-            .build();
+    return Student.builder()
+        .id(keycloakUser.getId())
+        .dateOfBirth(LocalDate.of(STUDENT_G2_YEAR, 1, 1))
+        .address("Some other Address")
+        .phoneNumber("+49151000000" + (PHONE_NUM_G2_START + i))
+        .matriculationNumber("m_g2_" + i)
+        .degreeProgram("Business Informatics")
+        .semester(4)
+        .studyStatus(Student.StudyStatus.ENROLLED)
+        .cohort(cohort)
+        .build();
   }
 
   private void createGeneratedLecturers() {
