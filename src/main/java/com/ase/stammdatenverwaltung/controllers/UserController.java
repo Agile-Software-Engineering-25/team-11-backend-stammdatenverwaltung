@@ -57,6 +57,18 @@ public class UserController {
    * @param request The request body containing the student data.
    * @return The created student.
    */
+  @Operation(
+      summary = "Creates a new student.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created student",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Student.class))
+            })
+      })
   @PostMapping("/students")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
 
@@ -98,6 +110,18 @@ public class UserController {
    * @param request The request body containing the employee data.
    * @return The created employee.
    */
+  @Operation(
+      summary = "Creates a new employee.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created employee",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Employee.class))
+            })
+      })
   @PostMapping("/employees")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
@@ -140,6 +164,18 @@ public class UserController {
    * @param request The request body containing the lecturer data.
    * @return The created lecturer.
    */
+  @Operation(
+      summary = "Creates a new lecturer.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created lecturer",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Lecturer.class))
+            })
+      })
   @PostMapping("/lecturers")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
