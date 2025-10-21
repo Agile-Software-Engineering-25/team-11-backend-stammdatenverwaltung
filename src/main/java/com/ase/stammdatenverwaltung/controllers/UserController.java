@@ -22,7 +22,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Controller for handling user-related requests. Provides endpoints for creating and retrieving
@@ -49,6 +57,18 @@ public class UserController {
    * @param request The request body containing the student data.
    * @return The created student.
    */
+  @Operation(
+      summary = "Creates a new student.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created student",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Student.class))
+            })
+      })
   @PostMapping("/students")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
 
@@ -80,8 +100,8 @@ public class UserController {
               required = false)
           @RequestParam(required = false)
           String userType) {
-    List<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
-    return ResponseEntity.ok(users);
+    Flux<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
+    return ResponseEntity.ok(users.collectList().block());
   }
 
   /**
@@ -90,6 +110,18 @@ public class UserController {
    * @param request The request body containing the employee data.
    * @return The created employee.
    */
+  @Operation(
+      summary = "Creates a new employee.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created employee",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Employee.class))
+            })
+      })
   @PostMapping("/employees")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
@@ -121,9 +153,9 @@ public class UserController {
           @RequestParam(defaultValue = "true")
           boolean withDetails) {
 
-    PersonDetailsDTO user = personService.findById(userId, withDetails);
+    Mono<PersonDetailsDTO> user = personService.findById(userId, withDetails);
 
-    return ResponseEntity.ok(user);
+    return ResponseEntity.ok(user.block());
   }
 
   /**
@@ -132,6 +164,18 @@ public class UserController {
    * @param request The request body containing the lecturer data.
    * @return The created lecturer.
    */
+  @Operation(
+      summary = "Creates a new lecturer.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created lecturer",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Lecturer.class))
+            })
+      })
   @PostMapping("/lecturers")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
