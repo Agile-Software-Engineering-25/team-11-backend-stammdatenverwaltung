@@ -43,7 +43,7 @@ public class OpenApiConfig {
     return GroupedOpenApi.builder()
         .group("public-api")
         .displayName("Public API")
-        .pathsToMatch("/api/**")
+        .pathsToMatch("/api/v1/group/**", "/api/v1/users/**")
         .pathsToExclude(
             "/api/v1/users/students", "/api/v1/users/employees", "/api/v1/users/lecturers")
         .build();
