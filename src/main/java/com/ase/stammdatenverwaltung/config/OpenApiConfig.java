@@ -44,6 +44,18 @@ public class OpenApiConfig {
         .group("public-api")
         .displayName("Public API")
         .pathsToMatch("/api/**")
+        .pathsToExclude(
+            "/api/v1/users/students", "/api/v1/users/employees", "/api/v1/users/lecturers")
+        .build();
+  }
+
+  @Bean
+  GroupedOpenApi internalApi() {
+    return GroupedOpenApi.builder()
+        .group("internal-api")
+        .displayName("Internal API")
+        .pathsToMatch(
+            "/api/v1/users/students", "/api/v1/users/employees", "/api/v1/users/lecturers")
         .build();
   }
 
