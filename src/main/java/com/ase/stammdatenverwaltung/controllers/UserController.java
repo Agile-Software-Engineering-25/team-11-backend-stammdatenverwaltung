@@ -4,8 +4,10 @@ import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
+import com.ase.stammdatenverwaltung.dto.PersonUpdateDTO;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
+import com.ase.stammdatenverwaltung.entities.Person;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.services.EmployeeService;
 import com.ase.stammdatenverwaltung.services.LecturerService;
@@ -51,32 +53,7 @@ public class UserController {
 
   private final LecturerService lecturerService;
 
-  /**
-   * Creates a new student.
-   *
-   * @param request The request body containing the student data.
-   * @return The created student.
-   */
-  @Operation(
-      summary = "Creates a new student.",
-      responses = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Successfully created student",
-            content = {
-              @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = Student.class))
-            })
-      })
-  @PostMapping("/students")
-  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
-
-    Student createdStudent = studentService.create(request);
-
-    return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
-  }
-
+  /** */
   @Operation(
       summary = "Get master data for multiple users",
       description = "Returns master data for multiple users, with optional filters.",
@@ -104,33 +81,7 @@ public class UserController {
     return ResponseEntity.ok(users.collectList().block());
   }
 
-  /**
-   * Creates a new employee.
-   *
-   * @param request The request body containing the employee data.
-   * @return The created employee.
-   */
-  @Operation(
-      summary = "Creates a new employee.",
-      responses = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Successfully created employee",
-            content = {
-              @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = Employee.class))
-            })
-      })
-  @PostMapping("/employees")
-  public ResponseEntity<Employee> createEmployee(
-      @Valid @RequestBody CreateEmployeeRequest request) {
-
-    Employee createdEmployee = employeeService.create(request);
-
-    return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
-  }
-
+  /** */
   @Operation(
       summary = "Get master data for a single user",
       description = "Returns master data for a single user by their ID.",
@@ -156,6 +107,90 @@ public class UserController {
     Mono<PersonDetailsDTO> user = personService.findById(userId, withDetails);
 
     return ResponseEntity.ok(user.block());
+  }
+
+  /**
+   * Updates existing Users
+   *
+   * @param request The request body contains the updated User
+   * @return The updated User
+   */
+  @Operation(
+      summary = "Change data for a single user",
+      description = "Changes or overrides data for a single user by their ID.",
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved user data",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = PersonUpdateDTO.class))
+            }),
+        @ApiResponse(responseCode = "404", description = "User not found")
+      })
+  @PostMapping("/{userId}")
+  public ResponseEntity<PersonDetailsDTO> updateDataByUserId(
+      @Valid @RequestBody PersonUpdateDTO request,
+      @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
+          String userId) {
+
+    Person updatedUser = personService.update(userId, request);
+
+    return new ResponseEntity<>(updatedUser, HttpStatus.CREATED);
+  }
+
+  /**
+   * Creates a new student.
+   *
+   * @param request The request body containing the student data.
+   * @return The created student.
+   */
+  @Operation(
+      summary = "Creates a new student.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created student",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Student.class))
+            })
+      })
+  @PostMapping("/students")
+  public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
+
+    Student createdStudent = studentService.create(request);
+
+    return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+  }
+
+  /**
+   * Creates a new employee.
+   *
+   * @param request The request body containing the employee data.
+   * @return The created employee.
+   */
+  @Operation(
+      summary = "Creates a new employee.",
+      responses = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Successfully created employee",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Employee.class))
+            })
+      })
+  @PostMapping("/employees")
+  public ResponseEntity<Employee> createEmployee(
+      @Valid @RequestBody CreateEmployeeRequest request) {
+
+    Employee createdEmployee = employeeService.create(request);
+
+    return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
   }
 
   /**
