@@ -28,21 +28,28 @@ public class PersonUpdateDTO {
   private String email;
 
   /**
-   * Creates a DTO from a Person entity. Does not populate authentication-related fields.
+   * Apply non-null fields from this DTO to the provided Person entity. IMPORTANT: Do NOT change the
+   * person's id here — the controller supplies the id from the path.
    *
-   * @param person source Person entity
-   * @return mapped PersonDetailsDTO
+   * @param person the Person entity to update
    */
-  public static PersonUpdateDTO fromEntity(Person person) {
+  public Person applyTo(Person person) {
     if (person == null) {
       return null;
     }
-    return PersonUpdateDTO.builder()
-        .id(person.getId())
-        .dateOfBirth(person.getDateOfBirth())
-        .address(person.getAddress())
-        .phoneNumber(person.getPhoneNumber())
-        .photoUrl(person.getPhotoUrl())
-        .build();
+    if (dateOfBirth != null) {
+      person.setDateOfBirth(dateOfBirth);
+    }
+    if (address != null) {
+      person.setAddress(address);
+    }
+    if (phoneNumber != null) {
+      person.setPhoneNumber(phoneNumber);
+    }
+    if (photoUrl != null) {
+      person.setPhotoUrl(photoUrl);
+    }
+
+    return person;
   }
 }

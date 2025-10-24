@@ -130,14 +130,18 @@ public class UserController {
         @ApiResponse(responseCode = "404", description = "User not found")
       })
   @PostMapping("/{userId}")
-  public ResponseEntity<PersonDetailsDTO> updateDataByUserId(
-      @Valid @RequestBody PersonUpdateDTO request,
+  public ResponseEntity<Person> updateDataByUserId(
+      @Valid @RequestBody(required = false) PersonUpdateDTO request,
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId) {
 
-    Person updatedUser = personService.update(userId, request);
+    // create entity shell with the path id and apply only non-null fields from DTO
+    Person personToUpdate = new Person();
+    personToUpdate.setId(userId); // ensure id is not changed by client payload
 
-    return new ResponseEntity<>(updatedUser, HttpStatus.CREATED);
+    Person updatedUser = personService.update(userId, request.applyTo(personToUpdate));
+
+    return new ResponseEntity<>(updatedUser, HttpStatus.OK);
   }
 
   /**

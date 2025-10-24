@@ -1,0 +1,29 @@
+meta {
+  name: update by ID single USer
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/v1/users/:userId
+  body: json
+  auth: none
+}
+
+params:path {
+  userId: b7acb825-4e70-49e4-84a1-bf5dc7c8f509
+}
+
+body:json {
+    {
+      "id": "b7acb825-4e70-49e4-84a1-bf5dc7c8f509",
+      "dateOfBirth": "2000-02-01",
+      "address": "Test Address 1",
+      "phoneNumber": "123456789",
+      "matriculationNumber": "123456",
+      "degreeProgram": "Computer Science",
+      "semester": 1,
+      "studyStatus": "ENROLLED",
+      "cohort": "BIN-T23-F4"
+    }
+}
