@@ -184,4 +184,32 @@ public class UserController {
 
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
   }
+
+  /**
+   * Deletes a user
+   *
+   * @param id is the uuid of the user
+   * @return an empty response
+   */
+  @PostMapping("/delete")
+  @Operation(summary = "Delete example", description = "Delete an example by ID")
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "204", description = "Example deleted successfully"),
+          @ApiResponse(responseCode = "404", description = "Example not found"),
+          @ApiResponse(responseCode=  "500", description = "Internal Server Error")
+      })
+  public ResponseEntity<Void> deleteUserById(
+      @RequestBody Map<String,String> body) {
+    String id = body.get("user-id");
+    log.debug("DELETE /api/v1/User/{} - Deleting User", id);
+    try {
+      personService.deleteById(id);
+      return ResponseEntity.noContent().build();
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to delete example with ID {}: {}", id, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
+  }
+}
 }
