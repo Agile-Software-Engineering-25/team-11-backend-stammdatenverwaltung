@@ -25,7 +25,14 @@ public class GroupService {
   private final StudentRepository studentRepository;
   private final KeycloakClient keycloakClient;
 
-  public GroupResponseDTO getAllGroups(boolean withDetails) {
+  /**
+   * Fetches all groups
+   *
+   * @param withDetails whether to fetch details from Keycloak
+   * @param show_members whether to show all students of each group
+   * @return a GroupResponseDTO with a group Count and Info to each group
+   */
+  public GroupResponseDTO getAllGroups(boolean withDetails,boolean show_members) {
     List<Student> students = studentRepository.findAll();
     Map<String, KeycloakUser> keycloakUserMap = fetchKeycloakUsers(students, withDetails);
 
@@ -39,13 +46,26 @@ public class GroupService {
                               student ->
                                   toStudentDTO(student, keycloakUserMap.get(student.getId())))
                           .collect(Collectors.toList());
-                  return new GroupDTO(entry.getKey(), studentDTOs.size(), studentDTOs);
+                  if (show_members) {
+                    return new GroupDTO(entry.getKey(), studentDTOs.size(), studentDTOs);
+                  }else{
+                    return new GroupDTO(entry.getKey(), studentDTO.size(), null);
+                  }
+
                 })
             .collect(Collectors.toList());
     return new GroupResponseDTO(groups.size(), groups);
   }
 
-  public GroupDTO getGroupByName(String groupName, boolean withDetails) {
+  /**
+   * Fetches a single Group by name
+   *
+   * @param groupName the name of the group
+   * @param withDetails whether to fetch details from Keycloak
+   * @param show_members whether to show all students of that group
+   * @return a GroupDTO with name, studentCount and optionally all students
+   */
+  public GroupDTO getGroupByName(String groupName, boolean withDetails, boolean show_members) {
     List<Student> students = studentRepository.findByCohort(groupName);
     if (students.isEmpty()) {
       return null;
@@ -57,7 +77,11 @@ public class GroupService {
         students.stream()
             .map(student -> toStudentDTO(student, keycloakUserMap.get(student.getId())))
             .collect(Collectors.toList());
-    return new GroupDTO(groupName, studentDTOs.size(), studentDTOs);
+    if(show_members) {
+      return new GroupDTO(groupName, studentDTOs.size(), studentDTOs);
+    }else{
+      return new GroupDTO(groupName, studentDTO.size(), null);
+    }
   }
 
   /**

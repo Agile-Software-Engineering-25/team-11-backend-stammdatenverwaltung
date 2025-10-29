@@ -28,11 +28,15 @@ public class GroupController {
   @ApiResponse(responseCode = "200", description = "Successfully retrieved all groups")
   public GroupResponseDTO getAllGroups(
       @io.swagger.v3.oas.annotations.Parameter(
-              description = "Flag to include details from Keycloak",
-              required = false)
-          @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
-          boolean withDetails) {
-    return groupService.getAllGroups(withDetails);
+          description = "Flag to include details from Keycloak",
+          required = false)
+      @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
+      boolean withDetails,
+      @io.swagger.v3.oas.annotations.Parameter(
+          description = "Include full member list in each group")
+      @org.springframework.web.bind.annotation.RequestParam(deflautValue = "true")
+      boolean show_members) {
+    return groupService.getAllGroups(withDetails, show_members);
   }
 
   @GetMapping("/{groupName}")
@@ -44,10 +48,14 @@ public class GroupController {
   public GroupDTO getGroupByName(
       @PathVariable String groupName,
       @io.swagger.v3.oas.annotations.Parameter(
-              description = "Flag to include details from Keycloak",
-              required = false)
-          @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
-          boolean withDetails) {
-    return groupService.getGroupByName(groupName, withDetails);
+            description = "Flag to include details from Keycloak",
+            required = false)
+      @org.springframework.web.bind.annotation.RequestParam(defaultValue = "true")
+      boolean withDetails,
+      @io.swagger.v3.oas.annotations.Parameter(
+          description = "Include full member list of the group")
+      @org.springframework.web.bind.annotation.RequestParam(deflautValue = "true")
+      boolean show_members) {
+    return groupService.getGroupByName(groupName, withDetails, show_members);
   }
 }

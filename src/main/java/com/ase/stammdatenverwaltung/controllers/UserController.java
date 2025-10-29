@@ -16,12 +16,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +43,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "User Data", description = "API for user data management")
 public class UserController {
 
@@ -183,5 +187,32 @@ public class UserController {
     Lecturer createdLecturer = lecturerService.create(request);
 
     return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+  }
+  /**
+   * Deletes a user.
+   *
+   * @param id the ID of the user to delete
+   * @return empty response
+   */
+
+  @DeleteMapping("/{id}")
+  @Operation(summary = "Delete example", description = "Delete an example by ID")
+  @ApiResponses(
+      value = {
+          @ApiResponse(responseCode = "204", description = "Example deleted successfully"),
+          @ApiResponse(responseCode = "404", description = "Example not found"),
+          @ApiResponse(responseCode=  "500", description = "Internal Server Error")
+      })
+  public ResponseEntity<Void> deleteUserById(
+  @Parameter(description = "ID of the example to delete", required = true) @PathVariable
+  String id) {
+    log.debug("DELETE /api/v1/User/{} - Deleting User", id);
+    try {
+      personService.deleteById(id);
+      return ResponseEntity.noContent().build();
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to delete example with ID {}: {}", id, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
   }
 }
