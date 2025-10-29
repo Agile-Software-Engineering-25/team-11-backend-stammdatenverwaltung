@@ -7,17 +7,18 @@ import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
-import com.ase.stammdatenverwaltung.repositories.PersonRepository;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /** Initializes the database with test data on application startup. */
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
@@ -37,7 +38,6 @@ public class DataInitializer implements CommandLineRunner {
   private static final int COHORT_F1_END = 10;
   private static final int COHORT_F2_END = 20;
 
-  private final PersonRepository personRepository;
   private final StudentRepository studentRepository;
   private final LecturerRepository lecturerRepository;
   private final EmployeeRepository employeeRepository;
