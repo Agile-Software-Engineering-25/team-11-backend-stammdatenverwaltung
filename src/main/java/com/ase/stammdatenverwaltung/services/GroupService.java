@@ -32,7 +32,7 @@ public class GroupService {
    * @param show_members whether to show all students of each group
    * @return a GroupResponseDTO with a group Count and Info to each group
    */
-  public GroupResponseDTO getAllGroups(boolean withDetails,boolean show_members) {
+  public GroupResponseDTO getAllGroups(boolean withDetails, boolean show_members) {
     List<Student> students = studentRepository.findAll();
     Map<String, KeycloakUser> keycloakUserMap = fetchKeycloakUsers(students, withDetails);
 
@@ -48,10 +48,9 @@ public class GroupService {
                           .collect(Collectors.toList());
                   if (show_members) {
                     return new GroupDTO(entry.getKey(), studentDTOs.size(), studentDTOs);
-                  }else{
-                    return new GroupDTO(entry.getKey(), studentDTO.size(), null);
+                  } else {
+                    return new GroupDTO(entry.getKey(), studentDTOs.size(), null);
                   }
-
                 })
             .collect(Collectors.toList());
     return new GroupResponseDTO(groups.size(), groups);
@@ -77,10 +76,10 @@ public class GroupService {
         students.stream()
             .map(student -> toStudentDTO(student, keycloakUserMap.get(student.getId())))
             .collect(Collectors.toList());
-    if(show_members) {
+    if (show_members) {
       return new GroupDTO(groupName, studentDTOs.size(), studentDTOs);
-    }else{
-      return new GroupDTO(groupName, studentDTO.size(), null);
+    } else {
+      return new GroupDTO(groupName, studentDTOs.size(), null);
     }
   }
 
