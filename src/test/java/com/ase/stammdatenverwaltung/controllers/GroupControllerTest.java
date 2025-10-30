@@ -36,7 +36,7 @@ class GroupControllerTest {
     StudentDTO student1 = new StudentDTO();
     GroupDTO group1 = new GroupDTO("BIN-T23 F3", 1, Collections.singletonList(student1));
     GroupResponseDTO response = new GroupResponseDTO(1, Collections.singletonList(group1));
-    when(groupService.getAllGroups(false)).thenReturn(response);
+    when(groupService.getAllGroups(false, false)).thenReturn(response);
 
     // When & Then
     mockMvc
@@ -56,7 +56,7 @@ class GroupControllerTest {
     String groupName = "BIN-T23 F3";
     StudentDTO student1 = new StudentDTO();
     GroupDTO group = new GroupDTO(groupName, 1, Collections.singletonList(student1));
-    when(groupService.getGroupByName(groupName, false)).thenReturn(group);
+    when(groupService.getGroupByName(groupName, false, false)).thenReturn(group);
 
     // When & Then
     mockMvc
@@ -72,7 +72,7 @@ class GroupControllerTest {
   void getGroupByNameShouldReturnNotFound() throws Exception {
     // Given
     String groupName = "NonExistentGroup";
-    when(groupService.getGroupByName(groupName, false)).thenReturn(null);
+    when(groupService.getGroupByName(groupName, false, false)).thenReturn(null);
 
     // When & Then
     mockMvc.perform(get("/api/v1/group/{groupName}", groupName)).andExpect(status().isOk());
