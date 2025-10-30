@@ -16,10 +16,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +43,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "User Data", description = "API for user data management")
 public class UserController {
 
@@ -195,12 +199,11 @@ public class UserController {
   @Operation(summary = "Delete example", description = "Delete an example by ID")
   @ApiResponses(
       value = {
-          @ApiResponse(responseCode = "204", description = "Example deleted successfully"),
-          @ApiResponse(responseCode = "404", description = "Example not found"),
-          @ApiResponse(responseCode=  "500", description = "Internal Server Error")
+        @ApiResponse(responseCode = "204", description = "Example deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Example not found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
-  public ResponseEntity<Void> deleteUserById(
-      @RequestBody Map<String,String> body) {
+  public ResponseEntity<Void> deleteUserById(@RequestBody Map<String, String> body) {
     String id = body.get("user-id");
     log.debug("DELETE /api/v1/User/{} - Deleting User", id);
     try {
@@ -211,5 +214,4 @@ public class UserController {
       return ResponseEntity.notFound().build();
     }
   }
-}
 }
