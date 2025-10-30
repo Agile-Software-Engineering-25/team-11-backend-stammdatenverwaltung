@@ -3,6 +3,7 @@ package com.ase.stammdatenverwaltung.controllers;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.DeleteUserRequest;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
@@ -18,13 +19,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -190,28 +191,28 @@ public class UserController {
   }
 
   /**
-   * Deletes a user.
+   * Deletes a user
    *
-   * @param id the ID of the user to delete
-   * @return empty response
+   * @param request the request body containing the user-id
+   * @return an empty response
    */
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete example", description = "Delete an example by ID")
+  @PostMapping("/delete")
+  @Operation(summary = "Delete a user", description = "Delete a user by ID")
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "204", description = "Example deleted successfully"),
-        @ApiResponse(responseCode = "404", description = "Example not found"),
+        @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request - invalid request body"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
-  public ResponseEntity<Void> deleteUserById(
-      @Parameter(description = "ID of the example to delete", required = true) @PathVariable
-          String id) {
-    log.debug("DELETE /api/v1/User/{} - Deleting User", id);
+  public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
+    String id = request.getUserId();
+    log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);
     try {
       personService.deleteById(id);
       return ResponseEntity.noContent().build();
-    } catch (IllegalArgumentException e) {
-      log.warn("Failed to delete example with ID {}: {}", id, e.getMessage());
+    } catch (EntityNotFoundException e) {
+      log.warn("Failed to delete user with ID {}: {}", id, e.getMessage());
       return ResponseEntity.notFound().build();
     }
   }
