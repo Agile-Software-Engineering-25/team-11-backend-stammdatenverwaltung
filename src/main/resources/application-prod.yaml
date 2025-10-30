@@ -53,7 +53,7 @@ logging:
 # No additional JWT configuration needed for role extraction
 
 cors:
-  allowed-origins: "https://sau-portal.de/"
+  allowed-origins: "https://sau-portal.de/,http://localhost:3000"
 
 openapi:
   server:
