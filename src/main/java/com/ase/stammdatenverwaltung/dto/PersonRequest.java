@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.dto;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,11 +30,17 @@ public abstract class PersonRequest {
   private String username;
 
   @NotBlank(message = "First name is required")
-  @Size(max = 100, message = "First name cannot exceed 100 characters")
+  @Size(
+      max = ValidationConstants.MAX_FIRST_NAME_LENGTH,
+      message =
+          "First name cannot exceed " + ValidationConstants.MAX_FIRST_NAME_LENGTH + " characters")
   private String firstName;
 
   @NotBlank(message = "Last name is required")
-  @Size(max = 100, message = "Last name cannot exceed 100 characters")
+  @Size(
+      max = ValidationConstants.MAX_LAST_NAME_LENGTH,
+      message =
+          "Last name cannot exceed " + ValidationConstants.MAX_LAST_NAME_LENGTH + " characters")
   private String lastName;
 
   @NotBlank(message = "Email is required")
@@ -44,12 +51,19 @@ public abstract class PersonRequest {
   @NotNull(message = "Date of birth is required") @Past(message = "Date of birth must be in the past")
   private LocalDate dateOfBirth;
 
-  @Size(max = 500, message = "Address cannot exceed 500 characters")
+  @Size(
+      max = ValidationConstants.MAX_ADDRESS_LENGTH,
+      message = "Address cannot exceed " + ValidationConstants.MAX_ADDRESS_LENGTH + " characters")
   private String address;
 
-  @Pattern(regexp = "^[+]?[0-9\\s\\-()]{7,20}$", message = "Phone number must be a valid format")
+  @Pattern(
+      regexp = ValidationConstants.PHONE_NUMBER_PATTERN,
+      message = "Phone number must be a valid format")
   private String phoneNumber;
 
-  @Size(max = 1000, message = "Photo URL cannot exceed 1000 characters")
+  @Size(
+      max = ValidationConstants.MAX_PHOTO_URL_LENGTH,
+      message =
+          "Photo URL cannot exceed " + ValidationConstants.MAX_PHOTO_URL_LENGTH + " characters")
   private String photoUrl;
 }

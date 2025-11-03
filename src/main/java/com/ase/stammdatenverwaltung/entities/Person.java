@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.entities;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -46,17 +47,24 @@ public class Person {
   private LocalDate dateOfBirth;
 
   /** Physical address of the person. */
-  @Size(max = 500, message = "Address cannot exceed 500 characters")
-  @Column(name = "address", length = 500)
+  @Size(
+      max = ValidationConstants.MAX_ADDRESS_LENGTH,
+      message = "Address cannot exceed " + ValidationConstants.MAX_ADDRESS_LENGTH + " characters")
+  @Column(name = "address", length = ValidationConstants.MAX_ADDRESS_LENGTH)
   private String address;
 
   /** Phone number of the person. */
-  @Pattern(regexp = "^[+]?[0-9\\s\\-()]{7,20}$", message = "Phone number must be a valid format")
-  @Column(name = "phone_number", length = 20)
+  @Pattern(
+      regexp = ValidationConstants.PHONE_NUMBER_PATTERN,
+      message = "Phone number must be a valid format")
+  @Column(name = "phone_number", length = ValidationConstants.MAX_PHONE_NUMBER_LENGTH)
   private String phoneNumber;
 
   /** Optional URL or path to the person's photo. */
-  @Size(max = 1000, message = "Photo URL cannot exceed 1000 characters")
-  @Column(name = "photo_url", length = 1000)
+  @Size(
+      max = ValidationConstants.MAX_PHOTO_URL_LENGTH,
+      message =
+          "Photo URL cannot exceed " + ValidationConstants.MAX_PHOTO_URL_LENGTH + " characters")
+  @Column(name = "photo_url", length = ValidationConstants.MAX_PHOTO_URL_LENGTH)
   private String photoUrl;
 }
