@@ -58,6 +58,9 @@ public class UpdateUserMapper {
   }
 
   private void updateStudentFields(Student student, UpdateUserRequest request) {
+    if (request.getMatriculationNumber() != null) {
+      student.setMatriculationNumber(request.getMatriculationNumber());
+    }
     if (request.getDegreeProgram() != null) {
       student.setDegreeProgram(request.getDegreeProgram());
     }
@@ -83,11 +86,28 @@ public class UpdateUserMapper {
   }
 
   private void updateEmployeeFields(Employee employee, UpdateUserRequest request) {
+    if (request.getEmployeeNumber() != null) {
+      employee.setEmployeeNumber(request.getEmployeeNumber());
+    }
     if (request.getDepartment() != null) {
       employee.setDepartment(request.getDepartment());
     }
-    if (request.getJobTitle() != null) {
-      employee.setOfficeNumber(request.getJobTitle());
+    if (request.getOfficeNumber() != null) {
+      employee.setOfficeNumber(request.getOfficeNumber());
+    }
+    if (request.getWorkingTimeModel() != null) {
+      try {
+        employee.setWorkingTimeModel(
+            Employee.WorkingTimeModel.valueOf(request.getWorkingTimeModel()));
+      } catch (IllegalArgumentException ex) {
+        // WHY: Provide context for invalid enum values to aid debugging and client error handling
+        throw new IllegalArgumentException(
+            "Invalid workingTimeModel value: '"
+                + request.getWorkingTimeModel()
+                + "'. Allowed values: "
+                + java.util.Arrays.toString(Employee.WorkingTimeModel.values()),
+            ex);
+      }
     }
   }
 
@@ -96,6 +116,12 @@ public class UpdateUserMapper {
     updateEmployeeFields(lecturer, request);
 
     // Then update lecturer-specific fields
+    if (request.getFieldChair() != null) {
+      lecturer.setFieldChair(request.getFieldChair());
+    }
+    if (request.getTitle() != null) {
+      lecturer.setTitle(request.getTitle());
+    }
     if (request.getEmploymentStatus() != null) {
       try {
         lecturer.setEmploymentStatus(
@@ -109,12 +135,6 @@ public class UpdateUserMapper {
                 + java.util.Arrays.toString(Lecturer.EmploymentStatus.values()),
             ex);
       }
-    }
-    if (request.getSpecialization() != null) {
-      lecturer.setFieldChair(request.getSpecialization());
-    }
-    if (request.getOfficeLocation() != null) {
-      lecturer.setOfficeNumber(request.getOfficeLocation());
     }
   }
 }

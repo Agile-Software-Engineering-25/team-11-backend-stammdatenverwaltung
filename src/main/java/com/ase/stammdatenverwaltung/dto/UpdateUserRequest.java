@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
  * DTO for updating user data. Supports partial updates where only provided fields are modified. All
  * fields are optional to allow flexible updates. Fields not provided remain unchanged.
  *
- * <p>Supports updating both Person base fields (address, phone, etc.) and Student-specific fields
- * (study status, semester, etc.).
+ * <p>Supports updating fields from Person base class and all subtypes (Student, Employee, Lecturer)
+ * according to the inheritance hierarchy.
  */
 @Data
 @Builder
@@ -23,10 +23,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateUserRequest {
 
-  // Person base fields
+  // ========== PERSON BASE FIELDS ==========
+
   @JsonProperty("date_of_birth")
   private LocalDate dateOfBirth;
 
+  @JsonProperty("address")
+  @Size(max = 500, message = "Address cannot exceed 500 characters")
   private String address;
 
   @JsonProperty("phone_number")
@@ -37,36 +40,54 @@ public class UpdateUserRequest {
   @Size(max = 1000, message = "Photo URL cannot exceed 1000 characters")
   private String photoUrl;
 
-  // Student-specific fields
+  // ========== STUDENT-SPECIFIC FIELDS ==========
+
+  @JsonProperty("matriculation_number")
+  @Size(max = 20, message = "Matriculation number cannot exceed 20 characters")
+  private String matriculationNumber;
+
   @JsonProperty("degree_program")
   @Size(max = 200, message = "Degree program cannot exceed 200 characters")
   private String degreeProgram;
 
-  @Positive(message = "Semester must be positive") private Integer semester;
+  @JsonProperty("semester")
+  @Positive(message = "Semester must be positive")
+  private Integer semester;
 
   @JsonProperty("study_status")
   private String studyStatus;
 
+  @JsonProperty("cohort")
+  @Pattern(regexp = "\\S+", message = "Cohort cannot contain whitespaces")
   private String cohort;
 
-  // Employee-specific fields
-  @JsonProperty("employment_status")
-  private String employmentStatus;
+  // ========== EMPLOYEE-SPECIFIC FIELDS ==========
+
+  @JsonProperty("employee_number")
+  @Size(max = 20, message = "Employee number cannot exceed 20 characters")
+  private String employeeNumber;
 
   @JsonProperty("department")
-  @Size(max = 100, message = "Department cannot exceed 100 characters")
+  @Size(max = 200, message = "Department cannot exceed 200 characters")
   private String department;
 
-  @JsonProperty("job_title")
-  @Size(max = 150, message = "Job title cannot exceed 150 characters")
-  private String jobTitle;
+  @JsonProperty("office_number")
+  @Size(max = 50, message = "Office number cannot exceed 50 characters")
+  private String officeNumber;
 
-  // Lecturer-specific fields
-  @JsonProperty("office_location")
-  @Size(max = 200, message = "Office location cannot exceed 200 characters")
-  private String officeLocation;
+  @JsonProperty("working_time_model")
+  private String workingTimeModel;
 
-  @JsonProperty("specialization")
-  @Size(max = 300, message = "Specialization cannot exceed 300 characters")
-  private String specialization;
+  // ========== LECTURER-SPECIFIC FIELDS ==========
+
+  @JsonProperty("field_chair")
+  @Size(max = 300, message = "Field/chair cannot exceed 300 characters")
+  private String fieldChair;
+
+  @JsonProperty("title")
+  @Size(max = 50, message = "Title cannot exceed 50 characters")
+  private String title;
+
+  @JsonProperty("employment_status")
+  private String employmentStatus;
 }

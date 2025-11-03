@@ -10,7 +10,7 @@ import lombok.Data;
  * JsonProperty annotations to map to the JWT claim names with underscores.
  */
 @Data
-public class User {
+public class JWTUser {
   public int exp;
   public int iat;
 
