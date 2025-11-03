@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.entities;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,21 +30,34 @@ import lombok.experimental.SuperBuilder;
 public class Employee extends Person {
 
   /** Employee number/ID if available. May be null for external employees or contractors. */
-  @Size(max = 20, message = "Employee number cannot exceed 20 characters")
-  @Column(name = "employee_number", length = 20)
+  @Size(
+      max = ValidationConstants.MAX_EMPLOYEE_NUMBER_LENGTH,
+      message =
+          "Employee number cannot exceed "
+              + ValidationConstants.MAX_EMPLOYEE_NUMBER_LENGTH
+              + " characters")
+  @Column(name = "employee_number", length = ValidationConstants.MAX_EMPLOYEE_NUMBER_LENGTH)
   private String employeeNumber;
 
   /**
    * Department or area where the employee works (e.g., Examination Office, IT Support, Academic
    * Department).
    */
-  @Size(max = 200, message = "Department cannot exceed 200 characters")
-  @Column(name = "department", length = 200)
+  @Size(
+      max = ValidationConstants.MAX_DEPARTMENT_LENGTH,
+      message =
+          "Department cannot exceed " + ValidationConstants.MAX_DEPARTMENT_LENGTH + " characters")
+  @Column(name = "department", length = ValidationConstants.MAX_DEPARTMENT_LENGTH)
   private String department;
 
   /** Office or room number where the employee is located. */
-  @Size(max = 50, message = "Office number cannot exceed 50 characters")
-  @Column(name = "office_number", length = 50)
+  @Size(
+      max = ValidationConstants.MAX_OFFICE_NUMBER_LENGTH,
+      message =
+          "Office number cannot exceed "
+              + ValidationConstants.MAX_OFFICE_NUMBER_LENGTH
+              + " characters")
+  @Column(name = "office_number", length = ValidationConstants.MAX_OFFICE_NUMBER_LENGTH)
   private String officeNumber;
 
   /** Working time model indicating the employment type and hours. */

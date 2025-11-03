@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.components;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.entities.Example;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Component;
 @Profile("dev")
 public class ExampleUtility {
 
-  private static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s\\-_]{1,255}$");
+  private static final Pattern VALID_NAME_PATTERN =
+      Pattern.compile(ValidationConstants.VALID_NAME_PATTERN);
   private static final Pattern FORBIDDEN_WORDS_PATTERN =
       Pattern.compile("(?i).*(test|debug|temp|delete).*");
   private static final DateTimeFormatter TIMESTAMP_FORMATTER =

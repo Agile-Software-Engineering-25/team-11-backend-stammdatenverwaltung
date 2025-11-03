@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.entities;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,13 +33,18 @@ public class Lecturer extends Employee {
    * Field of expertise or chair the lecturer belongs to. Alternatively, this could represent the
    * modules they teach.
    */
-  @Size(max = 300, message = "Field/chair cannot exceed 300 characters")
-  @Column(name = "field_chair", length = 300)
+  @Size(
+      max = ValidationConstants.MAX_FIELD_CHAIR_LENGTH,
+      message =
+          "Field/chair cannot exceed " + ValidationConstants.MAX_FIELD_CHAIR_LENGTH + " characters")
+  @Column(name = "field_chair", length = ValidationConstants.MAX_FIELD_CHAIR_LENGTH)
   private String fieldChair;
 
   /** Academic title of the lecturer (e.g., Prof., Dr., etc.). */
-  @Size(max = 50, message = "Title cannot exceed 50 characters")
-  @Column(name = "title", length = 50)
+  @Size(
+      max = ValidationConstants.MAX_TITLE_LENGTH,
+      message = "Title cannot exceed " + ValidationConstants.MAX_TITLE_LENGTH + " characters")
+  @Column(name = "title", length = ValidationConstants.MAX_TITLE_LENGTH)
   private String title;
 
   /** Employment status indicating the type of lecturer employment. */

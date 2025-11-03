@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.entities;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,13 +35,27 @@ public class Student extends Person {
 
   /** Unique matriculation number identifying the student within the institution. */
   @NotBlank(message = "Matriculation number is required")
-  @Size(max = 20, message = "Matriculation number cannot exceed 20 characters")
-  @Column(name = "matriculation_number", nullable = false, unique = true, length = 20)
+  @Size(
+      max = ValidationConstants.MAX_MATRICULATION_NUMBER_LENGTH,
+      message =
+          "Matriculation number cannot exceed "
+              + ValidationConstants.MAX_MATRICULATION_NUMBER_LENGTH
+              + " characters")
+  @Column(
+      name = "matriculation_number",
+      nullable = false,
+      unique = true,
+      length = ValidationConstants.MAX_MATRICULATION_NUMBER_LENGTH)
   private String matriculationNumber;
 
   /** The degree program the student is enrolled in (e.g., Computer Science, Business, etc.). */
-  @Size(max = 200, message = "Degree program cannot exceed 200 characters")
-  @Column(name = "degree_program", length = 200)
+  @Size(
+      max = ValidationConstants.MAX_DEGREE_PROGRAM_LENGTH,
+      message =
+          "Degree program cannot exceed "
+              + ValidationConstants.MAX_DEGREE_PROGRAM_LENGTH
+              + " characters")
+  @Column(name = "degree_program", length = ValidationConstants.MAX_DEGREE_PROGRAM_LENGTH)
   private String degreeProgram;
 
   /** Current semester/term number. Must be positive. */
@@ -56,9 +71,16 @@ public class Student extends Person {
    * Cohort or class identifier (e.g., BIN-T23). Used to group students by their entering class or
    * program variant.
    */
-  @Size(max = 50, message = "Cohort identifier cannot exceed 50 characters")
-  @Pattern(regexp = "\\S+", message = "Cohort cannot contain whitespaces")
-  @Column(name = "cohort", length = 50)
+  @Size(
+      max = ValidationConstants.MAX_COHORT_LENGTH,
+      message =
+          "Cohort identifier cannot exceed "
+              + ValidationConstants.MAX_COHORT_LENGTH
+              + " characters")
+  @Pattern(
+      regexp = ValidationConstants.COHORT_NO_WHITESPACE_PATTERN,
+      message = "Cohort cannot contain whitespaces")
+  @Column(name = "cohort", length = ValidationConstants.MAX_COHORT_LENGTH)
   private String cohort;
 
   /** Enumeration defining possible study statuses for a student. */

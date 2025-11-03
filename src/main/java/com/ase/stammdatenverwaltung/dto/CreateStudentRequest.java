@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.dto;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.entities.Student;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,16 +21,31 @@ import lombok.experimental.SuperBuilder;
 public class CreateStudentRequest extends PersonRequest {
 
   @NotBlank(message = "Matriculation number is required")
-  @Size(max = 20, message = "Matriculation number cannot exceed 20 characters")
+  @Size(
+      max = ValidationConstants.MAX_MATRICULATION_NUMBER_LENGTH,
+      message =
+          "Matriculation number cannot exceed "
+              + ValidationConstants.MAX_MATRICULATION_NUMBER_LENGTH
+              + " characters")
   private String matriculationNumber;
 
-  @Size(max = 200, message = "Degree program cannot exceed 200 characters")
+  @Size(
+      max = ValidationConstants.MAX_DEGREE_PROGRAM_LENGTH,
+      message =
+          "Degree program cannot exceed "
+              + ValidationConstants.MAX_DEGREE_PROGRAM_LENGTH
+              + " characters")
   private String degreeProgram;
 
   @Positive(message = "Semester must be positive") private Integer semester;
 
   @NotNull(message = "Study status is required") private Student.StudyStatus studyStatus;
 
-  @Size(max = 50, message = "Cohort identifier cannot exceed 50 characters")
+  @Size(
+      max = ValidationConstants.MAX_COHORT_LENGTH,
+      message =
+          "Cohort identifier cannot exceed "
+              + ValidationConstants.MAX_COHORT_LENGTH
+              + " characters")
   private String cohort;
 }

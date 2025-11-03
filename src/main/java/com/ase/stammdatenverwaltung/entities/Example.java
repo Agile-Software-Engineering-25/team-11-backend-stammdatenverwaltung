@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.entities;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,12 +32,31 @@ public class Example {
   private Long id;
 
   @NotBlank(message = "Name cannot be blank")
-  @Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters")
-  @Column(name = "name", nullable = false, length = 255)
+  @Size(
+      min = ValidationConstants.MIN_NAME_LENGTH,
+      max = ValidationConstants.MAX_NAME_LENGTH,
+      message =
+          "Name must be between "
+              + ValidationConstants.MIN_NAME_LENGTH
+              + " and "
+              + ValidationConstants.MAX_NAME_LENGTH
+              + " characters")
+  @Column(name = "name", nullable = false, length = ValidationConstants.MAX_NAME_LENGTH)
   private String name;
 
   @NotBlank(message = "Description cannot be blank")
-  @Size(min = 1, max = 500, message = "Description must be between 1 and 500 characters")
-  @Column(name = "description", nullable = false, length = 500)
+  @Size(
+      min = ValidationConstants.MIN_DESCRIPTION_LENGTH,
+      max = ValidationConstants.MAX_DESCRIPTION_LENGTH,
+      message =
+          "Description must be between "
+              + ValidationConstants.MIN_DESCRIPTION_LENGTH
+              + " and "
+              + ValidationConstants.MAX_DESCRIPTION_LENGTH
+              + " characters")
+  @Column(
+      name = "description",
+      nullable = false,
+      length = ValidationConstants.MAX_DESCRIPTION_LENGTH)
   private String description;
 }

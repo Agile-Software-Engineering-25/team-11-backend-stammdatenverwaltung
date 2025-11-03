@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.dto;
 
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,15 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class CreateLecturerRequest extends CreateEmployeeRequest {
 
-  @Size(max = 300, message = "Field/chair cannot exceed 300 characters")
+  @Size(
+      max = ValidationConstants.MAX_FIELD_CHAIR_LENGTH,
+      message =
+          "Field/chair cannot exceed " + ValidationConstants.MAX_FIELD_CHAIR_LENGTH + " characters")
   private String fieldChair;
 
-  @Size(max = 50, message = "Title cannot exceed 50 characters")
+  @Size(
+      max = ValidationConstants.MAX_TITLE_LENGTH,
+      message = "Title cannot exceed " + ValidationConstants.MAX_TITLE_LENGTH + " characters")
   private String title;
 
   private Lecturer.EmploymentStatus employmentStatus;
