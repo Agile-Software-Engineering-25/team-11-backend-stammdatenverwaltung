@@ -51,8 +51,7 @@ public class UpdateUserRequest {
   private String degreeProgram;
 
   @JsonProperty("semester")
-  @Positive(message = "Semester must be positive")
-  private Integer semester;
+  @Positive(message = "Semester must be positive") private Integer semester;
 
   @JsonProperty("study_status")
   private String studyStatus;
