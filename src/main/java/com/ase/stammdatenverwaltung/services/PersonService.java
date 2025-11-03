@@ -1,10 +1,13 @@
 package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
+import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Person;
 import com.ase.stammdatenverwaltung.mapper.PersonDtoMapper;
+import com.ase.stammdatenverwaltung.mapper.UpdateUserMapper;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
@@ -33,13 +36,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class PersonService {
 
-  private static final int MAX_AGE_YEARS = 150;
   private final PersonRepository personRepository;
   private final StudentRepository studentRepository;
   private final LecturerRepository lecturerRepository;
   private final EmployeeRepository employeeRepository;
   private final KeycloakClient keycloakClient;
   private final PersonDtoMapper personDtoMapper;
+  private final UpdateUserMapper updateUserMapper;
 
   /**
    * Finds all persons and optionally enriches them with data from Keycloak.
@@ -158,6 +161,40 @@ public class PersonService {
   }
 
   /**
+   * Applies partial updates to an existing person. Only fields provided in the request are updated;
+   * remaining fields retain their existing values. Supports updating all person subtypes (Student,
+   * Employee, Lecturer).
+   *
+   * <p>Validation is applied to ensure business logic constraints are maintained, maintaining
+   * consistency with create() and update() operations.
+   *
+   * @param id The ID of the person to update.
+   * @param updateRequest The request containing fields to update.
+   * @return The updated person.
+   * @throws EntityNotFoundException if the person is not found.
+   * @throws IllegalArgumentException if the update violates business constraints (e.g., invalid
+   *     date of birth).
+   */
+  public Person updatePartial(String id, @Valid UpdateUserRequest updateRequest) {
+    log.debug("Applying partial update to person with ID: {}", id);
+    Person existingPerson =
+        personRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Person not found with ID: " + id));
+
+    updateUserMapper.applyUpdates(existingPerson, updateRequest);
+
+    // WHY: Apply validation after updates to maintain consistency with create() and update()
+    // methods. Validation in mapper catches individual field violations; service-level validation
+    // ensures complete entity consistency.
+    validatePersonData(existingPerson);
+
+    Person savedPerson = personRepository.save(existingPerson);
+    log.info("Successfully applied partial updates to person with ID: {}", savedPerson.getId());
+    return savedPerson;
+  }
+
+  /**
    * Deletes a person by their ID.
    *
    * @param id The ID of the person to delete.
@@ -181,9 +218,11 @@ public class PersonService {
     }
 
     if (person.getDateOfBirth() != null
-        && person.getDateOfBirth().isBefore(LocalDate.now().minusYears(MAX_AGE_YEARS))) {
+        && person
+            .getDateOfBirth()
+            .isBefore(LocalDate.now().minusYears(ValidationConstants.MAX_AGE_YEARS))) {
       throw new IllegalArgumentException(
-          "Date of birth cannot be more than " + MAX_AGE_YEARS + " years ago");
+          "Date of birth cannot be more than " + ValidationConstants.MAX_AGE_YEARS + " years ago");
     }
   }
 }

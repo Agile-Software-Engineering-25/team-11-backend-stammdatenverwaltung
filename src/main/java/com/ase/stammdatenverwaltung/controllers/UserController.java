@@ -5,6 +5,7 @@ import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
 import com.ase.stammdatenverwaltung.dto.DeleteUserRequest;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
+import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Student;
@@ -29,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -161,6 +163,49 @@ public class UserController {
     Mono<PersonDetailsDTO> user = personService.findById(userId, withDetails);
 
     return ResponseEntity.ok(user.block());
+  }
+
+  /**
+   * Updates an existing user with partial data. Only provided fields are updated; others retain
+   * their existing values. Supports updating all user types (students, employees, lecturers).
+   *
+   * @param userId The ID of the user to update.
+   * @param updateRequest The request containing fields to update.
+   * @return The updated user data.
+   */
+  @Operation(
+      summary = "Update an existing user",
+      description =
+          "Partially updates a user. Only provided fields are updated; omitted fields retain their"
+              + " existing values.",
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully updated user",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = PersonDetailsDTO.class))
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request body"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+      })
+  @PutMapping("/{userId}")
+  public ResponseEntity<PersonDetailsDTO> updateUser(
+      @Parameter(description = "ID of the user to update", required = true) @PathVariable
+          String userId,
+      @Valid @RequestBody UpdateUserRequest updateRequest) {
+
+    log.debug("PUT /api/v1/users/{} - Updating user with data", userId);
+    try {
+      personService.updatePartial(userId, updateRequest);
+      PersonDetailsDTO result = personService.findById(userId, true).block();
+      return ResponseEntity.ok(result);
+    } catch (EntityNotFoundException e) {
+      log.warn("Failed to update user with ID {}: {}", userId, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
   }
 
   /**
