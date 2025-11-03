@@ -2,6 +2,9 @@
 # Stage 1: Build stage
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
+# Enable BuildKit for caching Maven repository
+# syntax=docker/dockerfile:1.4
+
 # Set the working directory for build
 WORKDIR /app
 
@@ -13,15 +16,16 @@ COPY .mvn .mvn
 RUN chmod +x mvnw && \
     sed -i 's/\r$//' mvnw
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
+# Download dependencies with BuildKit cache mount for Maven repository
+# This caches the Maven repository and speeds up subsequent builds
+RUN --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -B
 
 # Copy the source code and configuration files needed for build
 COPY src ./src
 COPY checkstyle-logic-only.xml ./
 
-# Build the application
-RUN ./mvnw clean package -DskipTests
+# Build the application with Maven cache mount
+RUN --mount=type=cache,target=/root/.m2 ./mvnw clean package -DskipTests
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine AS runtime
