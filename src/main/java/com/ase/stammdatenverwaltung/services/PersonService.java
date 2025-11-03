@@ -170,7 +170,7 @@ public class PersonService {
    * @return The updated person.
    * @throws EntityNotFoundException if the person is not found.
    */
-  public Person updatePartial(String id, UpdateUserRequest updateRequest) {
+  public Person updatePartial(String id, @Valid UpdateUserRequest updateRequest) {
     log.debug("Applying partial update to person with ID: {}", id);
     Person existingPerson =
         personRepository
