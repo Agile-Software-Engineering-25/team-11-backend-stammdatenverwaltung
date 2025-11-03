@@ -65,7 +65,17 @@ public class UpdateUserMapper {
       student.setSemester(request.getSemester());
     }
     if (request.getStudyStatus() != null) {
-      student.setStudyStatus(Student.StudyStatus.valueOf(request.getStudyStatus()));
+      try {
+        student.setStudyStatus(Student.StudyStatus.valueOf(request.getStudyStatus()));
+      } catch (IllegalArgumentException ex) {
+        // WHY: Provide context for invalid enum values to aid debugging and client error handling
+        throw new IllegalArgumentException(
+            "Invalid studyStatus value: '"
+                + request.getStudyStatus()
+                + "'. Allowed values: "
+                + java.util.Arrays.toString(Student.StudyStatus.values()),
+            ex);
+      }
     }
     if (request.getCohort() != null) {
       student.setCohort(request.getCohort());
@@ -87,8 +97,18 @@ public class UpdateUserMapper {
 
     // Then update lecturer-specific fields
     if (request.getEmploymentStatus() != null) {
-      lecturer.setEmploymentStatus(
-          Lecturer.EmploymentStatus.valueOf(request.getEmploymentStatus()));
+      try {
+        lecturer.setEmploymentStatus(
+            Lecturer.EmploymentStatus.valueOf(request.getEmploymentStatus()));
+      } catch (IllegalArgumentException ex) {
+        // WHY: Provide context for invalid enum values to aid debugging and client error handling
+        throw new IllegalArgumentException(
+            "Invalid employment status: '"
+                + request.getEmploymentStatus()
+                + "'. Allowed values: "
+                + java.util.Arrays.toString(Lecturer.EmploymentStatus.values()),
+            ex);
+      }
     }
     if (request.getSpecialization() != null) {
       lecturer.setFieldChair(request.getSpecialization());
