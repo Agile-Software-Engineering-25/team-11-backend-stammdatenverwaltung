@@ -25,7 +25,9 @@ COPY src ./src
 COPY checkstyle-logic-only.xml ./
 
 # Build the application with Maven cache mount
-RUN --mount=type=cache,target=/root/.m2 ./mvnw clean package -DskipTests
+# This leverages BuildKit cache for Maven repository (/root/.m2)
+# Separating dependency layer from source changes maximizes cache hit rate
+RUN --mount=type=cache,target=/root/.m2 ./mvnw package -DskipTests
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine AS runtime
