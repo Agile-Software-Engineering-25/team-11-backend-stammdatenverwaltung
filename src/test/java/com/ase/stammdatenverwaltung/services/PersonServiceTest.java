@@ -6,9 +6,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ase.stammdatenverwaltung.clients.KeycloakClient;
+import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
+import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.mapper.PersonDtoMapper;
+import com.ase.stammdatenverwaltung.mapper.UpdateUserMapper;
+import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
+import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
+import com.ase.stammdatenverwaltung.repositories.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -19,7 +27,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,17 +34,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("PersonService Tests")
 class PersonServiceTest {
 
-  // Test constants
-  private static final int MAX_AGE_VALIDATION = 150;
-
   @Mock private PersonRepository personRepository;
+  @Mock private StudentRepository studentRepository;
+  @Mock private LecturerRepository lecturerRepository;
+  @Mock private EmployeeRepository employeeRepository;
+  @Mock private KeycloakClient keycloakClient;
+  @Mock private PersonDtoMapper personDtoMapper;
 
-  @InjectMocks private PersonService personService;
+  // Use real UpdateUserMapper because it's a stateless, pure component with no external
+  // dependencies. Tests that exercise update logic need its actual behavior to verify correct
+  // validation and mapping.
+  private final UpdateUserMapper updateUserMapper = new UpdateUserMapper();
+
+  private PersonService personService;
 
   private Person testPerson;
 
   @BeforeEach
   void setUp() {
+    // Manually construct PersonService with real UpdateUserMapper and mocked dependencies.
+    // This provides explicit control while eliminating the fragile factory method.
+    personService =
+        new PersonService(
+            personRepository,
+            studentRepository,
+            lecturerRepository,
+            employeeRepository,
+            keycloakClient,
+            personDtoMapper,
+            updateUserMapper);
+
     testPerson =
         Person.builder()
             .id("test-id")
@@ -148,7 +174,7 @@ class PersonServiceTest {
     // Given
     Person invalidPerson =
         Person.builder()
-            .dateOfBirth(LocalDate.now().minusYears(MAX_AGE_VALIDATION).minusDays(1))
+            .dateOfBirth(LocalDate.now().minusYears(ValidationConstants.MAX_AGE_YEARS).minusDays(1))
             .address("Test Address")
             .phoneNumber("+49 123 456789")
             .build();
@@ -156,7 +182,10 @@ class PersonServiceTest {
     // When & Then
     assertThatThrownBy(() -> personService.create(invalidPerson))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Date of birth cannot be more than 150 years ago");
+        .hasMessage(
+            "Date of birth cannot be more than "
+                + ValidationConstants.MAX_AGE_YEARS
+                + " years ago");
   }
 
   @Test
@@ -203,6 +232,82 @@ class PersonServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> personService.update("1", updatedData))
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessage("Person not found with ID: 1");
+  }
+
+  @Test
+  @DisplayName("Should update person with partial data successfully")
+  void shouldPartiallyUpdatePersonSuccessfully() {
+    // Given
+    UpdateUserRequest updateRequest =
+        UpdateUserRequest.builder().address("New Address").phoneNumber("+49 555 666777").build();
+
+    Person updatedPerson =
+        Person.builder()
+            .id("1")
+            .address("New Address")
+            .phoneNumber("+49 555 666777")
+            .dateOfBirth(testPerson.getDateOfBirth())
+            .build();
+
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
+    when(personRepository.save(any(Person.class))).thenReturn(updatedPerson);
+
+    // When
+    Person result = personService.updatePartial("1", updateRequest);
+
+    // Then
+    assertThat(result.getAddress()).isEqualTo("New Address");
+    assertThat(result.getPhoneNumber()).isEqualTo("+49 555 666777");
+    verify(personRepository).findById("1");
+    verify(personRepository).save(any(Person.class));
+  }
+
+  @Test
+  @DisplayName("Should throw exception when partial update contains future birth date")
+  void shouldThrowExceptionWhenPartialUpdateContainsFutureBirthDate() {
+    // Given
+    UpdateUserRequest updateRequest =
+        UpdateUserRequest.builder().dateOfBirth(LocalDate.now().plusDays(1)).build();
+
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
+
+    // When & Then
+    assertThatThrownBy(() -> personService.updatePartial("1", updateRequest))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Date of birth cannot be in the future");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when partial update contains birth date too far in past")
+  void shouldThrowExceptionWhenPartialUpdateContainsBirthDateTooFarInPast() {
+    // Given
+    UpdateUserRequest updateRequest =
+        UpdateUserRequest.builder()
+            .dateOfBirth(LocalDate.now().minusYears(ValidationConstants.MAX_AGE_YEARS).minusDays(1))
+            .build();
+
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
+
+    // When & Then
+    assertThatThrownBy(() -> personService.updatePartial("1", updateRequest))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage(
+            "Date of birth cannot be more than "
+                + ValidationConstants.MAX_AGE_YEARS
+                + " years ago");
+  }
+
+  @Test
+  @DisplayName("Should throw EntityNotFoundException when partially updating non-existent person")
+  void shouldThrowEntityNotFoundExceptionWhenPartiallyUpdatingNonExistentPerson() {
+    // Given
+    UpdateUserRequest updateRequest = UpdateUserRequest.builder().address("New Address").build();
+    when(personRepository.findById("1")).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> personService.updatePartial("1", updateRequest))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Person not found with ID: 1");
   }
