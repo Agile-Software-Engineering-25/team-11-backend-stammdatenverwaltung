@@ -43,19 +43,16 @@ public class OpenApiConfig {
     return GroupedOpenApi.builder()
         .group("public-api")
         .displayName("Public API")
-        .pathsToMatch("/api/v1/group/**", "/api/v1/users/**")
-        .pathsToExclude(
-            "/api/v1/users/students", "/api/v1/users/employees", "/api/v1/users/lecturers")
+        .pathsToMatch("/api/v1/public/**")
         .build();
   }
 
   @Bean
-  GroupedOpenApi internalApi() {
+  GroupedOpenApi authenticatedApi() {
     return GroupedOpenApi.builder()
-        .group("internal-api")
-        .displayName("Internal API")
-        .pathsToMatch(
-            "/api/v1/users/students", "/api/v1/users/employees", "/api/v1/users/lecturers")
+        .group("authenticated-api")
+        .displayName("Authenticated API")
+        .pathsToMatch("/api/v1/group/**", "/api/v1/users/**")
         .build();
   }
 
