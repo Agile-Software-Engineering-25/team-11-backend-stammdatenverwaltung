@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,8 @@ public class GroupController {
       summary = "Get all student groups",
       description = "Returns a list of all active student groups and their student counts.")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved all groups")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Read.User') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public GroupResponseDTO getAllGroups(
       @io.swagger.v3.oas.annotations.Parameter(
               description = "Flag to include details from Keycloak",
@@ -45,6 +48,8 @@ public class GroupController {
       description = "Returns information for a specific student group.")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved group information")
   @ApiResponse(responseCode = "404", description = "Group not found")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public GroupDTO getGroupByName(
       @PathVariable String groupName,
       @io.swagger.v3.oas.annotations.Parameter(
