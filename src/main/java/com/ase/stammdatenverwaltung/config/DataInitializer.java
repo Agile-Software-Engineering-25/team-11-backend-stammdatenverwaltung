@@ -71,83 +71,76 @@ public class DataInitializer implements CommandLineRunner {
     boolean sauAdminExists = employeeRepository.existsById(predefinedSauAdminId);
     boolean adminStaffExists = employeeRepository.existsById(predefinedAdminStaffId);
 
-    // Collect entities to save
-    List<Student> students = new ArrayList<>();
-    List<Lecturer> lecturers = new ArrayList<>();
-    List<Employee> employees = new ArrayList<>();
-
-    // Add only entities that don't already exist
+    // Build and save entities
     if (!studentExists) {
-      Student student =
-          Student.builder()
-              .id(predefinedStudentId)
-              .dateOfBirth(LocalDate.of(PREDEF_STUDENT_YEAR, 1, 1))
-              .address("Test Address 1")
-              .phoneNumber("123456789")
-              .matriculationNumber("123456")
-              .degreeProgram("Computer Science")
-              .semester(1)
-              .studyStatus(Student.StudyStatus.ENROLLED)
-              .cohort("BIN-T23-F4")
-              .build();
-      students.add(student);
+      Student student = buildPredefinedStudent(predefinedStudentId);
+      studentRepository.save(student);
     }
-
     if (!lecturerExists) {
-      Lecturer lecturer =
-          Lecturer.builder()
-              .id(predefinedLecturerId)
-              .dateOfBirth(LocalDate.of(PREDEF_LECTURER_YEAR, 1, 1))
-              .address("Test Address 2")
-              .phoneNumber("987654321")
-              .employeeNumber("L123")
-              .fieldChair("Software Engineering")
-              .title("Dr.")
-              .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
-              .build();
-      lecturers.add(lecturer);
+      Lecturer lecturer = buildPredefinedLecturer(predefinedLecturerId);
+      lecturerRepository.save(lecturer);
     }
-
     if (!sauAdminExists) {
-      Employee sauAdmin =
-          Employee.builder()
-              .id(predefinedSauAdminId)
-              .dateOfBirth(LocalDate.of(PREDEF_SAU_ADMIN_YEAR, 1, 1))
-              .address("Test Address 3")
-              .phoneNumber("1122334455")
-              .employeeNumber("E123")
-              .department("SAU")
-              .officeNumber("A101")
-              .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-              .build();
-      employees.add(sauAdmin);
+      Employee sauAdmin = buildPredefinedSauAdmin(predefinedSauAdminId);
+      employeeRepository.save(sauAdmin);
     }
-
     if (!adminStaffExists) {
-      Employee adminStaff =
-          Employee.builder()
-              .id(predefinedAdminStaffId)
-              .dateOfBirth(LocalDate.of(PREDEF_ADMIN_STAFF_YEAR, 1, 1))
-              .address("Test Address 4")
-              .phoneNumber("5566778899")
-              .employeeNumber("E124")
-              .department("Administration")
-              .officeNumber("B202")
-              .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
-              .build();
-      employees.add(adminStaff);
+      Employee adminStaff = buildPredefinedAdminStaff(predefinedAdminStaffId);
+      employeeRepository.save(adminStaff);
     }
+  }
 
-    // Save all collected entities in bulk
-    if (!students.isEmpty()) {
-      studentRepository.saveAll(students);
-    }
-    if (!lecturers.isEmpty()) {
-      lecturerRepository.saveAll(lecturers);
-    }
-    if (!employees.isEmpty()) {
-      employeeRepository.saveAll(employees);
-    }
+  private Student buildPredefinedStudent(String id) {
+    return Student.builder()
+        .id(id)
+        .dateOfBirth(LocalDate.of(PREDEF_STUDENT_YEAR, 1, 1))
+        .address("Test Address 1")
+        .phoneNumber("123456789")
+        .matriculationNumber("123456")
+        .degreeProgram("Computer Science")
+        .semester(1)
+        .studyStatus(Student.StudyStatus.ENROLLED)
+        .cohort("BIN-T23-F4")
+        .build();
+  }
+
+  private Lecturer buildPredefinedLecturer(String id) {
+    return Lecturer.builder()
+        .id(id)
+        .dateOfBirth(LocalDate.of(PREDEF_LECTURER_YEAR, 1, 1))
+        .address("Test Address 2")
+        .phoneNumber("987654321")
+        .employeeNumber("L123")
+        .fieldChair("Software Engineering")
+        .title("Dr.")
+        .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+        .build();
+  }
+
+  private Employee buildPredefinedSauAdmin(String id) {
+    return Employee.builder()
+        .id(id)
+        .dateOfBirth(LocalDate.of(PREDEF_SAU_ADMIN_YEAR, 1, 1))
+        .address("Test Address 3")
+        .phoneNumber("1122334455")
+        .employeeNumber("E123")
+        .department("SAU")
+        .officeNumber("A101")
+        .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+        .build();
+  }
+
+  private Employee buildPredefinedAdminStaff(String id) {
+    return Employee.builder()
+        .id(id)
+        .dateOfBirth(LocalDate.of(PREDEF_ADMIN_STAFF_YEAR, 1, 1))
+        .address("Test Address 4")
+        .phoneNumber("5566778899")
+        .employeeNumber("E124")
+        .department("Administration")
+        .officeNumber("B202")
+        .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
+        .build();
   }
 
   private void createGeneratedStudents() {
