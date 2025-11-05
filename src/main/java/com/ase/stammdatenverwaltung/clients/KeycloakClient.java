@@ -107,11 +107,14 @@ public class KeycloakClient {
                           return Mono.just(Collections.emptyList());
                         })
                     .doOnSuccess(
-                        users ->
+                        users -> {
+                          if (!users.isEmpty()) {
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for ID: {}",
                                 users.size(),
-                                userId)))
+                                userId);
+                          }
+                        }))
         .onErrorResume(
             error -> {
               log.warn(
@@ -157,11 +160,14 @@ public class KeycloakClient {
                           return Mono.just(Collections.emptyList());
                         })
                     .doOnSuccess(
-                        users ->
+                        users -> {
+                          if (!users.isEmpty()) {
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for email: {}",
                                 users.size(),
-                                email)))
+                                email);
+                          }
+                        }))
         .onErrorResume(
             error -> {
               log.warn(
