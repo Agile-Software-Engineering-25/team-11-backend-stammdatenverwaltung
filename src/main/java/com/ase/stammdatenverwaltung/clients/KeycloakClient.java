@@ -83,7 +83,12 @@ public class KeycloakClient {
             token ->
                 webClient
                     .get()
-                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?id={id}", userId)
+                    .uri(
+                        uriBuilder ->
+                            uriBuilder
+                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
+                                .queryParam("id", userId)
+                                .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -112,7 +117,12 @@ public class KeycloakClient {
             token ->
                 webClient
                     .get()
-                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?email={email}", email)
+                    .uri(
+                        uriBuilder ->
+                            uriBuilder
+                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
+                                .queryParam("email", email)
+                                .build())
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
                     .bodyToMono(String.class)
