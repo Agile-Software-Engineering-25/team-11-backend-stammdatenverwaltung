@@ -5,7 +5,9 @@
 ## 🎯 Core Principles
 
 ### 1. **CLEAN Code First**
+
 AI must prioritize **CLEAN principles** in all code contributions:
+
 - **C**ohesion: Keep related functionality together
 - **L**ow Coupling: Minimize dependencies between classes/modules
 - **E**ncapsulation: Hide implementation details, expose only interfaces
@@ -13,14 +15,17 @@ AI must prioritize **CLEAN principles** in all code contributions:
 - **N**aming: Use clear, self-documenting names (classes, methods, variables)
 
 ### 2. **Simplicity Over Cleverness**
+
 - Write code that is **easy to understand** and maintain, not impressively complex
 - Prefer straightforward solutions over clever one-liners
 - Use design patterns only when they genuinely solve a problem, not to show knowledge
-- Ask yourself: *Would another developer immediately understand this?*
+- Ask yourself: _Would another developer immediately understand this?_
 - Avoid over-engineering; build what's needed, not what might be needed
 
 ### 3. **Analyze Before Acting**
+
 **ALWAYS** gather context before making changes:
+
 - Read relevant existing code in the repository
 - Check related tests to understand expected behavior
 - Review similar patterns already established in the codebase
@@ -29,7 +34,9 @@ AI must prioritize **CLEAN principles** in all code contributions:
 - **Never assume**; verify current state using tools
 
 ### 4. **Research with Context7**
+
 For library/framework decisions, **always** use Context7 documentation tools:
+
 - Use `mcp_upstash_conte_resolve-library-id` to find exact library documentation
 - Use `mcp_upstash_conte_get-library-docs` to retrieve up-to-date information
 - Refer to current Spring Boot 3.5.x and Java 21 documentation
@@ -38,86 +45,26 @@ For library/framework decisions, **always** use Context7 documentation tools:
 
 ---
 
-## 📋 Project Overview
-
-### Tech Stack
-- **Language**: Java 21
-- **Framework**: Spring Boot 3.5.x
-- **Build Tool**: Maven
-- **Databases**: PostgreSQL (prod), H2 (dev)
-- **Authentication**: Keycloak JWT + Spring Security OAuth2
-- **Documentation**: SpringDoc OpenAPI 3.0 / Swagger UI
-- **Code Quality**: Spotless (Google Java Format) + Checkstyle (logic-only)
-- **Deployment**: Docker, Kubernetes, Flyway DB migrations
-
-### Architecture
-- **Pattern**: Layered architecture (Controller → Service → Repository)
-- **Profiles**: Development (dev) and Production (prod)
-- **Security**: Multi-profile security configuration (Basic + JWT in dev, JWT-only in prod)
-- **Database**: Flyway-managed migrations with environment-specific schemas
-
-### Key Directories
-```
-src/main/java/com/ase/stammdatenverwaltung/
-├── config/          # OpenAPI, Security configuration
-├── controllers/     # REST endpoints
-├── dto/            # Data Transfer Objects
-├── entities/       # JPA entities
-├── mapper/         # Entity ↔ DTO mapping
-├── repositories/   # Data access layer
-├── security/       # Security implementations
-├── services/       # Business logic
-└── components/     # Reusable components
-```
-
----
-
 ## 🛠️ Development Workflow
 
 ### Code Quality Standards
+
 1. **Spotless Formatting** (automatic)
-   - Run before commits: `./format-code.sh` (Linux/Mac) or `./format-code.cmd` (Windows)
+
+   - Run before commits: `./format-code.sh` (Linux/Mac)
    - Uses Google Java Format
    - **Never disable** formatting rules
 
 2. **Checkstyle Validation** (manual review)
+
    - Validates logic and complexity (not formatting)
    - Configuration: `checkstyle-logic-only.xml`
    - Review violations but don't disable rules without justification
 
 3. **Build and Test**
-   - Always run `mvn clean package` before committing
+   - Always run `./mvnw clean package` before committing
    - Ensure all tests pass
    - Fix failing tests immediately
-
-### Before Making Changes
-
-```
-ALWAYS follow this checklist:
-
-1. ✅ Run existing tests to confirm current behavior
-   mvn test
-
-2. ✅ Read related existing code
-   - Find similar implementations in the codebase
-   - Understand naming conventions and patterns
-
-3. ✅ Check if utilities/services already exist
-   - Don't duplicate functionality
-   - Reuse services, mappers, repositories
-
-4. ✅ Review affected tests
-   - What tests cover this code?
-   - Will changes break existing tests?
-
-5. ✅ Understand the module's responsibility
-   - Does change fit the module's cohesion?
-   - Would it increase coupling?
-
-6. ✅ Document your understanding
-   - Add comments explaining WHY, not WHAT
-   - WHAT is evident from code; WHY is not
-```
 
 ### When Adding New Features
 
@@ -159,6 +106,7 @@ ALWAYS follow this checklist:
 ## 🎨 Coding Conventions
 
 ### Naming Standards
+
 ```java
 // ✅ GOOD - Clear intent
 private final UserService userService;
@@ -172,32 +120,34 @@ private static final int MAX = 3;
 ```
 
 ### Class Organization
+
 ```java
 public class UserService {
     // 1. Class-level constants
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-    
+
     // 2. Dependencies
     private final UserRepository userRepository;
-    
+
     // 3. Constructor
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    
+
     // 4. Public methods
     public User findById(Long id) { }
-    
+
     // 5. Private helper methods
     private void validateInput(String input) { }
 }
 ```
 
 ### Documentation Comments
+
 ```java
 // ✅ Explain WHY and non-obvious decisions
 /**
- * Retrieves users with retry logic because external cache may be temporarily 
+ * Retrieves users with retry logic because external cache may be temporarily
  * unavailable during scheduled maintenance windows (2-5 AM UTC).
  */
 public List<User> getUsersWithFallback(String department) { }
@@ -210,6 +160,7 @@ public List<User> getUsersWithFallback(String department) { }
 ```
 
 ### Error Handling
+
 ```java
 // ✅ Specific exceptions with context
 throw new EntityNotFoundException("User with ID " + id + " not found in database");
@@ -220,87 +171,10 @@ throw new Exception("Error");
 
 ---
 
-## 🔐 Security Considerations
-
-### Authentication & Authorization
-- **Dev Profile**: Basic Auth + JWT support via Keycloak
-- **Prod Profile**: JWT-only via Keycloak
-- Always validate principal in security context
-- Use `@PreAuthorize` annotations for method-level security
-- Reference: `src/main/java/com/ase/stammdatenverwaltung/config/SecurityConfig.java`
-
-### Data Validation
-- Use Jakarta Validation annotations (`@NotNull`, `@NotBlank`, `@Email`, etc.)
-- Validate in DTOs, not entities
-- Provide meaningful validation error messages
-- Reference: `src/main/java/com/ase/stammdatenverwaltung/dto/`
-
----
-
-## 📊 Testing Guidelines
-
-### Test Structure
-```
-src/test/java/com/ase/stammdatenverwaltung/
-├── controllers/
-├── services/
-├── repositories/
-└── integration/
-```
-
-### Test Naming Convention
-```java
-// Method_Scenario_ExpectedResult
-@Test
-void getUserById_WithValidId_ReturnsUser() { }
-
-@Test
-void getUserById_WithInvalidId_ThrowsException() { }
-
-@Test
-void deleteUser_WithDependentRecords_ThrowsConstraintException() { }
-```
-
-### Test Coverage Goals
-- Unit tests for business logic (Services): **≥80% coverage**
-- Integration tests for critical flows
-- Repository tests for complex queries
-- Controller tests for security and validation
-
----
-
-## 🚀 Deployment & Configuration
-
-### Environment Profiles
-- **dev**: `src/main/resources/application-dev.yaml`
-  - H2 in-memory database
-  - Debug logging
-  - Basic Auth enabled
-  - Swagger UI accessible
-  
-- **prod**: `src/main/resources/application-prod.yaml`
-  - PostgreSQL external database
-  - Info logging only
-  - JWT-only security
-  - Actuator endpoints restricted
-
-### Database Migrations
-- Location: `src/main/resources/db/migration/`
-- Tool: Flyway
-- Naming: `V<version>__<description>.sql`
-- Never modify applied migrations (V files)
-- For rollback scenarios, create new Undo migrations
-
-### Docker & Kubernetes
-- Dockerfile: Multi-stage build for optimization
-- K8s configs: `k8s/` directory
-- Reference deployment: `k8s/deployment.yaml`
-
----
-
 ## ❌ Common Pitfalls to Avoid
 
 ### 1. Premature Optimization
+
 ```java
 // ❌ Unnecessarily complex
 @Cacheable(cacheNames = "users", unless = "#result.isEmpty()")
@@ -311,6 +185,7 @@ public List<User> getActiveUsers(String department) { }
 ```
 
 ### 2. Tight Coupling
+
 ```java
 // ❌ Hard dependency
 public class UserController {
@@ -327,6 +202,7 @@ public class UserController {
 ```
 
 ### 3. Cryptic Variable Names
+
 ```java
 // ❌ No context
 LocalDateTime ud = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
@@ -338,6 +214,7 @@ List<User> inactiveUsers = repository.findByLastLoginBefore(thirtyDaysAgo);
 ```
 
 ### 4. Ignoring Existing Patterns
+
 ```java
 // ❌ Creates inconsistency
 public class NewMapper {
@@ -351,6 +228,7 @@ public class UserMapper {
 ```
 
 ### 5. Missing Error Context
+
 ```java
 // ❌ Silent failures
 try {
