@@ -59,73 +59,95 @@ public class DataInitializer implements CommandLineRunner {
   }
 
   private void createPredefinedUsers() {
-    // Collect predefined entities and save in bulk
+    // Define predefined user IDs upfront
+    String predefinedStudentId = "d03aa006-6f0b-4939-9287-753798b6d403";
+    String predefinedLecturerId = "5a9cee80-7f1e-4bfb-8d4a-218128b3550f";
+    String predefinedSauAdminId = "8807bc3c-5329-4a7b-8b47-6a828d696465";
+    String predefinedAdminStaffId = "9d1c388c-55a5-426e-8dd6-9f037a1bc1ba";
+
+    // Check existence before creating any entities
+    boolean studentExists = studentRepository.existsById(predefinedStudentId);
+    boolean lecturerExists = lecturerRepository.existsById(predefinedLecturerId);
+    boolean sauAdminExists = employeeRepository.existsById(predefinedSauAdminId);
+    boolean adminStaffExists = employeeRepository.existsById(predefinedAdminStaffId);
+
+    // Collect entities to save
     List<Student> students = new ArrayList<>();
     List<Lecturer> lecturers = new ArrayList<>();
     List<Employee> employees = new ArrayList<>();
 
-    // test-stud - b7acb825-4e70-49e4-84a1-bf5dc7c8f509 - Student
-    Student student =
-        Student.builder()
-            .id("b7acb825-4e70-49e4-84a1-bf5dc7c8f509")
-            .dateOfBirth(LocalDate.of(PREDEF_STUDENT_YEAR, 1, 1))
-            .address("Test Address 1")
-            .phoneNumber("123456789")
-            .matriculationNumber("123456")
-            .degreeProgram("Computer Science")
-            .semester(1)
-            .studyStatus(Student.StudyStatus.ENROLLED)
-            .cohort("BIN-T23-F4")
-            .build();
-    students.add(student);
+    // Add only entities that don't already exist
+    if (!studentExists) {
+      Student student =
+          Student.builder()
+              .id(predefinedStudentId)
+              .dateOfBirth(LocalDate.of(PREDEF_STUDENT_YEAR, 1, 1))
+              .address("Test Address 1")
+              .phoneNumber("123456789")
+              .matriculationNumber("123456")
+              .degreeProgram("Computer Science")
+              .semester(1)
+              .studyStatus(Student.StudyStatus.ENROLLED)
+              .cohort("BIN-T23-F4")
+              .build();
+      students.add(student);
+    }
 
-    // test-doz - fc6ac29a-b9dd-4b35-889f-2baff71f3be1 - Lecturer
-    Lecturer lecturer =
-        Lecturer.builder()
-            .id("fc6ac29a-b9dd-4b35-889f-2baff71f3be1")
-            .dateOfBirth(LocalDate.of(PREDEF_LECTURER_YEAR, 1, 1))
-            .address("Test Address 2")
-            .phoneNumber("987654321")
-            .employeeNumber("L123")
-            .fieldChair("Software Engineering")
-            .title("Dr.")
-            .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
-            .build();
-    lecturers.add(lecturer);
+    if (!lecturerExists) {
+      Lecturer lecturer =
+          Lecturer.builder()
+              .id(predefinedLecturerId)
+              .dateOfBirth(LocalDate.of(PREDEF_LECTURER_YEAR, 1, 1))
+              .address("Test Address 2")
+              .phoneNumber("987654321")
+              .employeeNumber("L123")
+              .fieldChair("Software Engineering")
+              .title("Dr.")
+              .employmentStatus(Lecturer.EmploymentStatus.FULL_TIME_PERMANENT)
+              .build();
+      lecturers.add(lecturer);
+    }
 
-    // test-sau-admin - 4f6bf355-6a63-45c5-8839-2f4b571cb478 - SAU Admin
-    Employee sauAdmin =
-        Employee.builder()
-            .id("4f6bf355-6a63-45c5-8839-2f4b571cb478")
-            .dateOfBirth(LocalDate.of(PREDEF_SAU_ADMIN_YEAR, 1, 1))
-            .address("Test Address 3")
-            .phoneNumber("1122334455")
-            .employeeNumber("E123")
-            .department("SAU")
-            .officeNumber("A101")
-            .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
-            .build();
-    employees.add(sauAdmin);
+    if (!sauAdminExists) {
+      Employee sauAdmin =
+          Employee.builder()
+              .id(predefinedSauAdminId)
+              .dateOfBirth(LocalDate.of(PREDEF_SAU_ADMIN_YEAR, 1, 1))
+              .address("Test Address 3")
+              .phoneNumber("1122334455")
+              .employeeNumber("E123")
+              .department("SAU")
+              .officeNumber("A101")
+              .workingTimeModel(Employee.WorkingTimeModel.FULL_TIME)
+              .build();
+      employees.add(sauAdmin);
+    }
 
-    // test-hochschulverwaltung - 471fb05c-e3c5-4bd1-9c41-dc355885811c - University administrative
-    // staff
-    Employee adminStaff =
-        Employee.builder()
-            .id("471fb05c-e3c5-4bd1-9c41-dc355885811c")
-            .dateOfBirth(LocalDate.of(PREDEF_ADMIN_STAFF_YEAR, 1, 1))
-            .address("Test Address 4")
-            .phoneNumber("5566778899")
-            .employeeNumber("E124")
-            .department("Administration")
-            .officeNumber("B202")
-            .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
-            .build();
-    employees.add(adminStaff);
+    if (!adminStaffExists) {
+      Employee adminStaff =
+          Employee.builder()
+              .id(predefinedAdminStaffId)
+              .dateOfBirth(LocalDate.of(PREDEF_ADMIN_STAFF_YEAR, 1, 1))
+              .address("Test Address 4")
+              .phoneNumber("5566778899")
+              .employeeNumber("E124")
+              .department("Administration")
+              .officeNumber("B202")
+              .workingTimeModel(Employee.WorkingTimeModel.PART_TIME)
+              .build();
+      employees.add(adminStaff);
+    }
 
-    // Save predefined entities in bulk (lists contain the predefined entries above)
-    studentRepository.saveAll(students);
-    lecturerRepository.saveAll(lecturers);
-    employeeRepository.saveAll(employees);
+    // Save all collected entities in bulk
+    if (!students.isEmpty()) {
+      studentRepository.saveAll(students);
+    }
+    if (!lecturers.isEmpty()) {
+      lecturerRepository.saveAll(lecturers);
+    }
+    if (!employees.isEmpty()) {
+      employeeRepository.saveAll(employees);
+    }
   }
 
   private void createGeneratedStudents() {
