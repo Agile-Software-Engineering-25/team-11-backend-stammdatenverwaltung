@@ -99,27 +99,31 @@ public class PersonService {
   }
 
   private Mono<PersonDetailsDTO> enrichPersonWithKeycloakData(Person person) {
-    try {
-      Mono<PersonDetailsDTO> keycloakUsers =
-          keycloakClient
-              .findUserById(person.getId())
-              .map(
-                  keycloakUsers1 -> {
-                    PersonDetailsDTO dto = personDtoMapper.map(person);
-                    if (keycloakUsers1 != null && !keycloakUsers1.isEmpty()) {
-                      KeycloakUser keycloakUser = keycloakUsers1.getFirst();
-                      dto.setUsername(keycloakUser.getUsername());
-                      dto.setFirstName(keycloakUser.getFirstName());
-                      dto.setLastName(keycloakUser.getLastName());
-                      dto.setEmail(keycloakUser.getEmail());
-                    }
-                    return dto;
-                  });
-      return keycloakUsers;
-    } catch (Exception e) {
-      log.error("Failed to fetch user details from Keycloak for person ID: {}", person.getId(), e);
-      return Mono.just(personDtoMapper.map(person));
-    }
+    // WHY: Wrap enrichment in error handling to prevent cascading failures. If Keycloak is
+    // unavailable or returns a user not found error, we still return basic person data without
+    // enrichment instead of failing the entire request.
+    return keycloakClient
+        .findUserById(person.getId())
+        .map(
+            keycloakUsers -> {
+              PersonDetailsDTO dto = personDtoMapper.map(person);
+              if (keycloakUsers != null && !keycloakUsers.isEmpty()) {
+                KeycloakUser keycloakUser = keycloakUsers.getFirst();
+                dto.setUsername(keycloakUser.getUsername());
+                dto.setFirstName(keycloakUser.getFirstName());
+                dto.setLastName(keycloakUser.getLastName());
+                dto.setEmail(keycloakUser.getEmail());
+              }
+              return dto;
+            })
+        .onErrorResume(
+            error -> {
+              log.debug(
+                  "Failed to fetch user details from Keycloak for person ID: {} - returning person data without enrichment",
+                  person.getId(),
+                  error);
+              return Mono.just(personDtoMapper.map(person));
+            });
   }
 
   /**

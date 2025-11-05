@@ -107,8 +107,19 @@ public class UserController {
               required = false)
           @RequestParam(required = false)
           String userType) {
-    Flux<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
-    return ResponseEntity.ok(users.collectList().block());
+    try {
+      Flux<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
+      List<PersonDetailsDTO> userList = users.collectList().block();
+      return ResponseEntity.ok(userList);
+    } catch (Exception e) {
+      log.error(
+          "Error retrieving users with withDetails={} and userType={}: {}",
+          withDetails,
+          userType,
+          e.getMessage(),
+          e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**
@@ -160,9 +171,17 @@ public class UserController {
           @RequestParam(defaultValue = "true")
           boolean withDetails) {
 
-    Mono<PersonDetailsDTO> user = personService.findById(userId, withDetails);
-
-    return ResponseEntity.ok(user.block());
+    try {
+      Mono<PersonDetailsDTO> user = personService.findById(userId, withDetails);
+      PersonDetailsDTO userDetails = user.block();
+      return ResponseEntity.ok(userDetails);
+    } catch (EntityNotFoundException e) {
+      log.debug("User not found with ID: {}", userId);
+      return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+      log.error("Error retrieving user with ID {}: {}", userId, e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**

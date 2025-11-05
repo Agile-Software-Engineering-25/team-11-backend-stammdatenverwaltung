@@ -34,8 +34,8 @@ import lombok.experimental.SuperBuilder;
 public class Person {
 
   /**
-   * Primary key that must match the ID from Team 10's database for collaboration and consistency
-   * across systems.
+   * Primary key that must match the ID from Team 10's keycloak database for collaboration and
+   * consistency across systems.
    */
   @Id
   @Column(name = "id")

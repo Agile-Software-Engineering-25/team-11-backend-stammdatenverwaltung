@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -72,10 +73,12 @@ public class KeycloakClient {
   }
 
   /**
-   * Finds a user in Keycloak by their ID.
+   * Finds a user in Keycloak by their ID. Returns an empty list if the user is not found (404) or
+   * if the API call fails. This graceful handling prevents cascading failures when enriching user
+   * data from external sources.
    *
    * @param userId The UUID of the user to find.
-   * @return A Mono emitting a list of matching users.
+   * @return A Mono emitting a list of matching users, or empty list on 404 or error.
    */
   public Mono<List<KeycloakUser>> findUserById(String userId) {
     return getAdminAccessToken()
@@ -83,33 +86,49 @@ public class KeycloakClient {
             token ->
                 webClient
                     .get()
-                    .uri(
-                        uriBuilder ->
-                            uriBuilder
-                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
-                                .queryParam("id", userId)
-                                .build())
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?id=" + userId)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
+                    .onStatus(
+                        status -> status.equals(HttpStatus.NOT_FOUND),
+                        response -> {
+                          log.debug(
+                              "User not found in Keycloak for ID: {} (404 Not Found)", userId);
+                          return Mono.empty();
+                        })
                     .bodyToMono(String.class)
                     .map(this::parseFindUserByIdResponse)
+                    .onErrorResume(
+                        error -> {
+                          log.warn(
+                              "Failed to fetch user from Keycloak for ID: {} - returning empty list",
+                              userId,
+                              error);
+                          return Mono.just(Collections.emptyList());
+                        })
                     .doOnSuccess(
                         users ->
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for ID: {}",
                                 users.size(),
-                                userId))
-                    .doOnError(
-                        error ->
-                            log.error(
-                                "Failed to fetch user from Keycloak for ID: {}", userId, error)));
+                                userId)))
+        .onErrorResume(
+            error -> {
+              log.warn(
+                  "Failed to fetch admin token or complete request for user ID: {} - returning empty list",
+                  userId,
+                  error);
+              return Mono.just(Collections.emptyList());
+            });
   }
 
   /**
-   * Finds a user in Keycloak by their email.
+   * Finds a user in Keycloak by their email. Returns an empty list if the user is not found (404)
+   * or if the API call fails. This graceful handling prevents cascading failures when enriching
+   * user data from external sources.
    *
    * @param email The email of the user to find.
-   * @return A Mono emitting a list of matching users.
+   * @return A Mono emitting a list of matching users, or empty list on 404 or error.
    */
   public Mono<List<KeycloakUser>> findUserByEmail(String email) {
     return getAdminAccessToken()
@@ -117,26 +136,40 @@ public class KeycloakClient {
             token ->
                 webClient
                     .get()
-                    .uri(
-                        uriBuilder ->
-                            uriBuilder
-                                .path(keycloakConfigProperties.getUserApiUrl() + "/v1/user")
-                                .queryParam("email", email)
-                                .build())
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?email=" + email)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                     .retrieve()
+                    .onStatus(
+                        status -> status.equals(HttpStatus.NOT_FOUND),
+                        response -> {
+                          log.debug(
+                              "User not found in Keycloak for email: {} (404 Not Found)", email);
+                          return Mono.empty();
+                        })
                     .bodyToMono(String.class)
                     .map(this::parseFindUserByIdResponse)
+                    .onErrorResume(
+                        error -> {
+                          log.warn(
+                              "Failed to fetch user from Keycloak for email: {} - returning empty list",
+                              email,
+                              error);
+                          return Mono.just(Collections.emptyList());
+                        })
                     .doOnSuccess(
                         users ->
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for email: {}",
                                 users.size(),
-                                email))
-                    .doOnError(
-                        error ->
-                            log.error(
-                                "Failed to fetch user from Keycloak for email: {}", email, error)));
+                                email)))
+        .onErrorResume(
+            error -> {
+              log.warn(
+                  "Failed to fetch admin token or complete request for email: {} - returning empty list",
+                  email,
+                  error);
+              return Mono.just(Collections.emptyList());
+            });
   }
 
   private List<KeycloakUser> parseFindUserByIdResponse(String raw) {
