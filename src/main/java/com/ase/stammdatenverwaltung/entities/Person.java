@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -67,4 +68,12 @@ public class Person {
           "Photo URL cannot exceed " + ValidationConstants.MAX_PHOTO_URL_LENGTH + " characters")
   @Column(name = "photo_url", length = ValidationConstants.MAX_PHOTO_URL_LENGTH)
   private String photoUrl;
+
+  /**
+   * Indicates whether the person drives a car to the institution. Used for parking service feature.
+   * Default is false.
+   */
+  @Builder.Default
+  @Column(name = "drives_car", nullable = false)
+  private Boolean drivesCar = false;
 }

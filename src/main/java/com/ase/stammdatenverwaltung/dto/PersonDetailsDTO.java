@@ -20,6 +20,7 @@ public class PersonDetailsDTO {
   private String address;
   private String phoneNumber;
   private String photoUrl;
+  private Boolean drivesCar;
 
   // Additional fields coming from Keycloak
   private String username;
@@ -43,6 +44,7 @@ public class PersonDetailsDTO {
         .address(person.getAddress())
         .phoneNumber(person.getPhoneNumber())
         .photoUrl(person.getPhotoUrl())
+        .drivesCar(person.getDrivesCar())
         .build();
   }
 }

@@ -48,6 +48,9 @@ public class UpdateUserRequest {
           "Photo URL cannot exceed " + ValidationConstants.MAX_PHOTO_URL_LENGTH + " characters")
   private String photoUrl;
 
+  @JsonProperty("drives_car")
+  private Boolean drivesCar;
+
   // ========== STUDENT-SPECIFIC FIELDS ==========
 
   @JsonProperty("matriculation_number")
