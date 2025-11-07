@@ -337,4 +337,161 @@ class PersonServiceTest {
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Person not found with ID: 1");
   }
+
+  @Test
+  @DisplayName("Should create person with driveCar defaulting to false")
+  void shouldCreatePersonWithDriveAutoDefaultingToFalse() {
+    // Given
+    Person newPerson =
+        Person.builder()
+            .id("test-drive-auto-1")
+            .dateOfBirth(LocalDate.of(1990, 5, 15))
+            .address("Test Address")
+            .phoneNumber("+49 123 456789")
+            .build();
+
+    when(personRepository.save(any(Person.class))).thenReturn(newPerson);
+
+    // When
+    Person result = personService.create(newPerson);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.isDrivesCar()).isFalse();
+    verify(personRepository).save(newPerson);
+  }
+
+  @Test
+  @DisplayName("Should create person with driveCar explicitly set to true")
+  void shouldCreatePersonWithDriveAutoSetToTrue() {
+    // Given
+    Person newPerson =
+        Person.builder()
+            .id("test-drive-auto-2")
+            .dateOfBirth(LocalDate.of(1990, 5, 15))
+            .address("Test Address")
+            .phoneNumber("+49 123 456789")
+            .drivesCar(true)
+            .build();
+
+    Person savedPerson =
+        Person.builder()
+            .id("test-drive-auto-2")
+            .dateOfBirth(LocalDate.of(1990, 5, 15))
+            .address("Test Address")
+            .phoneNumber("+49 123 456789")
+            .drivesCar(true)
+            .build();
+
+    when(personRepository.save(any(Person.class))).thenReturn(savedPerson);
+
+    // When
+    Person result = personService.create(newPerson);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.isDrivesCar()).isTrue();
+    verify(personRepository).save(any(Person.class));
+  }
+
+  @Test
+  @DisplayName("Should update driveCar field via partial update")
+  void shouldUpdateDriveAutoViaPartialUpdate() {
+    // Given
+    UpdateUserRequest updateRequest = UpdateUserRequest.builder().drivesCar(true).build();
+
+    Person personWithDriveAutoUpdated =
+        Person.builder()
+            .id("1")
+            .dateOfBirth(testPerson.getDateOfBirth())
+            .address(testPerson.getAddress())
+            .phoneNumber(testPerson.getPhoneNumber())
+            .photoUrl(testPerson.getPhotoUrl())
+            .drivesCar(true)
+            .build();
+
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
+    when(personRepository.save(any(Person.class))).thenReturn(personWithDriveAutoUpdated);
+
+    // When
+    Person result = personService.updatePartial("1", updateRequest);
+
+    // Then
+    assertThat(result.isDrivesCar()).isTrue();
+    verify(personRepository).findById("1");
+    verify(personRepository).save(any(Person.class));
+  }
+
+  @Test
+  @DisplayName("Should not update driveCar when field is null in partial update")
+  void shouldNotUpdateDriveAutoWhenNullInPartialUpdate() {
+    // Given
+    UpdateUserRequest updateRequest = UpdateUserRequest.builder().address("New Address").build();
+
+    Person personWithoutDriveAutoChange =
+        Person.builder()
+            .id("1")
+            .dateOfBirth(testPerson.getDateOfBirth())
+            .address("New Address")
+            .phoneNumber(testPerson.getPhoneNumber())
+            .photoUrl(testPerson.getPhotoUrl())
+            .drivesCar(testPerson.isDrivesCar())
+            .build();
+
+    when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
+    when(personRepository.save(any(Person.class))).thenReturn(personWithoutDriveAutoChange);
+
+    // When
+    Person result = personService.updatePartial("1", updateRequest);
+
+    // Then
+    assertThat(result.isDrivesCar()).isEqualTo(testPerson.isDrivesCar());
+    verify(personRepository).findById("1");
+    verify(personRepository).save(any(Person.class));
+  }
+
+  @Test
+  @DisplayName("Should include driveCar field in PersonDetailsDTO")
+  void shouldIncludeDriveAutoInPersonDetailsDTO() {
+    // Given
+    Person personWithDriveAuto =
+        Person.builder()
+            .id("test-id")
+            .dateOfBirth(LocalDate.of(1990, 5, 15))
+            .address("Test Address")
+            .phoneNumber("+49 123 456789")
+            .photoUrl("http://example.com/photo.jpg")
+            .drivesCar(true)
+            .build();
+
+    // When
+    PersonDetailsDTO result = PersonDetailsDTO.fromEntity(personWithDriveAuto);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.isDrivesCar()).isTrue();
+    assertThat(result.getId()).isEqualTo("test-id");
+    assertThat(result.getAddress()).isEqualTo("Test Address");
+  }
+
+  @Test
+  @DisplayName("Should handle driveCar as false in PersonDetailsDTO")
+  void shouldHandleDriveAutoFalseInPersonDetailsDTO() {
+    // Given
+    Person personWithDriveAutoFalse =
+        Person.builder()
+            .id("test-id")
+            .dateOfBirth(LocalDate.of(1990, 5, 15))
+            .address("Test Address")
+            .phoneNumber("+49 123 456789")
+            .drivesCar(false)
+            .build();
+
+    // When
+    PersonDetailsDTO result = PersonDetailsDTO.fromEntity(personWithDriveAutoFalse);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.isDrivesCar()).isFalse();
+  }
 }

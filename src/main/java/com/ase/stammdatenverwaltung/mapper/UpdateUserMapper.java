@@ -55,6 +55,9 @@ public class UpdateUserMapper {
     if (request.getPhotoUrl() != null) {
       person.setPhotoUrl(request.getPhotoUrl());
     }
+    if (request.getDrivesCar() != null) {
+      person.setDrivesCar(request.getDrivesCar());
+    }
   }
 
   private void updateStudentFields(Student student, UpdateUserRequest request) {

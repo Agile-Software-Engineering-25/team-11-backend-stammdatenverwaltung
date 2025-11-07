@@ -2,6 +2,7 @@ package com.ase.stammdatenverwaltung.dto;
 
 import com.ase.stammdatenverwaltung.entities.Person;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,9 @@ public class PersonDetailsDTO {
   private String address;
   private String phoneNumber;
   private String photoUrl;
+
+  @JsonProperty("drives_car")
+  private boolean drivesCar;
 
   // Additional fields coming from Keycloak
   private String username;
@@ -43,6 +47,7 @@ public class PersonDetailsDTO {
         .address(person.getAddress())
         .phoneNumber(person.getPhoneNumber())
         .photoUrl(person.getPhotoUrl())
+        .drivesCar(person.isDrivesCar())
         .build();
   }
 }
