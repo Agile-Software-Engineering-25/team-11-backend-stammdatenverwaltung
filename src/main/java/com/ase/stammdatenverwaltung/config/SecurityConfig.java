@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.config;
 
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
+import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,10 +22,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  /** Provides a centralized access denied handler for logging role information on auth failures */
+  @Bean
+  public RoleAwareAccessDeniedHandler roleAwareAccessDeniedHandler() {
+    return new RoleAwareAccessDeniedHandler();
+  }
+
   /** Development security configuration with relaxed permissions */
   @Bean
   @Profile("dev")
-  SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain devSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
@@ -53,6 +61,7 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(
             csrf ->
                 csrf.ignoringRequestMatchers(
@@ -69,7 +78,8 @@ public class SecurityConfig {
    */
   @Bean
   @Profile("test")
-  SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain testSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
@@ -96,6 +106,7 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         // Support JWT (for API testing)
         .oauth2ResourceServer(
@@ -116,7 +127,8 @@ public class SecurityConfig {
    */
   @Bean
   @Profile("prod")
-  SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain prodSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
@@ -146,6 +158,7 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .headers(headers -> headers.frameOptions(frame -> frame.deny()))
         .oauth2ResourceServer(
