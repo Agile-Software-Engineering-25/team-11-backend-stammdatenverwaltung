@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.dto;
 
 import com.ase.stammdatenverwaltung.constants.ValidationConstants;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -68,5 +69,6 @@ public abstract class PersonRequest {
   private String photoUrl;
 
   /** Whether the person drives a car to the institution (for parking service feature). */
+  @JsonProperty("drives_car")
   private boolean drivesCar;
 }
