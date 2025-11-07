@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -69,5 +68,5 @@ public abstract class PersonRequest {
   private String photoUrl;
 
   /** Whether the person drives a car to the institution (for parking service feature). */
-  @Builder.Default private Boolean drivesCar = false;
+  private boolean drivesCar;
 }

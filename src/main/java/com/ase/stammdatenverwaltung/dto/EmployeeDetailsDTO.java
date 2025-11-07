@@ -29,7 +29,7 @@ public class EmployeeDetailsDTO extends PersonDetailsDTO {
       this.setAddress(base.getAddress());
       this.setPhoneNumber(base.getPhoneNumber());
       this.setPhotoUrl(base.getPhotoUrl());
-      this.setDrivesCar(base.getDrivesCar());
+      this.setDrivesCar(base.isDrivesCar());
     }
 
     this.employeeNumber = employee.getEmployeeNumber();

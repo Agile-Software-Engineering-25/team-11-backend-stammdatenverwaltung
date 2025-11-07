@@ -357,7 +357,7 @@ class PersonServiceTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getDrivesCar()).isFalse();
+    assertThat(result.isDrivesCar()).isFalse();
     verify(personRepository).save(newPerson);
   }
 
@@ -390,7 +390,7 @@ class PersonServiceTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getDrivesCar()).isTrue();
+    assertThat(result.isDrivesCar()).isTrue();
     verify(personRepository).save(any(Person.class));
   }
 
@@ -417,7 +417,7 @@ class PersonServiceTest {
     Person result = personService.updatePartial("1", updateRequest);
 
     // Then
-    assertThat(result.getDrivesCar()).isTrue();
+    assertThat(result.isDrivesCar()).isTrue();
     verify(personRepository).findById("1");
     verify(personRepository).save(any(Person.class));
   }
@@ -435,7 +435,7 @@ class PersonServiceTest {
             .address("New Address")
             .phoneNumber(testPerson.getPhoneNumber())
             .photoUrl(testPerson.getPhotoUrl())
-            .drivesCar(testPerson.getDrivesCar())
+            .drivesCar(testPerson.isDrivesCar())
             .build();
 
     when(personRepository.findById("1")).thenReturn(Optional.of(testPerson));
@@ -445,7 +445,7 @@ class PersonServiceTest {
     Person result = personService.updatePartial("1", updateRequest);
 
     // Then
-    assertThat(result.getDrivesCar()).isEqualTo(testPerson.getDrivesCar());
+    assertThat(result.isDrivesCar()).isEqualTo(testPerson.isDrivesCar());
     verify(personRepository).findById("1");
     verify(personRepository).save(any(Person.class));
   }
@@ -469,7 +469,7 @@ class PersonServiceTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getDrivesCar()).isTrue();
+    assertThat(result.isDrivesCar()).isTrue();
     assertThat(result.getId()).isEqualTo("test-id");
     assertThat(result.getAddress()).isEqualTo("Test Address");
   }
@@ -492,6 +492,6 @@ class PersonServiceTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getDrivesCar()).isFalse();
+    assertThat(result.isDrivesCar()).isFalse();
   }
 }
