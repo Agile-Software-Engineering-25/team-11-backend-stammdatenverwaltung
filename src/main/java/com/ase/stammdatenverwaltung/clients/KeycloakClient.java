@@ -108,7 +108,7 @@ public class KeycloakClient {
                         })
                     .doOnSuccess(
                         users -> {
-                          if (!users.isEmpty()) {
+                          if (users != null && !users.isEmpty()) {
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for ID: {}",
                                 users.size(),
@@ -161,7 +161,7 @@ public class KeycloakClient {
                         })
                     .doOnSuccess(
                         users -> {
-                          if (!users.isEmpty()) {
+                          if (users != null && !users.isEmpty()) {
                             log.info(
                                 "Successfully fetched {} user(s) from Keycloak for email: {}",
                                 users.size(),
