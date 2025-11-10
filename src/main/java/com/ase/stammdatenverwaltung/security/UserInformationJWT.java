@@ -3,6 +3,8 @@ package com.ase.stammdatenverwaltung.security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,6 +26,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  * application without needing direct access to the JWT token.
  */
 public class UserInformationJWT {
+
+  private static final Logger LOG = LoggerFactory.getLogger(UserInformationJWT.class);
+
+  /** Private constructor to prevent instantiation of utility class. */
+  private UserInformationJWT() {
+    throw new UnsupportedOperationException(
+        "This is a utility class and cannot be instantiated");
+  }
 
   /**
    * Get the current JWT token from the security context
@@ -153,8 +163,9 @@ public class UserInformationJWT {
           allRoles.addAll(realmRoles);
         }
       }
-    } catch (Exception e) {
-      // Ignore parsing errors - claim may not exist or have unexpected structure
+    } catch (ClassCastException | NullPointerException e) {
+      LOG.debug(
+          "Failed to parse realm_access.roles from JWT. Token may have unexpected structure.", e);
     }
   }
 
@@ -178,8 +189,10 @@ public class UserInformationJWT {
           }
         }
       }
-    } catch (Exception e) {
-      // Ignore parsing errors - claim may not exist or have unexpected structure
+    } catch (ClassCastException | NullPointerException e) {
+      LOG.debug(
+          "Failed to parse resource_access.account.roles from JWT. Token may have unexpected structure.",
+          e);
     }
   }
 
