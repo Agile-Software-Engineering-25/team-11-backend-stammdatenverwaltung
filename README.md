@@ -191,22 +191,22 @@ flyway.validateOnMigrate=true
 
 ### Users (`/api/v1/users`)
 
-| Method   | Endpoint           | Description              | Required Role                                        |
-| -------- | ------------------ | ------------------------ | ---------------------------------------------------- |
-| `GET`    | `/`                | Get all persons          | `Area-3.Team-11.Read.*` or `HVS-Admin`               |
-| `GET`    | `/{id}`            | Get person by ID         | `Area-3.Team-11.Read.*` or `HVS-Admin`               |
-| `POST`   | `/students`        | Create new student       | `Area-3.Team-11.Write.Student` or `HVS-Admin`        |
-| `POST`   | `/employees`       | Create new employee      | `Area-3.Team-11.Write.Employee` or `HVS-Admin`       |
-| `POST`   | `/lecturers`       | Create new lecturer      | `Area-3.Team-11.Write.Lecturer` or `HVS-Admin`       |
-| `PUT`    | `/{id}`            | Update person            | `Area-3.Team-11.Write.*` or `HVS-Admin`              |
-| `DELETE` | `/{id}`            | Delete person            | `Area-3.Team-11.Delete.*` or `HVS-Admin`             |
+| Method   | Endpoint     | Description         | Required Role                                  |
+| -------- | ------------ | ------------------- | ---------------------------------------------- |
+| `GET`    | `/`          | Get all persons     | `Area-3.Team-11.Read.*` or `HVS-Admin`         |
+| `GET`    | `/{id}`      | Get person by ID    | `Area-3.Team-11.Read.*` or `HVS-Admin`         |
+| `POST`   | `/students`  | Create new student  | `Area-3.Team-11.Write.Student` or `HVS-Admin`  |
+| `POST`   | `/employees` | Create new employee | `Area-3.Team-11.Write.Employee` or `HVS-Admin` |
+| `POST`   | `/lecturers` | Create new lecturer | `Area-3.Team-11.Write.Lecturer` or `HVS-Admin` |
+| `PUT`    | `/{id}`      | Update person       | `Area-3.Team-11.Write.*` or `HVS-Admin`        |
+| `DELETE` | `/{id}`      | Delete person       | `Area-3.Team-11.Delete.*` or `HVS-Admin`       |
 
 ### Groups (`/api/v1/group`)
 
-| Method | Endpoint       | Description       | Required Role                                        |
-| ------ | -------------- | ----------------- | ---------------------------------------------------- |
-| `GET`  | `/`            | Get all groups    | `Area-3.Team-11.Read.User` or `HVS-Admin`            |
-| `GET`  | `/{groupName}` | Get group by name | `Area-3.Team-11.Read.Student` or `HVS-Admin`         |
+| Method | Endpoint       | Description       | Required Role                                |
+| ------ | -------------- | ----------------- | -------------------------------------------- |
+| `GET`  | `/`            | Get all groups    | `Area-3.Team-11.Read.User` or `HVS-Admin`    |
+| `GET`  | `/{groupName}` | Get group by name | `Area-3.Team-11.Read.Student` or `HVS-Admin` |
 
 ### Examples (`/api/v1/examples`) - Dev Only
 

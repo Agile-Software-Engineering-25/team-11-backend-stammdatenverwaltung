@@ -104,14 +104,14 @@ public class PersonService {
 
   /**
    * Enriches a Person entity with additional user details from Keycloak.
-   * 
-   * This method retrieves user information from Keycloak using the person's ID and maps
-   * it to a PersonDetailsDTO. If Keycloak data is available, the DTO is populated with
-   * username, first name, last name, and email from the Keycloak user record.
-   * 
+   *
+   * <p>This method retrieves user information from Keycloak using the person's ID and maps it to a
+   * PersonDetailsDTO. If Keycloak data is available, the DTO is populated with username, first
+   * name, last name, and email from the Keycloak user record.
+   *
    * @param person the Person entity to be enriched with Keycloak data
-   * @return a Mono containing a PersonDetailsDTO with enriched user details from Keycloak,
-   *         or a basic PersonDetailsDTO if Keycloak data is unavailable or an error occurs
+   * @return a Mono containing a PersonDetailsDTO with enriched user details from Keycloak, or a
+   *     basic PersonDetailsDTO if Keycloak data is unavailable or an error occurs
    * @throws No checked exceptions are thrown; errors are logged and handled gracefully
    */
   private Mono<PersonDetailsDTO> enrichPersonWithKeycloakData(Person person) {
@@ -229,13 +229,13 @@ public class PersonService {
   }
 
   /**
-   * Checks if the current user has the specified permission on a person based on the person's
-   * type. Used for authorization in @PreAuthorize expressions.
+   * Checks if the current user has the specified permission on a person based on the person's type.
+   * Used for authorization in @PreAuthorize expressions.
    *
    * @param userId The ID of the person to check access for.
    * @param permission The permission type (e.g., "Read", "Write", "Delete")
-   * @return true if the user has the permission for the person's type, false if the person is
-   *     not found or has an unsupported type
+   * @return true if the user has the permission for the person's type, false if the person is not
+   *     found or has an unsupported type
    */
   public boolean canAccessUser(String userId, String permission) {
     Person person = personRepository.findById(userId).orElse(null);
@@ -262,7 +262,7 @@ public class PersonService {
 
   /**
    * Validates the personal data of a person, specifically the date of birth.
-   * 
+   *
    * @param person the Person object whose data is to be validated
    * @throws IllegalArgumentException if the date of birth is in the future
    * @throws IllegalArgumentException if the date of birth is more than MAX_AGE_YEARS in the past

@@ -208,9 +208,11 @@ Person (base entity)
 - Two authorization patterns:
 
   1. **Static Role Checks** (create/list endpoints):
+
      ```java
      @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') ...")
      ```
+
      Directly checks user roles for coarse-grained operations
 
   2. **Dynamic Type-Based Checks** (single user operations):

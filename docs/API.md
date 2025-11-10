@@ -118,6 +118,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 **Authorization**: `Area-3.Team-11.Read.{UserType}` (dynamically based on person type in database) or `HVS-Admin`
 
 **Note**: Authorization is dynamic and type-aware. The required role is determined by the person's actual type (Student/Employee/Lecturer) stored in the database:
+
 - For a **Student**: Requires `Area-3.Team-11.Read.Student`
 - For an **Employee**: Requires `Area-3.Team-11.Read.Employee`
 - For a **Lecturer**: Requires `Area-3.Team-11.Read.Lecturer`
@@ -296,6 +297,7 @@ curl -X POST \
 **Authorization**: Type-aware role requirement OR `HVS-Admin`
 
 The required role is dynamically determined based on the person type:
+
 - **Student**: `Area-3.Team-11.Write.Student`
 - **Employee**: `Area-3.Team-11.Write.Employee`
 - **Lecturer**: `Area-3.Team-11.Write.Lecturer`
@@ -365,6 +367,7 @@ curl -X PUT \
 **Authorization**: Type-aware role requirement OR `HVS-Admin`
 
 The required role is dynamically determined based on the person type:
+
 - **Student**: `Area-3.Team-11.Delete.Student`
 - **Employee**: `Area-3.Team-11.Delete.Employee`
 - **Lecturer**: `Area-3.Team-11.Delete.Lecturer`

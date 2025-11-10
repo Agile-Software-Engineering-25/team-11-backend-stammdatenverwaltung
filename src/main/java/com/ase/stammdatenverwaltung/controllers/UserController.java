@@ -158,7 +158,8 @@ public class UserController {
 
   @Operation(
       summary = "Get master data for a single user",
-      description = "Returns master data for a single user by their ID. Permission is enforced based on user type.",
+      description =
+          "Returns master data for a single user by their ID. Permission is enforced based on user type.",
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -168,11 +169,14 @@ public class UserController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = PersonDetailsDTO.class))
             }),
-        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions for user type"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found")
       })
   @GetMapping("/{userId}")
-  @PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+  @PreAuthorize(
+      "@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> getUserById(
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId,
@@ -217,12 +221,15 @@ public class UserController {
                   schema = @Schema(implementation = PersonDetailsDTO.class))
             }),
         @ApiResponse(responseCode = "400", description = "Invalid request body"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions for user type"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PutMapping("/{userId}")
-  @PreAuthorize("@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+  @PreAuthorize(
+      "@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> updateUser(
       @Parameter(description = "ID of the user to update", required = true) @PathVariable
           String userId,
@@ -280,11 +287,14 @@ public class UserController {
       value = {
         @ApiResponse(responseCode = "204", description = "User deleted successfully"),
         @ApiResponse(responseCode = "400", description = "Bad request - invalid request body"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions for user type"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
-  @PreAuthorize("@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+  @PreAuthorize(
+      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
     String id = request.getUserId();
     log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);

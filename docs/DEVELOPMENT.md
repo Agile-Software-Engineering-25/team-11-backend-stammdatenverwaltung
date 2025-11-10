@@ -292,20 +292,20 @@ import com.ase.stammdatenverwaltung.security.UserInformationJWT;
 
 @Service
 public class PersonService {
-    
+
     public void createPersonWithAudit(Person person) {
         // Get current user information from JWT
         String currentUserId = UserInformationJWT.getUserId();
         String currentUsername = UserInformationJWT.getUsername();
         List<String> userRoles = UserInformationJWT.getRoles();
-        
+
         // Check if user has specific role
         boolean isAdmin = UserInformationJWT.hasRole("HVS-Admin");
-        
+
         // Create person with audit information
         person.setCreatedBy(currentUserId);
         person.setCreatedByName(currentUsername);
-        
+
         personRepository.save(person);
         LOG.info("User {} with roles {} created person {}", currentUsername, userRoles, person.getId());
     }
@@ -331,7 +331,8 @@ The `RoleAwareAccessDeniedHandler` logs authorization failures with user role in
 ---
 
 ## Code Standards
-```
+
+````
 
 ### Naming Conventions
 
@@ -353,7 +354,7 @@ LocalDateTime lastLoginTime = LocalDateTime.now();
 // Constants
 private static final int MAX_RETRY_ATTEMPTS = 3;
 private static final String DEFAULT_TIMEZONE = "UTC";
-```
+````
 
 ### Class Organization
 
