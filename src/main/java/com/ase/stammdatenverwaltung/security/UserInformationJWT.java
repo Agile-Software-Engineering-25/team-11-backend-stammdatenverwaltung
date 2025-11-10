@@ -31,8 +31,7 @@ public class UserInformationJWT {
 
   /** Private constructor to prevent instantiation of utility class. */
   private UserInformationJWT() {
-    throw new UnsupportedOperationException(
-        "This is a utility class and cannot be instantiated");
+    throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
   }
 
   /**
