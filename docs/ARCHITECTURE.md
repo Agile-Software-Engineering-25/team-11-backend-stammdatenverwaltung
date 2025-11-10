@@ -178,19 +178,55 @@ Person (base entity)
 
 - **SecurityConfig**: Spring Security configuration
 
-  - OAuth2 resource server setup
-  - Keycloak JWT validation
-  - CORS configuration
-  - Authorization rules
+  - OAuth2 resource server setup with Keycloak JWT validation
+  - Profile-specific rules (dev/test/prod)
+  - CORS and CSRF configuration
+  - Authorization rules per endpoint pattern
 
 - **JwtAuthConverter**: Converts JWT tokens to Spring Security authorities
 
-  - Extracts client roles from Keycloak
-  - Maps to Spring GrantedAuthority
+  - Extracts client roles from Keycloak `groups` and `realm_access` claims
+  - Maps to Spring `GrantedAuthority` for `@PreAuthorize` evaluation
 
-- **UserInformationJWT**: JWT claims extraction
-  - User ID, email, roles from token
-  - Helper methods for security context
+- **UserInformationJWT**: Utility class for JWT claims extraction
+
+  - Static methods to access user ID, email, username, first/last names from current authentication
+  - Role retrieval from multiple JWT claim sources (groups, realm_access, resource_access)
+  - `hasRole(String role)` method for programmatic role checking
+  - Thread-safe access via `SecurityContextHolder`
+
+- **RoleAwareAccessDeniedHandler**: Custom 403 access denied handler
+
+  - Logs authorization failures with role information for debugging
+  - Extracts expected roles from `@PreAuthorize` exception messages
+  - Provides JSON error response with 403 Forbidden status
+  - Helps troubleshoot why specific users cannot access endpoints
+
+**Role-Based Access Control**:
+
+- Endpoints use `@PreAuthorize` annotations for method-level security
+- Two authorization patterns:
+
+  1. **Static Role Checks** (create/list endpoints):
+     ```java
+     @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') ...")
+     ```
+     Directly checks user roles for coarse-grained operations
+
+  2. **Dynamic Type-Based Checks** (single user operations):
+     ```java
+     @PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') ...")
+     ```
+     Calls `PersonService.canAccessUser()` which:
+     - Fetches the person's type from database (Student/Employee/Lecturer)
+     - Dynamically constructs required role: `Area-3.Team-11.{permission}.{type}`
+     - Checks if user has that role via `UserInformationJWT.hasRole()`
+     - Enables fine-grained authorization based on actual data
+
+- Supported role formats:
+  - `Area-3.Team-11.Read.Student`, `Area-3.Team-11.Write.Employee`, etc. (fine-grained permissions)
+  - `HVS-Admin` (administrator access)
+  - `Hochschulverwaltungsmitarbeiter` (university staff)
 
 ---
 

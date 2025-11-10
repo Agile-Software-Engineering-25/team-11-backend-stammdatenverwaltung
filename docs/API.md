@@ -18,6 +18,26 @@ All protected endpoints require a valid OAuth2/Keycloak JWT token in the `Author
 Authorization: Bearer <access_token>
 ```
 
+### Authorization Failures
+
+When a user lacks the required roles for an endpoint, the API returns:
+
+**Response** (403 Forbidden):
+
+```json
+{
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Access denied - insufficient permissions to access this resource"
+}
+```
+
+**Note**: Authorization failures are logged server-side with the user's current roles and the endpoint being accessed. This information is useful for debugging why specific users cannot access certain resources. Check application logs for:
+
+```
+Authorization check failed - User: 'john.doe@example.com', Roles: [Area-3.Team-11.Read.User], Expected: [Area-3.Team-11.Write.Student], Request: POST /api/v1/users/students
+```
+
 ---
 
 ## Response Format
@@ -93,33 +113,44 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ### 2. Get User by ID
 
-**Endpoint**: `GET /api/v1/users/{id}`
+**Endpoint**: `GET /api/v1/users/{userId}`
 
-**Authorization**: `Area-3.Team-11.Read.User` or `HVS-Admin`
+**Authorization**: `Area-3.Team-11.Read.{UserType}` (dynamically based on person type in database) or `HVS-Admin`
+
+**Note**: Authorization is dynamic and type-aware. The required role is determined by the person's actual type (Student/Employee/Lecturer) stored in the database:
+- For a **Student**: Requires `Area-3.Team-11.Read.Student`
+- For an **Employee**: Requires `Area-3.Team-11.Read.Employee`
+- For a **Lecturer**: Requires `Area-3.Team-11.Read.Lecturer`
 
 **Path Parameters**:
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID |
+| `userId` | string | Yes | User ID |
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `withDetails` | boolean | No | Include Keycloak details (default: true) |
 
 **Example Request**:
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8080/api/v1/users/1"
+  "http://localhost:8080/api/v1/users/550e8400-e29b-41d4-a716-446655440000"
 ```
 
 **Response** (200 OK):
 
 ```json
 {
-  "id": 1,
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "type": "STUDENT",
   "studentId": "S001",
   "department": "Engineering",
+  "username": "john.doe",
   "createdAt": "2025-11-05T10:00:00Z",
   "updatedAt": "2025-11-05T11:00:00Z"
 }
@@ -127,15 +158,16 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Error Responses**:
 
+- `403 Forbidden`: Insufficient permissions for this user type (user has wrong role for person's type)
 - `404 Not Found`: User with the given ID does not exist
 
 ---
 
 ### 3. Create Student
 
-**Endpoint**: `POST /api/v1/users/student`
+**Endpoint**: `POST /api/v1/users/students`
 
-**Authorization**: `HVS-Admin` or `Hochschulverwaltungsmitarbeiter`
+**Authorization**: `Area-3.Team-11.Write.Student` or `HVS-Admin` or `Hochschulverwaltungsmitarbeiter`
 
 **Request Body**:
 
@@ -163,7 +195,7 @@ curl -X POST \
     "studentId": "S002",
     "department": "Computer Science"
   }' \
-  "http://localhost:8080/api/v1/users/student"
+  "http://localhost:8080/api/v1/users/students"
 ```
 
 **Response** (201 Created):
@@ -189,7 +221,7 @@ curl -X POST \
 
 ### 4. Create Employee
 
-**Endpoint**: `POST /api/v1/users/employee`
+**Endpoint**: `POST /api/v1/users/employees`
 
 **Authorization**: `HVS-Admin`
 
@@ -224,7 +256,7 @@ curl -X POST \
 
 ### 5. Create Lecturer
 
-**Endpoint**: `POST /api/v1/users/lecturer`
+**Endpoint**: `POST /api/v1/users/lecturers`
 
 **Authorization**: `HVS-Admin`
 
@@ -259,14 +291,26 @@ curl -X POST \
 
 ### 6. Update User
 
-**Endpoint**: `PUT /api/v1/users/{id}`
+**Endpoint**: `PUT /api/v1/users/{userId}`
 
-**Authorization**: `HVS-Admin` or owner's own profile
+**Authorization**: Type-aware role requirement OR `HVS-Admin`
+
+The required role is dynamically determined based on the person type:
+- **Student**: `Area-3.Team-11.Write.Student`
+- **Employee**: `Area-3.Team-11.Write.Employee`
+- **Lecturer**: `Area-3.Team-11.Write.Lecturer`
+
+The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `HVS-Admin` role bypass this check.
 
 **Path Parameters**:
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID to update |
+| `userId` | string | Yes | Unique identifier of the user to update |
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `withDetails` | boolean | No | If `true`, includes detailed information about related entities |
 
 **Request Body**:
 
@@ -290,14 +334,14 @@ curl -X PUT \
     "lastName": "Doe-Updated",
     "email": "john.doe.updated@example.com"
   }' \
-  "http://localhost:8080/api/v1/users/1"
+  "http://localhost:8080/api/v1/users/550e8400-e29b-41d4-a716-446655440000"
 ```
 
 **Response** (200 OK):
 
 ```json
 {
-  "id": 1,
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "firstName": "John",
   "lastName": "Doe-Updated",
   "email": "john.doe.updated@example.com",
@@ -307,7 +351,8 @@ curl -X PUT \
 
 **Error Responses**:
 
-- `400 Bad Request`: Validation errors
+- `400 Bad Request`: Validation errors (e.g., invalid email format, missing required fields)
+- `403 Forbidden`: Authorization failed - insufficient permissions for the person's type. User lacks the required type-specific role (e.g., `Area-3.Team-11.Write.Student` for updating a student). Check `RoleAwareAccessDeniedHandler` logs for expected role details.
 - `404 Not Found`: User does not exist
 - `409 Conflict`: Email already in use
 
@@ -315,30 +360,47 @@ curl -X PUT \
 
 ### 7. Delete User
 
-**Endpoint**: `DELETE /api/v1/users/{id}`
+**Endpoint**: `POST /api/v1/users/delete`
 
-**Authorization**: `HVS-Admin`
+**Authorization**: Type-aware role requirement OR `HVS-Admin`
 
-**Path Parameters**:
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID to delete |
+The required role is dynamically determined based on the person type:
+- **Student**: `Area-3.Team-11.Delete.Student`
+- **Employee**: `Area-3.Team-11.Delete.Employee`
+- **Lecturer**: `Area-3.Team-11.Delete.Lecturer`
 
-**Request Body** (optional):
+The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `HVS-Admin` role bypass this check.
+
+**Path Parameters**: None
+
+**Request Body**:
 
 ```json
 {
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
   "reason": "User graduation",
   "timestamp": "2025-11-05T14:30:00Z"
 }
 ```
 
+**Request Fields**:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `userId` | string | Yes | Unique identifier of the user to delete |
+| `reason` | string | No | Reason for deletion (e.g., "User graduation", "Account closure") |
+| `timestamp` | string | No | ISO 8601 timestamp of the deletion request |
+
 **Example Request**:
 
 ```bash
-curl -X DELETE \
+curl -X POST \
   -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8080/api/v1/users/1"
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "reason": "User graduation"
+  }' \
+  "http://localhost:8080/api/v1/users/delete"
 ```
 
 **Response** (204 No Content):
@@ -349,8 +411,9 @@ HTTP/1.1 204 No Content
 
 **Error Responses**:
 
+- `400 Bad Request`: Missing required fields or invalid request format
+- `403 Forbidden`: Authorization failed - insufficient permissions for the person's type. User lacks the required type-specific role (e.g., `Area-3.Team-11.Delete.Student` for deleting a student). Check `RoleAwareAccessDeniedHandler` logs for expected role details.
 - `404 Not Found`: User does not exist
-- `403 Forbidden`: Insufficient permissions
 
 ---
 

@@ -217,7 +217,121 @@ class UserControllerTest {
 
 ---
 
-## 📋 Code Standards
+## Security Implementation
+
+### Adding Authorization to Endpoints
+
+All protected endpoints must have `@PreAuthorize` annotations. Use this pattern:
+
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+
+    @PostMapping("/students")
+    @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
+        // Implementation
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    public ResponseEntity<List<PersonDetailsDTO>> getUsers() {
+        // Implementation
+    }
+}
+```
+
+#### Pattern 2: Dynamic Type-Based Checks (Single Resource Operations)
+
+For endpoints that access a specific person/resource, use `@personService.canAccessUser()` for **dynamic, type-aware authorization**:
+
+```java
+@GetMapping("/{userId}")
+@PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+public ResponseEntity<PersonDetailsDTO> getUserById(@PathVariable String userId) {
+    // Implementation
+}
+
+@PutMapping("/{userId}")
+@PreAuthorize("@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') ...")
+public ResponseEntity<PersonDetailsDTO> updateUser(@PathVariable String userId, ...) {
+    // Implementation
+}
+
+@PostMapping("/delete")
+@PreAuthorize("@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') ...")
+public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
+    // Implementation
+}
+```
+
+**How Dynamic Authorization Works**:
+
+The `canAccessUser()` method in `PersonService`:
+
+1. Fetches the person by ID to determine their type (Student/Employee/Lecturer)
+2. Constructs the required role: `Area-3.Team-11.{permission}.{type}`
+   - Example: For a Student with "Read" permission → `Area-3.Team-11.Read.Student`
+3. Checks if the current user has that role
+4. Returns true/false for `@PreAuthorize` evaluation
+
+**Benefits**:
+
+- ✅ Authorization based on actual resource type, not just the endpoint
+- ✅ Prevents unauthorized access even if role names are known
+- ✅ More secure than static role lists
+- ✅ Flexible for future resource-specific permission models
+
+### Using UserInformationJWT Utility
+
+Extract user information from JWT tokens in your service or controller:
+
+```java
+import com.ase.stammdatenverwaltung.security.UserInformationJWT;
+
+@Service
+public class PersonService {
+    
+    public void createPersonWithAudit(Person person) {
+        // Get current user information from JWT
+        String currentUserId = UserInformationJWT.getUserId();
+        String currentUsername = UserInformationJWT.getUsername();
+        List<String> userRoles = UserInformationJWT.getRoles();
+        
+        // Check if user has specific role
+        boolean isAdmin = UserInformationJWT.hasRole("HVS-Admin");
+        
+        // Create person with audit information
+        person.setCreatedBy(currentUserId);
+        person.setCreatedByName(currentUsername);
+        
+        personRepository.save(person);
+        LOG.info("User {} with roles {} created person {}", currentUsername, userRoles, person.getId());
+    }
+}
+```
+
+### Authorization Error Debugging
+
+The `RoleAwareAccessDeniedHandler` logs authorization failures with user role information. When debugging why a user cannot access an endpoint:
+
+1. Request returns **403 Forbidden**
+2. For **static role checks**, check application logs for:
+   ```
+   Authorization check failed - User: 'john@example.com', Roles: [Area-3.Team-11.Read.User], Expected: [Area-3.Team-11.Write.Student], Request: POST /api/v1/users/students
+   ```
+3. For **dynamic authorization checks**, also verify:
+   - The resource (person) exists in the database
+   - The resource type (Student/Employee/Lecturer) matches the required permission type
+   - For example: User has `Area-3.Team-11.Read.Student` role, but is trying to access a Lecturer
+4. Verify user has required role in Keycloak
+5. Check role name format matches exactly (case-sensitive)
+
+---
+
+## Code Standards
+```
 
 ### Naming Conventions
 

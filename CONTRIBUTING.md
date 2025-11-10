@@ -454,6 +454,9 @@ public List<User> getActiveUsers(String department) { }
 - [ ] Security vulnerabilities addressed
 - [ ] Follows existing patterns in codebase
 - [ ] Code is maintainable and understandable
+- [ ] **Authorization checks**: Protected endpoints have `@PreAuthorize` annotations with appropriate roles
+- [ ] **Security logging**: Uses `RoleAwareAccessDeniedHandler` for failed authorization attempts
+- [ ] **User info extraction**: Service code uses `UserInformationJWT` for accessing authenticated user data (not direct token manipulation)
 
 **Authors ensure before requesting review:**
 
@@ -465,6 +468,9 @@ public List<User> getActiveUsers(String department) { }
 - [ ] Commit messages are clear
 - [ ] No debug code or commented-out lines
 - [ ] No breaking changes (unless approved)
+- [ ] **Protected endpoints**: All new protected endpoints have `@PreAuthorize` annotations
+- [ ] **Security review**: Considered authorization requirements for new endpoints
+- [ ] **No token access**: Service code doesn't directly access JWT token (use `UserInformationJWT` instead)
 
 ---
 
