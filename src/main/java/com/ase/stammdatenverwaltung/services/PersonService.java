@@ -5,13 +5,17 @@ import com.ase.stammdatenverwaltung.constants.ValidationConstants;
 import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
+import com.ase.stammdatenverwaltung.entities.Employee;
+import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Person;
+import com.ase.stammdatenverwaltung.entities.Student;
 import com.ase.stammdatenverwaltung.mapper.PersonDtoMapper;
 import com.ase.stammdatenverwaltung.mapper.UpdateUserMapper;
 import com.ase.stammdatenverwaltung.repositories.EmployeeRepository;
 import com.ase.stammdatenverwaltung.repositories.LecturerRepository;
 import com.ase.stammdatenverwaltung.repositories.PersonRepository;
 import com.ase.stammdatenverwaltung.repositories.StudentRepository;
+import com.ase.stammdatenverwaltung.security.UserInformationJWT;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -98,6 +102,18 @@ public class PersonService {
     return Mono.just(personDtoMapper.map(person));
   }
 
+  /**
+   * Enriches a Person entity with additional user details from Keycloak.
+   * 
+   * This method retrieves user information from Keycloak using the person's ID and maps
+   * it to a PersonDetailsDTO. If Keycloak data is available, the DTO is populated with
+   * username, first name, last name, and email from the Keycloak user record.
+   * 
+   * @param person the Person entity to be enriched with Keycloak data
+   * @return a Mono containing a PersonDetailsDTO with enriched user details from Keycloak,
+   *         or a basic PersonDetailsDTO if Keycloak data is unavailable or an error occurs
+   * @throws No checked exceptions are thrown; errors are logged and handled gracefully
+   */
   private Mono<PersonDetailsDTO> enrichPersonWithKeycloakData(Person person) {
     // WHY: Wrap enrichment in error handling to prevent cascading failures. If Keycloak is
     // unavailable or returns a user not found error, we still return basic person data without
@@ -134,7 +150,7 @@ public class PersonService {
    */
   public Person create(@Valid Person person) {
     log.debug("Creating new person");
-    validatePersonForCreation(person);
+    validatePersonData(person);
     Person savedPerson = personRepository.save(person);
     log.info("Successfully created person with ID: {}", savedPerson.getId());
     return savedPerson;
@@ -212,10 +228,45 @@ public class PersonService {
     log.info("Successfully deleted person with ID: {}", id);
   }
 
-  private void validatePersonForCreation(Person person) {
-    validatePersonData(person);
+  /**
+   * Checks if the current user has the specified permission on a person based on the person's
+   * type. Used for authorization in @PreAuthorize expressions.
+   *
+   * @param userId The ID of the person to check access for.
+   * @param permission The permission type (e.g., "Read", "Write", "Delete")
+   * @return true if the user has the permission for the person's type, false if the person is
+   *     not found or has an unsupported type
+   */
+  public boolean canAccessUser(String userId, String permission) {
+    Person person = personRepository.findById(userId).orElse(null);
+
+    if (person == null) {
+      log.debug("User not found during permission check: {}", userId);
+      return false;
+    }
+
+    String role;
+    if (person instanceof Student) {
+      role = "Area-3.Team-11." + permission + ".Student";
+    } else if (person instanceof Employee) {
+      role = "Area-3.Team-11." + permission + ".Employee";
+    } else if (person instanceof Lecturer) {
+      role = "Area-3.Team-11." + permission + ".Lecturer";
+    } else {
+      log.debug("Unknown person type during permission check for user: {}", userId);
+      return false;
+    }
+
+    return UserInformationJWT.hasRole(role);
   }
 
+  /**
+   * Validates the personal data of a person, specifically the date of birth.
+   * 
+   * @param person the Person object whose data is to be validated
+   * @throws IllegalArgumentException if the date of birth is in the future
+   * @throws IllegalArgumentException if the date of birth is more than MAX_AGE_YEARS in the past
+   */
   private void validatePersonData(Person person) {
     if (person.getDateOfBirth() != null && person.getDateOfBirth().isAfter(LocalDate.now())) {
       throw new IllegalArgumentException("Date of birth cannot be in the future");
