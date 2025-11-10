@@ -269,7 +269,7 @@ public class UserController {
   }
 
   /**
-   * Deletes a user. Requires write access to the corresponding user type master data.
+   * Deletes a user. Requires delete access to the corresponding user type master data.
    *
    * @param request the request body containing the user-id
    * @return an empty response
@@ -284,7 +284,7 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Delete.Student') or hasRole('Area-3.Team-11.Delete.Employee') or hasRole('Area-3.Team-11.Delete.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
     String id = request.getUserId();
     log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);
