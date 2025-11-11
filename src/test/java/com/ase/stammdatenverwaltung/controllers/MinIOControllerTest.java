@@ -36,7 +36,6 @@ import org.springframework.test.web.servlet.MockMvc;
  * generate null safety warnings even though the framework guarantees these values are not null at
  * runtime.
  */
-@SuppressWarnings("null")
 @WebMvcTest(MinIOController.class)
 @DisplayName("MinIOController Tests")
 @org.springframework.test.context.TestPropertySource(properties = "minio.enabled=true")

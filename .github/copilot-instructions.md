@@ -169,6 +169,16 @@ throw new EntityNotFoundException("User with ID " + id + " not found in database
 throw new Exception("Error");
 ```
 
+### Logging Errors
+```java
+// ✅ Production-friendly: Error + debug levels
+log.error("Operation failed: {} ({})", ex.getMessage(), ex.getClass().getSimpleName());
+log.debug("Operation failed", ex);  // Full stack trace for debugging only
+
+// ❌ Avoids stack trace spam in production
+log.error("Operation failed: {}", ex.getMessage(), ex);  // Never do this
+```
+
 ---
 
 ## ❌ Common Pitfalls to Avoid

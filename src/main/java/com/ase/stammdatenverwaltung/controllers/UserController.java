@@ -75,16 +75,34 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Student.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/students")
   @PreAuthorize(
       "hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
-
-    Student createdStudent = studentService.create(request);
-
-    return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/students - Creating student with username: {}", request.getUsername());
+    try {
+      Student createdStudent = studentService.create(request);
+      return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create student: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error(
+          "Failed to create student: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create student: external service error", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create student: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create student", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @Operation(
@@ -118,11 +136,12 @@ public class UserController {
       return ResponseEntity.ok(userList);
     } catch (Exception e) {
       log.error(
-          "Error retrieving users with withDetails={} and userType={}: {}",
+          "Error retrieving users with withDetails={} and userType={}: {} ({})",
           withDetails,
           userType,
           e.getMessage(),
-          e);
+          e.getClass().getSimpleName());
+      log.debug("Error retrieving users", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -143,17 +162,36 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Employee.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/employees")
   @PreAuthorize(
       "hasRole('Area-3.Team-11.Write.Employee') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
-
-    Employee createdEmployee = employeeService.create(request);
-
-    return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/employees - Creating employee with username: {}",
+        request.getUsername());
+    try {
+      Employee createdEmployee = employeeService.create(request);
+      return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create employee: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error(
+          "Failed to create employee: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create employee: external service error", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create employee: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create employee", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @Operation(
@@ -192,7 +230,12 @@ public class UserController {
       log.debug("User not found with ID: {}", userId);
       return ResponseEntity.notFound().build();
     } catch (Exception e) {
-      log.error("Error retrieving user with ID {}: {}", userId, e.getMessage(), e);
+      log.error(
+          "Error retrieving user with ID {}: {} ({})",
+          userId,
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Error retrieving user with ID {}", userId, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -235,14 +278,31 @@ public class UserController {
           String userId,
       @Valid @RequestBody UpdateUserRequest updateRequest) {
 
-    log.debug("PUT /api/v1/users/{} - Updating user with data", userId);
+    log.debug("PUT /api/v1/users/{} - Updating user with data: {}", userId, updateRequest);
     try {
       personService.updatePartial(userId, updateRequest);
+      log.debug("User partial update completed for ID: {}", userId);
+
       PersonDetailsDTO result = personService.findById(userId, true).block();
+      log.info("Successfully updated user with ID: {}", userId);
       return ResponseEntity.ok(result);
+
     } catch (EntityNotFoundException e) {
-      log.warn("Failed to update user with ID {}: {}", userId, e.getMessage());
+      log.warn("Failed to update user with ID {}: user not found - {}", userId, e.getMessage());
       return ResponseEntity.notFound().build();
+
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to update user with ID {}: invalid data - {}", userId, e.getMessage());
+      return ResponseEntity.badRequest().build();
+
+    } catch (Exception e) {
+      log.error(
+          "Unexpected error while updating user with ID {}: {} ({})",
+          userId,
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Unexpected error while updating user with ID {}", userId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -262,17 +322,36 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Lecturer.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/lecturers")
   @PreAuthorize(
       "hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
-
-    Lecturer createdLecturer = lecturerService.create(request);
-
-    return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/lecturers - Creating lecturer with username: {}",
+        request.getUsername());
+    try {
+      Lecturer createdLecturer = lecturerService.create(request);
+      return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create lecturer: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error(
+          "Failed to create lecturer: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create lecturer: external service error", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create lecturer: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create lecturer", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**

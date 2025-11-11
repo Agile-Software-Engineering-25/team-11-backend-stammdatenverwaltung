@@ -1,5 +1,7 @@
 package com.ase.stammdatenverwaltung.config;
 
+import com.ase.stammdatenverwaltung.security.CustomAccessDeniedHandler;
+import com.ase.stammdatenverwaltung.security.CustomAuthenticationEntryPoint;
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
 import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
@@ -66,7 +68,16 @@ public class SecurityConfig {
             csrf ->
                 csrf.ignoringRequestMatchers(
                     "/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
-        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+        .headers(
+            headers -> headers.frameOptions(frame -> frame.sameOrigin())
+            )
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
+        // Support both Basic Auth (for dev tools) and JWT (for API)
+        .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Development"))
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
     return http.build();
@@ -108,6 +119,11 @@ public class SecurityConfig {
                     .authenticated())
         .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
         // Support JWT (for API testing)
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
@@ -166,6 +182,12 @@ public class SecurityConfig {
         .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .headers(headers -> headers.frameOptions(frame -> frame.deny()))
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
+        // JWT-only authentication in production
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
 
