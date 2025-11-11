@@ -229,13 +229,13 @@ All protected endpoints must have `@PreAuthorize` annotations. Use this pattern:
 public class UserController {
 
     @PostMapping("/students")
-    @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
     public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
         // Implementation
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    @PreAuthorize("hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
     public ResponseEntity<List<PersonDetailsDTO>> getUsers() {
         // Implementation
     }
@@ -248,7 +248,7 @@ For endpoints that access a specific person/resource, use `@personService.canAcc
 
 ```java
 @GetMapping("/{userId}")
-@PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+@PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
 public ResponseEntity<PersonDetailsDTO> getUserById(@PathVariable String userId) {
     // Implementation
 }

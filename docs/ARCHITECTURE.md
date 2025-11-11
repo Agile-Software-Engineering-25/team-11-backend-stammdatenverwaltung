@@ -228,7 +228,7 @@ Person (base entity)
 - Supported role formats:
   - `Area-3.Team-11.Read.Student`, `Area-3.Team-11.Write.Employee`, etc. (fine-grained permissions)
   - `sau-admin` (administrator access)
-  - `Hochschulverwaltungsmitarbeiter` (university staff)
+  - `university-administrative-staff` (university staff)
 
 ---
 
@@ -365,7 +365,7 @@ Group
 
 - **ROLE_Area-3.Team-11.Read.User**: Read-only access
 - **ROLE_sau-admin**: Full administrative access
-- **ROLE_Hochschulverwaltungsmitarbeiter**: University staff access
+- **ROLE_university-administrative-staff**: University staff access
 
 ---
 

@@ -28,7 +28,7 @@ public class GroupController {
       description = "Returns a list of all active student groups and their student counts.")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved all groups")
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Read.User') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Read.User') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public GroupResponseDTO getAllGroups(
       @io.swagger.v3.oas.annotations.Parameter(
               description = "Flag to include details from Keycloak",
@@ -49,7 +49,7 @@ public class GroupController {
   @ApiResponse(responseCode = "200", description = "Successfully retrieved group information")
   @ApiResponse(responseCode = "404", description = "Group not found")
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Read.Student') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public GroupDTO getGroupByName(
       @PathVariable String groupName,
       @io.swagger.v3.oas.annotations.Parameter(

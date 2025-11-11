@@ -168,7 +168,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Endpoint**: `POST /api/v1/users/students`
 
-**Authorization**: `Area-3.Team-11.Write.Student` or `sau-admin` or `Hochschulverwaltungsmitarbeiter`
+**Authorization**: `Area-3.Team-11.Write.Student` or `sau-admin` or `university-administrative-staff`
 
 **Request Body**:
 

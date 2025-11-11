@@ -118,7 +118,7 @@ src/main/resources/
 - **Supported Roles**:
   - `Area-3.Team-11.Read.*` / `Area-3.Team-11.Write.*` / `Area-3.Team-11.Delete.*`: Fine-grained resource permissions
   - `sau-admin`: Administrator privileges
-  - `Hochschulverwaltungsmitarbeiter`: University staff access
+  - `university-administrative-staff`: University staff access
 
 ### Examples (Development Only)
 
@@ -162,7 +162,7 @@ DATABASE_PASSWORD=your-password
 
 - `Area-3.Team-11.Read.User`: Read user data
 - `sau-admin`: Administrator privileges
-- `Hochschulverwaltungsmitarbeiter`: University staff
+- `university-administrative-staff`: University staff
 
 ---
 

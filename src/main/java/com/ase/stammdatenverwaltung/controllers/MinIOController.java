@@ -69,7 +69,7 @@ public class MinIOController {
         @ApiResponse(responseCode = "404", description = "Picture not found")
       })
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<byte[]> getProfilePicture(
       @Parameter(description = "ID of user", required = true) @PathVariable @NotBlank String id) {
     log.debug("GET /api/v1/profile-picture/{} - Getting Picture by user ID", id);
@@ -119,7 +119,7 @@ public class MinIOController {
         @ApiResponse(responseCode = "500", description = "MinIO operation failed"),
       })
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<Void> setProfilePicture(
       @PathVariable @NotBlank String id, @RequestParam MultipartFile file) throws IOException {
     log.debug("POST /api/v1/profile-picture/{} - uploading profile picture", id);
@@ -186,7 +186,7 @@ public class MinIOController {
         @ApiResponse(responseCode = "500", description = "MinIO operation failed")
       })
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<Void> deleteProfilePicture(
       @Parameter(description = "ID of user", required = true) @PathVariable @NotBlank String id) {
     log.debug("DELETE /api/v1/profile-picture/{} - Deleting profile picture", id);
