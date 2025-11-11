@@ -68,9 +68,7 @@ public class SecurityConfig {
             csrf ->
                 csrf.ignoringRequestMatchers(
                     "/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
-        .headers(
-            headers -> headers.frameOptions(frame -> frame.sameOrigin())
-            )
+        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling
