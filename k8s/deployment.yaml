@@ -14,6 +14,7 @@ spec:
       labels:
         app: ase-stammdaten
     spec:
+      restartPolicy: OnFailure
       containers:
         - name: app
           image: ghcr.io/agile-software-engineering-25/team-11-backend-stammdatenverwaltung:latest
