@@ -3,6 +3,7 @@ package com.ase.stammdatenverwaltung.config;
 import io.minio.MinioClient;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,19 +16,23 @@ import org.springframework.context.annotation.Configuration;
 public class MinioConfig {
 
   private String endpoint;
-  private int port;
-  private boolean tls;
+  private int port = 9000;
+  private boolean tls = true;
   private String accessKey;
-  private String accessSecret;
+  private String secretKey;
   private String bucketName;
 
-  /** Client for MinIO Operations */
+  /**
+   * Client for MinIO Operations. Only created if MinIO is enabled in configuration. Disabled by
+   * default in development environments without MinIO connectivity.
+   */
   @Bean
+  @ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = false)
   public MinioClient minioClient() {
 
     return MinioClient.builder()
         .endpoint(endpoint, port, tls)
-        .credentials(accessKey, accessSecret)
+        .credentials(accessKey, secretKey)
         .build();
   }
 }

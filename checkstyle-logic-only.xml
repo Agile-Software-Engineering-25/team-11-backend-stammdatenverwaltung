@@ -31,6 +31,12 @@
         <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
     </module>
 
+    <!-- Allow descriptive test method naming in test files only (e.g., methodName_Scenario_ExpectedResult) -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="MethodName"/>
+        <property name="files" value=".*[/\\]test[/\\].*\.java$"/>
+    </module>
+
     <!-- === TreeWalker module processes Java source code === -->
     <module name="TreeWalker">
 
