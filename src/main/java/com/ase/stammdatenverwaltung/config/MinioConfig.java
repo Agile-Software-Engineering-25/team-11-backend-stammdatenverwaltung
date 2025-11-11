@@ -15,9 +15,14 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class MinioConfig {
 
+  /** MinIO endpoint URL - can be with or without protocol (https://, http://) */
   private String endpoint;
+
   private int port = 9000;
+
+  /** Whether to use TLS/HTTPS for MinIO connection */
   private boolean tls = true;
+
   private String accessKey;
   private String secretKey;
   private String bucketName;
@@ -29,9 +34,16 @@ public class MinioConfig {
   @Bean
   @ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = false)
   public MinioClient minioClient() {
+    // Strip protocol from endpoint if present, as MinIO client expects only hostname
+    String cleanEndpoint = endpoint;
+    if (cleanEndpoint.startsWith("https://")) {
+      cleanEndpoint = cleanEndpoint.substring("https://".length());
+    } else if (cleanEndpoint.startsWith("http://")) {
+      cleanEndpoint = cleanEndpoint.substring("http://".length());
+    }
 
     return MinioClient.builder()
-        .endpoint(endpoint, port, tls)
+        .endpoint(cleanEndpoint, port, tls)
         .credentials(accessKey, secretKey)
         .build();
   }

@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.controllers;
 
 import com.ase.stammdatenverwaltung.dto.ProfilePictureData;
+import com.ase.stammdatenverwaltung.exceptions.ProfilePictureStorageException;
 import com.ase.stammdatenverwaltung.services.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -95,7 +96,10 @@ public class MinIOController {
    *
    * @param id The ID of the user.
    * @param file picture data (jpg/png/webp/gif), multipart field "file"
-   * @throws IllegalArgumentException if file is invalid or exceeds size limit
+   * @return 201 Created if successful
+   * @throws IllegalArgumentException if file validation fails
+   * @throws IOException if file read fails
+   * @throws ProfilePictureStorageException if MinIO storage fails
    */
   @PostMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(
@@ -121,8 +125,9 @@ public class MinIOController {
     // Validate file size (max 10 MiB)
     if (file.getSize() > MAX_FILE_SIZE_BYTES) {
       log.warn(
-          "Profile picture upload rejected: file too large ({} bytes) for user ID: {}",
+          "Profile picture upload rejected: file too large ({} bytes, max {} MiB) for user ID: {}",
           file.getSize(),
+          MAX_FILE_SIZE_BYTES / MB,
           id);
       throw new IllegalArgumentException(
           String.format(
@@ -142,7 +147,15 @@ public class MinIOController {
               contentType));
     }
 
-    minIOService.setProfilePicture(id, file.getBytes(), contentType);
+    // Upload profile picture (IOException and ProfilePictureStorageException bubble up to handler)
+    byte[] pictureBytes = file.getBytes();
+    minIOService.setProfilePicture(id, pictureBytes, contentType);
+
+    log.info(
+        "Profile picture uploaded successfully for user ID: {} (size: {} bytes, content-type: {})",
+        id,
+        pictureBytes.length,
+        contentType);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 

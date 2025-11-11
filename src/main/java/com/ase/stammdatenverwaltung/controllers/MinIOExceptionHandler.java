@@ -130,4 +130,23 @@ public class MinIOExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
+
+  /**
+   * Handles IOException from file operations.
+   *
+   * <p>Thrown when reading uploaded file fails (e.g., file deleted mid-upload).
+   *
+   * @param ex the exception
+   * @return 500 Internal Server Error
+   */
+  @ExceptionHandler(java.io.IOException.class)
+  public ResponseEntity<Map<String, String>> handleIOException(java.io.IOException ex) {
+    log.error("File I/O error during profile picture operation: {}", ex.getMessage(), ex);
+
+    Map<String, String> errorResponse = new HashMap<>();
+    errorResponse.put("error", "File read error");
+    errorResponse.put("message", "Failed to read uploaded file");
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+  }
 }

@@ -74,14 +74,27 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Student.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/students")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
-
-    Student createdStudent = studentService.create(request);
-
-    return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/students - Creating student with username: {}", request.getUsername());
+    try {
+      Student createdStudent = studentService.create(request);
+      return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create student: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error("Failed to create student: external service error - {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create student: {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @Operation(
@@ -138,15 +151,29 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Employee.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/employees")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
-
-    Employee createdEmployee = employeeService.create(request);
-
-    return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/employees - Creating employee with username: {}",
+        request.getUsername());
+    try {
+      Employee createdEmployee = employeeService.create(request);
+      return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create employee: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error("Failed to create employee: external service error - {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create employee: {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @Operation(
@@ -216,14 +243,26 @@ public class UserController {
           String userId,
       @Valid @RequestBody UpdateUserRequest updateRequest) {
 
-    log.debug("PUT /api/v1/users/{} - Updating user with data", userId);
+    log.debug("PUT /api/v1/users/{} - Updating user with data: {}", userId, updateRequest);
     try {
       personService.updatePartial(userId, updateRequest);
+      log.debug("User partial update completed for ID: {}", userId);
+
       PersonDetailsDTO result = personService.findById(userId, true).block();
+      log.info("Successfully updated user with ID: {}", userId);
       return ResponseEntity.ok(result);
+
     } catch (EntityNotFoundException e) {
-      log.warn("Failed to update user with ID {}: {}", userId, e.getMessage());
+      log.warn("Failed to update user with ID {}: user not found - {}", userId, e.getMessage());
       return ResponseEntity.notFound().build();
+
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to update user with ID {}: invalid data - {}", userId, e.getMessage());
+      return ResponseEntity.badRequest().build();
+
+    } catch (Exception e) {
+      log.error("Unexpected error while updating user with ID {}: {}", userId, e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -243,15 +282,29 @@ public class UserController {
               @Content(
                   mediaType = "application/json",
                   schema = @Schema(implementation = Lecturer.class))
-            })
+            }),
+        @ApiResponse(responseCode = "400", description = "Invalid request data or conflict"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/lecturers")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
-
-    Lecturer createdLecturer = lecturerService.create(request);
-
-    return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+    log.debug(
+        "POST /api/v1/users/lecturers - Creating lecturer with username: {}",
+        request.getUsername());
+    try {
+      Lecturer createdLecturer = lecturerService.create(request);
+      return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+      log.warn("Failed to create lecturer: invalid request data - {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    } catch (IllegalStateException e) {
+      log.error("Failed to create lecturer: external service error - {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    } catch (Exception e) {
+      log.error("Failed to create lecturer: {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**

@@ -1,5 +1,7 @@
 package com.ase.stammdatenverwaltung.config;
 
+import com.ase.stammdatenverwaltung.security.CustomAccessDeniedHandler;
+import com.ase.stammdatenverwaltung.security.CustomAuthenticationEntryPoint;
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,6 +73,11 @@ public class SecurityConfig {
         .headers(
             headers -> headers.frameOptions(frame -> frame.sameOrigin()) // For H2 console
             )
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
         // Support both Basic Auth (for dev tools) and JWT (for API)
         .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Development"))
         .oauth2ResourceServer(
@@ -131,6 +138,11 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated())
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
         // Support both Basic Auth (for tests) and JWT (for API testing)
         .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Test"))
         .oauth2ResourceServer(
@@ -200,6 +212,11 @@ public class SecurityConfig {
         .headers(
             headers -> headers.frameOptions(frame -> frame.deny()) // Security hardening
             )
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
         // JWT-only authentication in production
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
