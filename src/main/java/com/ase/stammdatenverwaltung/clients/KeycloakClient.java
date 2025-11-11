@@ -183,8 +183,10 @@ public class KeycloakClient {
       ObjectMapper mapper = new ObjectMapper();
       return mapper.readValue(raw, new TypeReference<List<KeycloakUser>>() {});
     } catch (Exception e) {
-      log.error("Failed to parse Keycloak user find by id response", e);
-      log.error("Raw response: {}", raw);
+      log.error(
+          "Failed to parse Keycloak user find by id response ({})", e.getClass().getSimpleName());
+      log.debug("Failed to parse Keycloak user find by id response", e);
+      log.debug("Raw response: {}", raw);
       return Collections.emptyList();
     }
   }

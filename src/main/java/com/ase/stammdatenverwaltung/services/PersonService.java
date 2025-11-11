@@ -134,7 +134,7 @@ public class PersonService {
    */
   public Person create(@Valid Person person) {
     log.debug("Creating new person");
-    validatePersonForCreation(person);
+    validatePersonData(person);
     Person savedPerson = personRepository.save(person);
     log.info("Successfully created person with ID: {}", savedPerson.getId());
     return savedPerson;
@@ -210,10 +210,6 @@ public class PersonService {
     }
     personRepository.deleteById(id);
     log.info("Successfully deleted person with ID: {}", id);
-  }
-
-  private void validatePersonForCreation(Person person) {
-    validatePersonData(person);
   }
 
   private void validatePersonData(Person person) {

@@ -45,10 +45,10 @@ public class MinIOController {
           Arrays.asList(
               "image/jpeg", "image/png", "image/webp", "image/gif", "application/octet-stream"));
 
-  // Maximum file size: 10 MiB
+  // Maximum file size: 1 MiB
   private static final int KB = 1024;
   private static final int MB = KB * KB;
-  private static final long MAX_FILE_SIZE_BYTES = 10L * MB;
+  private static final long MAX_FILE_SIZE_BYTES = 1L * MB;
 
   /**
    * Get profile picture by user ID.
@@ -77,7 +77,6 @@ public class MinIOController {
       return ResponseEntity.notFound().build();
     }
 
-    @SuppressWarnings("null")
     ResponseEntity<byte[]> response =
         ResponseEntity.ok()
             .contentType(

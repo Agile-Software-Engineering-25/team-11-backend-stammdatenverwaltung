@@ -36,10 +36,11 @@ public class MinIOExceptionHandler {
   public ResponseEntity<Map<String, String>> handleProfilePictureRetrievalException(
       ProfilePictureRetrievalException ex) {
     log.error(
-        "Profile picture retrieval failed for user ID: {} - {}",
+        "Profile picture retrieval failed for user ID: {} - {} ({})",
         ex.getUserId(),
         ex.getMessage(),
-        ex);
+        ex.getClass().getSimpleName());
+    log.debug("Profile picture retrieval failed", ex);
 
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -68,7 +69,11 @@ public class MinIOExceptionHandler {
   public ResponseEntity<Map<String, String>> handleProfilePictureStorageException(
       ProfilePictureStorageException ex) {
     log.error(
-        "Profile picture storage failed for user ID: {} - {}", ex.getUserId(), ex.getMessage(), ex);
+        "Profile picture storage failed for user ID: {} - {} ({})",
+        ex.getUserId(),
+        ex.getMessage(),
+        ex.getClass().getSimpleName());
+    log.debug("Profile picture storage failed", ex);
 
     Map<String, String> errorResponse = new HashMap<>();
     errorResponse.put("error", "Profile picture storage failed");
@@ -91,10 +96,11 @@ public class MinIOExceptionHandler {
   public ResponseEntity<Map<String, String>> handleProfilePictureDeletionException(
       ProfilePictureDeletionException ex) {
     log.error(
-        "Profile picture deletion failed for user ID: {} - {}",
+        "Profile picture deletion failed for user ID: {} - {} ({})",
         ex.getUserId(),
         ex.getMessage(),
-        ex);
+        ex.getClass().getSimpleName());
+    log.debug("Profile picture deletion failed", ex);
 
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -141,7 +147,11 @@ public class MinIOExceptionHandler {
    */
   @ExceptionHandler(java.io.IOException.class)
   public ResponseEntity<Map<String, String>> handleIOException(java.io.IOException ex) {
-    log.error("File I/O error during profile picture operation: {}", ex.getMessage(), ex);
+    log.error(
+        "File I/O error during profile picture operation: {} ({})",
+        ex.getMessage(),
+        ex.getClass().getSimpleName());
+    log.debug("File I/O error during profile picture operation", ex);
 
     Map<String, String> errorResponse = new HashMap<>();
     errorResponse.put("error", "File read error");

@@ -89,10 +89,15 @@ public class UserController {
       log.warn("Failed to create student: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error("Failed to create student: external service error - {}", e.getMessage(), e);
+      log.error(
+          "Failed to create student: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create student: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create student: {}", e.getMessage(), e);
+      log.error("Failed to create student: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create student", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -126,11 +131,12 @@ public class UserController {
       return ResponseEntity.ok(userList);
     } catch (Exception e) {
       log.error(
-          "Error retrieving users with withDetails={} and userType={}: {}",
+          "Error retrieving users with withDetails={} and userType={}: {} ({})",
           withDetails,
           userType,
           e.getMessage(),
-          e);
+          e.getClass().getSimpleName());
+      log.debug("Error retrieving users", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -168,10 +174,15 @@ public class UserController {
       log.warn("Failed to create employee: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error("Failed to create employee: external service error - {}", e.getMessage(), e);
+      log.error(
+          "Failed to create employee: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create employee: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create employee: {}", e.getMessage(), e);
+      log.error("Failed to create employee: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create employee", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -206,7 +217,12 @@ public class UserController {
       log.debug("User not found with ID: {}", userId);
       return ResponseEntity.notFound().build();
     } catch (Exception e) {
-      log.error("Error retrieving user with ID {}: {}", userId, e.getMessage(), e);
+      log.error(
+          "Error retrieving user with ID {}: {} ({})",
+          userId,
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Error retrieving user with ID {}", userId, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -261,7 +277,12 @@ public class UserController {
       return ResponseEntity.badRequest().build();
 
     } catch (Exception e) {
-      log.error("Unexpected error while updating user with ID {}: {}", userId, e.getMessage(), e);
+      log.error(
+          "Unexpected error while updating user with ID {}: {} ({})",
+          userId,
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Unexpected error while updating user with ID {}", userId, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -299,10 +320,15 @@ public class UserController {
       log.warn("Failed to create lecturer: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error("Failed to create lecturer: external service error - {}", e.getMessage(), e);
+      log.error(
+          "Failed to create lecturer: external service error - {} ({})",
+          e.getMessage(),
+          e.getClass().getSimpleName());
+      log.debug("Failed to create lecturer: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create lecturer: {}", e.getMessage(), e);
+      log.error("Failed to create lecturer: {} ({})", e.getMessage(), e.getClass().getSimpleName());
+      log.debug("Failed to create lecturer", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
