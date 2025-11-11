@@ -81,7 +81,7 @@ public class UserController {
       })
   @PostMapping("/students")
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
     log.debug(
         "POST /api/v1/users/students - Creating student with username: {}", request.getUsername());
@@ -120,7 +120,7 @@ public class UserController {
       })
   @GetMapping
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
@@ -168,7 +168,7 @@ public class UserController {
       })
   @PostMapping("/employees")
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Employee') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Write.Employee') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
     log.debug(
@@ -214,7 +214,7 @@ public class UserController {
       })
   @GetMapping("/{userId}")
   @PreAuthorize(
-      "@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> getUserById(
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId,
@@ -272,7 +272,7 @@ public class UserController {
       })
   @PutMapping("/{userId}")
   @PreAuthorize(
-      "@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "@personService.canAccessUser(#userId, 'Write') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> updateUser(
       @Parameter(description = "ID of the user to update", required = true) @PathVariable
           String userId,
@@ -328,7 +328,7 @@ public class UserController {
       })
   @PostMapping("/lecturers")
   @PreAuthorize(
-      "hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
     log.debug(
@@ -373,7 +373,7 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PreAuthorize(
-      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
     String id = request.getUserId();
     log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);

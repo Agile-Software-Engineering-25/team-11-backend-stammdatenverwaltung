@@ -229,13 +229,13 @@ All protected endpoints must have `@PreAuthorize` annotations. Use this pattern:
 public class UserController {
 
     @PostMapping("/students")
-    @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
     public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
         // Implementation
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+    @PreAuthorize("hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
     public ResponseEntity<List<PersonDetailsDTO>> getUsers() {
         // Implementation
     }
@@ -248,19 +248,19 @@ For endpoints that access a specific person/resource, use `@personService.canAcc
 
 ```java
 @GetMapping("/{userId}")
-@PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
+@PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
 public ResponseEntity<PersonDetailsDTO> getUserById(@PathVariable String userId) {
     // Implementation
 }
 
 @PutMapping("/{userId}")
-@PreAuthorize("@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') ...")
+@PreAuthorize("@personService.canAccessUser(#userId, 'Write') or hasRole('sau-admin') ...")
 public ResponseEntity<PersonDetailsDTO> updateUser(@PathVariable String userId, ...) {
     // Implementation
 }
 
 @PostMapping("/delete")
-@PreAuthorize("@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') ...")
+@PreAuthorize("@personService.canAccessUser(#request.userId, 'Delete') or hasRole('sau-admin') ...")
 public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
     // Implementation
 }
@@ -300,7 +300,7 @@ public class PersonService {
         List<String> userRoles = UserInformationJWT.getRoles();
 
         // Check if user has specific role
-        boolean isAdmin = UserInformationJWT.hasRole("HVS-Admin");
+        boolean isAdmin = UserInformationJWT.hasRole("sau-admin");
 
         // Create person with audit information
         person.setCreatedBy(currentUserId);

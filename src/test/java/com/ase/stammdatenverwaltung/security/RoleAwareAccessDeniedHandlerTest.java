@@ -179,7 +179,7 @@ class RoleAwareAccessDeniedHandlerTest {
     // Given - Exception with complex role names like 'Area-3.Team-11.Read.User'
     AccessDeniedException exceptionWithRoles =
         new AccessDeniedException(
-            "Access Denied; Reason: hasRole('Area-3.Team-11.Read.User') or hasRole('HVS-Admin')");
+            "Access Denied; Reason: hasRole('Area-3.Team-11.Read.User') or hasRole('sau-admin')");
 
     Authentication auth =
         new UsernamePasswordAuthenticationToken(

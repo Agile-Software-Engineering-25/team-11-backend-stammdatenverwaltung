@@ -73,7 +73,7 @@ Authorization check failed - User: 'john.doe@example.com', Roles: [Area-3.Team-1
 
 **Endpoint**: `GET /api/v1/users`
 
-**Authorization**: `Area-3.Team-11.Read.User` or `HVS-Admin`
+**Authorization**: `Area-3.Team-11.Read.User` or `sau-admin`
 
 **Query Parameters**:
 | Parameter | Type | Required | Description |
@@ -115,7 +115,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Endpoint**: `GET /api/v1/users/{userId}`
 
-**Authorization**: `Area-3.Team-11.Read.{UserType}` (dynamically based on person type in database) or `HVS-Admin`
+**Authorization**: `Area-3.Team-11.Read.{UserType}` (dynamically based on person type in database) or `sau-admin`
 
 **Note**: Authorization is dynamic and type-aware. The required role is determined by the person's actual type (Student/Employee/Lecturer) stored in the database:
 
@@ -168,7 +168,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Endpoint**: `POST /api/v1/users/students`
 
-**Authorization**: `Area-3.Team-11.Write.Student` or `HVS-Admin` or `Hochschulverwaltungsmitarbeiter`
+**Authorization**: `Area-3.Team-11.Write.Student` or `sau-admin` or `Hochschulverwaltungsmitarbeiter`
 
 **Request Body**:
 
@@ -224,7 +224,7 @@ curl -X POST \
 
 **Endpoint**: `POST /api/v1/users/employees`
 
-**Authorization**: `HVS-Admin`
+**Authorization**: `sau-admin`
 
 **Request Body**:
 
@@ -259,7 +259,7 @@ curl -X POST \
 
 **Endpoint**: `POST /api/v1/users/lecturers`
 
-**Authorization**: `HVS-Admin`
+**Authorization**: `sau-admin`
 
 **Request Body**:
 
@@ -294,7 +294,7 @@ curl -X POST \
 
 **Endpoint**: `PUT /api/v1/users/{userId}`
 
-**Authorization**: Type-aware role requirement OR `HVS-Admin`
+**Authorization**: Type-aware role requirement OR `sau-admin`
 
 The required role is dynamically determined based on the person type:
 
@@ -302,7 +302,7 @@ The required role is dynamically determined based on the person type:
 - **Employee**: `Area-3.Team-11.Write.Employee`
 - **Lecturer**: `Area-3.Team-11.Write.Lecturer`
 
-The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `HVS-Admin` role bypass this check.
+The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `sau-admin` role bypass this check.
 
 **Path Parameters**:
 | Parameter | Type | Required | Description |
@@ -364,7 +364,7 @@ curl -X PUT \
 
 **Endpoint**: `POST /api/v1/users/delete`
 
-**Authorization**: Type-aware role requirement OR `HVS-Admin`
+**Authorization**: Type-aware role requirement OR `sau-admin`
 
 The required role is dynamically determined based on the person type:
 
@@ -372,7 +372,7 @@ The required role is dynamically determined based on the person type:
 - **Employee**: `Area-3.Team-11.Delete.Employee`
 - **Lecturer**: `Area-3.Team-11.Delete.Lecturer`
 
-The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `HVS-Admin` role bypass this check.
+The actual person type is retrieved from the database, and the authorization check happens dynamically via the `PersonService.canAccessUser()` method. Users with `sau-admin` role bypass this check.
 
 **Path Parameters**: None
 
@@ -426,7 +426,7 @@ HTTP/1.1 204 No Content
 
 **Endpoint**: `GET /api/v1/group`
 
-**Authorization**: `Area-3.Team-11.Read.User` or `HVS-Admin`
+**Authorization**: `Area-3.Team-11.Read.User` or `sau-admin`
 
 **Query Parameters**:
 | Parameter | Type | Required | Description |
@@ -471,7 +471,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 **Endpoint**: `GET /api/v1/group/{groupName}`
 
-**Authorization**: `Area-3.Team-11.Read.User` or `HVS-Admin`
+**Authorization**: `Area-3.Team-11.Read.User` or `sau-admin`
 
 **Path Parameters**:
 | Parameter | Type | Required | Description |

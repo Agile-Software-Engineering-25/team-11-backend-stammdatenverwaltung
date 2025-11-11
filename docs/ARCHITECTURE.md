@@ -210,14 +210,14 @@ Person (base entity)
   1. **Static Role Checks** (create/list endpoints):
 
      ```java
-     @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') ...")
+     @PreAuthorize("hasRole('Area-3.Team-11.Write.Student') or hasRole('sau-admin') ...")
      ```
 
      Directly checks user roles for coarse-grained operations
 
   2. **Dynamic Type-Based Checks** (single user operations):
      ```java
-     @PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') ...")
+     @PreAuthorize("@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') ...")
      ```
      Calls `PersonService.canAccessUser()` which:
      - Fetches the person's type from database (Student/Employee/Lecturer)
@@ -227,7 +227,7 @@ Person (base entity)
 
 - Supported role formats:
   - `Area-3.Team-11.Read.Student`, `Area-3.Team-11.Write.Employee`, etc. (fine-grained permissions)
-  - `HVS-Admin` (administrator access)
+  - `sau-admin` (administrator access)
   - `Hochschulverwaltungsmitarbeiter` (university staff)
 
 ---
@@ -364,7 +364,7 @@ Group
 ### Authorization Levels
 
 - **ROLE_Area-3.Team-11.Read.User**: Read-only access
-- **ROLE_HVS-Admin**: Full administrative access
+- **ROLE_sau-admin**: Full administrative access
 - **ROLE_Hochschulverwaltungsmitarbeiter**: University staff access
 
 ---
