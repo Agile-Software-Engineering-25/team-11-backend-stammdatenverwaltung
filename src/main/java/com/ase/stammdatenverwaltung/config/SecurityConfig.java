@@ -150,6 +150,11 @@ public class SecurityConfig {
                     // using @PreAuthorize annotations
                     .requestMatchers("/api/v1/users/**")
                     .authenticated()
+                    // Profile picture endpoints require authenticated Keycloak JWT
+                    // Role-based access control is enforced at the controller method level
+                    // using @PreAuthorize annotations
+                    .requestMatchers("/api/v1/profile-picture/**")
+                    .authenticated()
                     // Group endpoints require authenticated Keycloak JWT
                     // Role-based access control is enforced at the controller method level
                     // using @PreAuthorize annotations

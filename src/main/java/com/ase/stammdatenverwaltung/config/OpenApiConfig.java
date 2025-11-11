@@ -52,7 +52,7 @@ public class OpenApiConfig {
     return GroupedOpenApi.builder()
         .group("authenticated-api")
         .displayName("Authenticated API")
-        .pathsToMatch("/api/v1/group/**", "/api/v1/users/**")
+        .pathsToMatch("/api/v1/group/**", "/api/v1/users/**", "/api/v1/profile-picture/**")
         .build();
   }
 
