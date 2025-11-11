@@ -52,6 +52,15 @@ logging:
 # Note: JWT roles are extracted from the "groups" claim automatically
 # No additional JWT configuration needed for role extraction
 
+minio:
+  enabled: true
+  endpoint: ${MINIO_ENDPOINT:https://file-service.sau-portal.de}
+  port: ${MINIO_PORT:9000}
+  tls: ${MINIO_TLS:true}
+  access-key: ${MINIO_ACCESS_KEY:ase-team-11}
+  secret-key: ${MINIO_SECRET}
+  bucket-name: ${MINIO_BUCKET_NAME:ase-team-11}
+
 cors:
   allowed-origins: "https://sau-portal.de/,http://localhost:3000"
 

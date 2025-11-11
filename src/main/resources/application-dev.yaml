@@ -57,6 +57,16 @@ logging:
 # Note: JWT roles are extracted from the "groups" claim automatically
 # No additional JWT configuration needed for role extraction
 
+minio:
+  enabled: false
+  # Set to true and configure MinIO details when a local MinIO instance is available
+  endpoint: ${MINIO_ENDPOINT:http://localhost}
+  port: ${MINIO_PORT:9000}
+  tls: ${MINIO_TLS:false}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:minio-bucket}
+
 cors:
   allowed-origins: "http://localhost:5173"
 
