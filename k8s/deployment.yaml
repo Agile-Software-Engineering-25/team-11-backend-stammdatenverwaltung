@@ -73,6 +73,11 @@ spec:
                 secretKeyRef:
                   name: keycloak-secret
                   key: KEYCLOAK_CLIENT_SECRET
+            - name: MINIO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: MINIO_SECRET
             # NOTE: The Ingress in this overlay contains a rewrite-target annotation
             # (traefik.ingress.kubernetes.io/rewrite-target: /) which rewrites requests
             # from /api -> /. Because of that, the application will receive requests
