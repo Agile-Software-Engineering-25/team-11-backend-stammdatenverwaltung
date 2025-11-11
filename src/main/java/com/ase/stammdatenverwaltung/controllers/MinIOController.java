@@ -1,5 +1,6 @@
 package com.ase.stammdatenverwaltung.controllers;
 
+import com.ase.stammdatenverwaltung.dto.ProfilePictureData;
 import com.ase.stammdatenverwaltung.services.MinIOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,11 +38,22 @@ public class MinIOController {
 
   private final MinIOService minIOService;
 
+  // Allowed MIME types for profile pictures
+  private static final Set<String> ALLOWED_CONTENT_TYPES =
+      new HashSet<>(
+          Arrays.asList(
+              "image/jpeg", "image/png", "image/webp", "image/gif", "application/octet-stream"));
+
+  // Maximum file size: 10 MiB
+  private static final int KB = 1024;
+  private static final int MB = KB * KB;
+  private static final long MAX_FILE_SIZE_BYTES = 10L * MB;
+
   /**
    * Get profile picture by user ID.
    *
    * @param id the user ID
-   * @return the picture if found
+   * @return the picture if found with appropriate content-type, or 404 if not found
    */
   @GetMapping("/{id}")
   @Operation(
@@ -51,16 +66,36 @@ public class MinIOController {
       })
   public ResponseEntity<byte[]> getProfilePicture(
       @Parameter(description = "ID of user", required = true) @PathVariable @NotBlank String id) {
-    log.debug("GET /api/v1/profile-picture{} - Getting Picture by user ID", id);
-    byte[] picture = minIOService.getProfilePicture(id);
-    return ResponseEntity.status(HttpStatus.OK).body(picture);
+    log.debug("GET /api/v1/profile-picture/{} - Getting Picture by user ID", id);
+    ProfilePictureData pictureData = minIOService.getProfilePicture(id);
+
+    if (pictureData == null
+        || pictureData.getPicture() == null
+        || pictureData.getPicture().length == 0) {
+      log.warn("Profile picture not found for user ID: {}", id);
+      return ResponseEntity.notFound().build();
+    }
+
+    @SuppressWarnings("null")
+    ResponseEntity<byte[]> response =
+        ResponseEntity.ok()
+            .contentType(
+                MediaType.parseMediaType(
+                    pictureData.getContentType() != null
+                        ? pictureData.getContentType()
+                        : "application/octet-stream"))
+            .body(pictureData.getPicture());
+    return response;
   }
 
   /**
    * Sets a Users ProfilePic in the MinIO Object Store.
    *
+   * <p>Validation: File must be a valid image format (PNG, JPEG, WebP, GIF) and not exceed 10 MiB.
+   *
    * @param id The ID of the user.
    * @param file picture data (jpg/png/webp/gif), multipart field "file"
+   * @throws IllegalArgumentException if file is invalid or exceeds size limit
    */
   @PostMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(
@@ -76,7 +111,38 @@ public class MinIOController {
   public ResponseEntity<Void> setProfilePicture(
       @PathVariable @NotBlank String id, @RequestParam MultipartFile file) throws IOException {
     log.debug("POST /api/v1/profile-picture/{} - uploading profile picture", id);
-    minIOService.setProfilePicture(id, file.getBytes(), file.getContentType());
+
+    // Validate file is not empty
+    if (file.isEmpty()) {
+      log.warn("Profile picture upload rejected: file is empty for user ID: {}", id);
+      throw new IllegalArgumentException("Profile picture file cannot be empty");
+    }
+
+    // Validate file size (max 10 MiB)
+    if (file.getSize() > MAX_FILE_SIZE_BYTES) {
+      log.warn(
+          "Profile picture upload rejected: file too large ({} bytes) for user ID: {}",
+          file.getSize(),
+          id);
+      throw new IllegalArgumentException(
+          String.format(
+              "Profile picture file exceeds maximum size of %d MiB", MAX_FILE_SIZE_BYTES / MB));
+    }
+
+    // Validate content type
+    String contentType = file.getContentType();
+    if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+      log.warn(
+          "Profile picture upload rejected: invalid content type '{}' for user ID: {}",
+          contentType,
+          id);
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid file type '%s'. Allowed types: image/jpeg, image/png, image/webp, image/gif",
+              contentType));
+    }
+
+    minIOService.setProfilePicture(id, file.getBytes(), contentType);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 

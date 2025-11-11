@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.services;
 
 import com.ase.stammdatenverwaltung.config.MinioConfig;
+import com.ase.stammdatenverwaltung.dto.ProfilePictureData;
 import com.ase.stammdatenverwaltung.exceptions.ProfilePictureDeletionException;
 import com.ase.stammdatenverwaltung.exceptions.ProfilePictureRetrievalException;
 import com.ase.stammdatenverwaltung.exceptions.ProfilePictureStorageException;
@@ -43,13 +44,13 @@ public class MinIOService {
   }
 
   /**
-   * Gets a Users ProfilePic from the MinIO Object Store.
+   * Gets a Users ProfilePic from the MinIO Object Store with metadata.
    *
    * @param id The ID of the user.
-   * @return the profile picture as byte array
+   * @return ProfilePictureData containing picture bytes, content-type, and existence flag
    * @throws ProfilePictureRetrievalException if retrieval fails
    */
-  public byte[] getProfilePicture(String id) {
+  public ProfilePictureData getProfilePicture(String id) {
     log.debug("Getting Profile Picture of User with ID: {}", id);
     try (InputStream stream = storageClient.getObject(minioConfig.getBucketName(), id);
         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -59,7 +60,7 @@ public class MinIOService {
       while ((bytesRead = stream.read(buffer)) != -1) {
         baos.write(buffer, 0, bytesRead);
       }
-      return baos.toByteArray();
+      return new ProfilePictureData(baos.toByteArray(), "application/octet-stream");
     } catch (Exception e) {
       log.error("Error retrieving profile picture for user ID: {}", id, e);
       String errorMessage =
