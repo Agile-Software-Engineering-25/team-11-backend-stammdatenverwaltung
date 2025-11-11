@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,7 +60,7 @@ public class UserController {
   private final LecturerService lecturerService;
 
   /**
-   * Creates a new student.
+   * Creates a new student. Requires write access to student master data.
    *
    * @param request The request body containing the student data.
    * @return The created student.
@@ -79,6 +80,8 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/students")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Student> createStudent(@Valid @RequestBody CreateStudentRequest request) {
     log.debug(
         "POST /api/v1/users/students - Creating student with username: {}", request.getUsername());
@@ -116,6 +119,8 @@ public class UserController {
             })
       })
   @GetMapping
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
@@ -142,7 +147,7 @@ public class UserController {
   }
 
   /**
-   * Creates a new employee.
+   * Creates a new employee. Requires write access to employee master data.
    *
    * @param request The request body containing the employee data.
    * @return The created employee.
@@ -162,6 +167,8 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/employees")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Write.Employee') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Employee> createEmployee(
       @Valid @RequestBody CreateEmployeeRequest request) {
     log.debug(
@@ -189,7 +196,8 @@ public class UserController {
 
   @Operation(
       summary = "Get master data for a single user",
-      description = "Returns master data for a single user by their ID.",
+      description =
+          "Returns master data for a single user by their ID. Permission is enforced based on user type.",
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -199,9 +207,14 @@ public class UserController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = PersonDetailsDTO.class))
             }),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found")
       })
   @GetMapping("/{userId}")
+  @PreAuthorize(
+      "@personService.canAccessUser(#userId, 'Read') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> getUserById(
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId,
@@ -230,6 +243,7 @@ public class UserController {
   /**
    * Updates an existing user with partial data. Only provided fields are updated; others retain
    * their existing values. Supports updating all user types (students, employees, lecturers).
+   * Requires write access to the corresponding user type master data.
    *
    * @param userId The ID of the user to update.
    * @param updateRequest The request containing fields to update.
@@ -250,10 +264,15 @@ public class UserController {
                   schema = @Schema(implementation = PersonDetailsDTO.class))
             }),
         @ApiResponse(responseCode = "400", description = "Invalid request body"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PutMapping("/{userId}")
+  @PreAuthorize(
+      "@personService.canAccessUser(#userId, 'Write') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<PersonDetailsDTO> updateUser(
       @Parameter(description = "ID of the user to update", required = true) @PathVariable
           String userId,
@@ -288,7 +307,7 @@ public class UserController {
   }
 
   /**
-   * Creates a new lecturer.
+   * Creates a new lecturer. Requires write access to lecturer master data.
    *
    * @param request The request body containing the lecturer data.
    * @return The created lecturer.
@@ -308,6 +327,8 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PostMapping("/lecturers")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Lecturer> createLecturer(
       @Valid @RequestBody CreateLecturerRequest request) {
     log.debug(
@@ -334,7 +355,7 @@ public class UserController {
   }
 
   /**
-   * Deletes a user
+   * Deletes a user. Requires delete access to the corresponding user type master data.
    *
    * @param request the request body containing the user-id
    * @return an empty response
@@ -345,9 +366,14 @@ public class UserController {
       value = {
         @ApiResponse(responseCode = "204", description = "User deleted successfully"),
         @ApiResponse(responseCode = "400", description = "Bad request - invalid request body"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
         @ApiResponse(responseCode = "404", description = "User not found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
+  @PreAuthorize(
+      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
     String id = request.getUserId();
     log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);

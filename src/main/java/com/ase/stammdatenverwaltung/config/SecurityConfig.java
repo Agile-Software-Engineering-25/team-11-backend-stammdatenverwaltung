@@ -3,15 +3,13 @@ package com.ase.stammdatenverwaltung.config;
 import com.ase.stammdatenverwaltung.security.CustomAccessDeniedHandler;
 import com.ase.stammdatenverwaltung.security.CustomAuthenticationEntryPoint;
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
+import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -26,13 +24,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-  /**
-   * Development security configuration with relaxed permissions and dual authentication support
-   * (Basic Auth for development tools + JWT for API testing).
-   */
+  /** Provides a centralized access denied handler for logging role information on auth failures */
+  @Bean
+  public RoleAwareAccessDeniedHandler roleAwareAccessDeniedHandler() {
+    return new RoleAwareAccessDeniedHandler();
+  }
+
+  /** Development security configuration with relaxed permissions */
   @Bean
   @Profile("dev")
-  SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain devSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
@@ -40,39 +42,33 @@ public class SecurityConfig {
             authz ->
                 authz
                     // Allow public access to these endpoints in development
-                    .requestMatchers("/actuator/**")
-                    .permitAll()
-                    .requestMatchers("/swagger-ui/**")
-                    .permitAll()
-                    .requestMatchers("/swagger-ui.html")
-                    .permitAll()
-                    .requestMatchers("/api-docs/**")
-                    .permitAll()
-                    .requestMatchers("/v3/api-docs/**")
+                    .requestMatchers(
+                        "/actuator/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/api-docs/**",
+                        "/v3/api-docs/**")
                     .permitAll()
                     .requestMatchers("/h2-console/**")
                     .permitAll()
                     // Public API endpoints (adjust as needed)
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
-                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    // User endpoints
                     .requestMatchers("/api/v1/users/**")
                     .permitAll()
-                    // Admin endpoints require ADMIN role
-                    .requestMatchers("/api/v1/admin/**")
-                    .hasRole("ADMIN")
-                    // All other API endpoints require authentication
-                    .requestMatchers("/api/**")
-                    .authenticated()
+                    // Group endpoints
+                    .requestMatchers("/api/v1/group/**")
+                    .permitAll()
+                    // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(
             csrf ->
                 csrf.ignoringRequestMatchers(
                     "/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
-        .headers(
-            headers -> headers.frameOptions(frame -> frame.sameOrigin()) // For H2 console
-            )
+        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling
@@ -82,30 +78,17 @@ public class SecurityConfig {
         .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Development"))
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
-
     return http.build();
   }
 
-  // In-memory users for development to allow Basic Auth without Keycloak
-  @Bean
-  @Profile("dev")
-  UserDetailsService inMemoryUsers() {
-    var user = User.withUsername("dev-user").password("{noop}dev-password").roles("USER").build();
-    var admin =
-        User.withUsername("dev-admin")
-            .password("{noop}dev-password")
-            .roles("ADMIN", "USER")
-            .build();
-    return new InMemoryUserDetailsManager(user, admin);
-  }
-
   /**
-   * Test security configuration with relaxed permissions and dual authentication support (Basic
-   * Auth for testing + JWT for API testing). Similar to dev but optimized for automated tests.
+   * Test security configuration with relaxed permissions. Similar to dev but optimized for
+   * automated tests.
    */
   @Bean
   @Profile("test")
-  SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain testSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
@@ -113,105 +96,90 @@ public class SecurityConfig {
             authz ->
                 authz
                     // Allow public access to these endpoints in tests
-                    .requestMatchers("/actuator/**")
-                    .permitAll()
-                    .requestMatchers("/swagger-ui/**")
-                    .permitAll()
-                    .requestMatchers("/swagger-ui.html")
-                    .permitAll()
-                    .requestMatchers("/api-docs/**")
-                    .permitAll()
-                    .requestMatchers("/v3/api-docs/**")
+                    .requestMatchers(
+                        "/actuator/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/api-docs/**",
+                        "/v3/api-docs/**")
                     .permitAll()
                     // Public API endpoints
                     .requestMatchers("/api/v1/public/**")
                     .permitAll()
-                    // User creation endpoints - temporarily public until JWT auth is re-enabled
+                    // User endpoints
                     .requestMatchers("/api/v1/users/**")
                     .permitAll()
-                    // Admin endpoints require ADMIN role
-                    .requestMatchers("/api/v1/admin/**")
-                    .hasRole("ADMIN")
-                    // All other API endpoints require authentication
-                    .requestMatchers("/api/**")
-                    .authenticated()
+                    // Group endpoints
+                    .requestMatchers("/api/v1/group/**")
+                    .permitAll()
+                    // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling
                     .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler()))
-        // Support both Basic Auth (for tests) and JWT (for API testing)
-        .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Test"))
+        // Support JWT (for API testing)
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
 
     return http.build();
   }
 
-  // In-memory users for testing to allow Basic Auth without Keycloak
-  @Bean
-  @Profile("test")
-  UserDetailsService testInMemoryUsers() {
-    var user = User.withUsername("dev-user").password("{noop}dev-password").roles("USER").build();
-    var admin =
-        User.withUsername("dev-admin")
-            .password("{noop}dev-password")
-            .roles("ADMIN", "USER")
-            .build();
-    return new InMemoryUserDetailsManager(user, admin);
-  }
-
   /**
    * Production security configuration with strict JWT-only authentication and role-based access
-   * control.
+   * control. All endpoints require valid JWT tokens from Keycloak with appropriate roles.
+   *
+   * <p>Based on documentation:
+   * https://agile-software-engineering-25.github.io/documentation/service-definitions/base-data-and-course-management/auth-overview
+   *
+   * <p>In production, only the Keycloak instance is used for authentication (no basic auth). Users
+   * must provide valid JWT tokens in the Authorization header for all protected endpoints.
    */
   @Bean
   @Profile("prod")
-  SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain prodSecurityFilterChain(
+      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
     http.authorizeHttpRequests(
             authz ->
                 authz
-                    // Only allow health endpoint publicly in production
+                    // Allow health endpoint access
                     .requestMatchers("/actuator/health")
                     .permitAll()
-                    // Public API endpoints (adjust as needed)
-                    .requestMatchers("/api/v1/public/**")
-                    .permitAll()
-                    // User creation endpoints - temporarily public until JWT auth is re-enabled
-                    // TODO: add JWT auth protection if keycloak is integrated
-                    .requestMatchers("/api/v1/users/**")
-                    .permitAll()
-                    // Group endpoints - temporarily public until JWT auth is re-enabled
-                    // TODO: add JWT auth protection if keycloak is integrated
-                    .requestMatchers("/api/v1/group/**")
-                    .permitAll()
-                    // Profile picture endpoints - temporarily public until JWT auth is re-enabled
-                    // TODO: add JWT auth protection if keycloak is integrated
-                    .requestMatchers("/api/v1/profile-picture/**")
-                    .permitAll()
-                    // Admin endpoints require ADMIN role
-                    .requestMatchers("/api/v1/admin/**")
-                    .hasRole("ADMIN")
-                    // All other API endpoints require authentication
-                    .requestMatchers("/api/**")
-                    .authenticated()
-                    // Permit all access to actuator endpoints except health
+                    // Permit Swagger UI and API docs
                     .requestMatchers(
                         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
                     .permitAll()
+                    // Public API endpoints
+                    .requestMatchers("/api/v1/public/**")
+                    .permitAll()
+                    // User endpoints require authenticated Keycloak JWT
+                    // Role-based access control is enforced at the controller method level
+                    // using @PreAuthorize annotations
+                    .requestMatchers("/api/v1/users/**")
+                    .authenticated()
+                    // Profile picture endpoints require authenticated Keycloak JWT
+                    // Role-based access control is enforced at the controller method level
+                    // using @PreAuthorize annotations
+                    .requestMatchers("/api/v1/profile-picture/**")
+                    .authenticated()
+                    // Group endpoints require authenticated Keycloak JWT
+                    // Role-based access control is enforced at the controller method level
+                    // using @PreAuthorize annotations
+                    .requestMatchers("/api/v1/group/**")
+                    .authenticated()
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
+        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
-        .headers(
-            headers -> headers.frameOptions(frame -> frame.deny()) // Security hardening
-            )
+        .headers(headers -> headers.frameOptions(frame -> frame.deny()))
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling

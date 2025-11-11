@@ -286,8 +286,5 @@ public class EmployeeService {
       throw new IllegalArgumentException(
           "Employee with employee number " + employee.getEmployeeNumber() + " already exists");
     }
-    validateEmployeeData(employee);
   }
-
-  private void validateEmployeeData(Employee employee) {}
 }

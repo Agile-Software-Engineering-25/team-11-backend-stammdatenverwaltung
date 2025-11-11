@@ -4,6 +4,14 @@
       "name": "app.security.jwt",
       "type": "com.ase.stammdatenverwaltung.config.JwtSecurityProperties",
       "description": "Configuration properties for JWT security settings"
+    },
+    {
+      "name": "cors",
+      "description": "CORS (Cross-Origin Resource Sharing) configuration"
+    },
+    {
+      "name": "openapi",
+      "description": "OpenAPI documentation configuration"
     }
   ],
   "properties": [
@@ -36,6 +44,24 @@
       "type": "java.lang.Boolean",
       "description": "Whether to extract client roles from JWT tokens",
       "defaultValue": true
+    },
+    {
+      "name": "cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Allowed origins for CORS requests",
+      "defaultValue": "http://localhost:5173"
+    },
+    {
+      "name": "openapi.server.url",
+      "type": "java.lang.String",
+      "description": "OpenAPI server URL for documentation",
+      "defaultValue": "http://localhost:8080"
+    },
+    {
+      "name": "openapi.server.description",
+      "type": "java.lang.String",
+      "description": "OpenAPI server description",
+      "defaultValue": "Development Server"
     }
   ]
 }

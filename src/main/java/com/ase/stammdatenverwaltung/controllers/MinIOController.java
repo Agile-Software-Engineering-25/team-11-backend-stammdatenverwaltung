@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,8 +64,12 @@ public class MinIOController {
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "200", description = "Picture found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
         @ApiResponse(responseCode = "404", description = "Picture not found")
       })
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Read.Student') or hasRole('Area-3.Team-11.Read.Employee') or hasRole('Area-3.Team-11.Read.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<byte[]> getProfilePicture(
       @Parameter(description = "ID of user", required = true) @PathVariable @NotBlank String id) {
     log.debug("GET /api/v1/profile-picture/{} - Getting Picture by user ID", id);
@@ -109,8 +114,12 @@ public class MinIOController {
       value = {
         @ApiResponse(responseCode = "201", description = "Profile picture set successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
         @ApiResponse(responseCode = "500", description = "MinIO operation failed"),
       })
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> setProfilePicture(
       @PathVariable @NotBlank String id, @RequestParam MultipartFile file) throws IOException {
     log.debug("POST /api/v1/profile-picture/{} - uploading profile picture", id);
@@ -172,8 +181,12 @@ public class MinIOController {
       value = {
         @ApiResponse(responseCode = "204", description = "Profile picture deleted"),
         @ApiResponse(responseCode = "400", description = "Invalid user ID"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
         @ApiResponse(responseCode = "500", description = "MinIO operation failed")
       })
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Write.Student') or hasRole('Area-3.Team-11.Write.Employee') or hasRole('Area-3.Team-11.Write.Lecturer') or hasRole('HVS-Admin') or hasRole('Hochschulverwaltungsmitarbeiter')")
   public ResponseEntity<Void> deleteProfilePicture(
       @Parameter(description = "ID of user", required = true) @PathVariable @NotBlank String id) {
     log.debug("DELETE /api/v1/profile-picture/{} - Deleting profile picture", id);
