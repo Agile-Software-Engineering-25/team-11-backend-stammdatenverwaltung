@@ -53,13 +53,28 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     String requestUri = request.getRequestURI();
     String method = request.getMethod();
+    String queryString = request.getQueryString();
+    String remoteAddr = request.getRemoteAddr();
+    String userAgent = request.getHeader("User-Agent");
+    String authHeader = request.getHeader("Authorization");
 
     log.warn(
-        "Unauthorized access attempt to endpoint: {} {} | Exception: {} | Message: '{}'",
+        "Unauthorized access attempt (401) to endpoint: {} {} | Exception: {} | Message: '{}'",
         method,
         requestUri,
         authException.getClass().getSimpleName(),
         authException.getMessage());
+
+    log.debug(
+        "401 Request details - Remote IP: {} | Query: {} | User-Agent: {} | Has Auth Header: {}",
+        remoteAddr,
+        queryString != null ? queryString : "none",
+        userAgent,
+        authHeader != null);
+
+    if (authException.getCause() != null) {
+      log.debug("401 Exception cause: {}", authException.getCause().getMessage(), authException.getCause());
+    }
 
     // Send JSON response with 401 status
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
