@@ -5,7 +5,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -14,9 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Global exception handler for authentication and authorization exceptions.
+ * Global exception handler for authentication exceptions.
  *
- * <p>Logs all 401 (Unauthorized) and 403 (Forbidden) responses with detailed information about:
+ * <p>Logs all 401 (Unauthorized) responses with detailed information about:
  *
  * <ul>
  *   <li>Endpoint that was accessed
@@ -25,10 +24,10 @@ import org.springframework.web.context.request.WebRequest;
  *   <li>Timestamp of the failure
  * </ul>
  *
- * <p>This handler catches exceptions thrown by Spring Security during authentication and
- * authorization checks. Note: Spring Security's filter chain may also catch some authentication
- * failures before they reach the controller layer; see AuthenticationEntryPoint configuration for
- * those cases.
+ * <p>This handler catches exceptions thrown by Spring Security during authentication checks at the
+ * controller layer. Note: Spring Security's filter chain handles lower-level authentication
+ * failures. Authorization failures (403 Forbidden) are handled by RoleAwareAccessDeniedHandler in
+ * the filter chain.
  */
 @ControllerAdvice
 @Slf4j
@@ -122,36 +121,5 @@ public class AuthenticationExceptionHandler {
     errorResponse.put("timestamp", System.currentTimeMillis());
 
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-  }
-
-  /**
-   * Handles AccessDeniedException (403 Forbidden).
-   *
-   * <p>Occurs when an authenticated user lacks the required permissions/roles for an endpoint. Logs
-   * the attempt to access restricted resources.
-   *
-   * @param ex the access denied exception
-   * @param request the web request
-   * @return 403 Forbidden response with error details
-   */
-  @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<Map<String, Object>> handleAccessDeniedException(
-      AccessDeniedException ex, WebRequest request) {
-    String requestUri = request.getDescription(false).replace("uri=", "");
-
-    log.warn(
-        "Access denied for endpoint: '{}' | Exception: {} | Message: '{}'",
-        requestUri,
-        ex.getClass().getSimpleName(),
-        ex.getMessage());
-
-    Map<String, Object> errorResponse = new HashMap<>();
-    errorResponse.put("error", "Forbidden");
-    errorResponse.put("message", "Access denied - insufficient permissions");
-    errorResponse.put("details", ex.getMessage());
-    errorResponse.put("endpoint", requestUri);
-    errorResponse.put("timestamp", System.currentTimeMillis());
-
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
   }
 }

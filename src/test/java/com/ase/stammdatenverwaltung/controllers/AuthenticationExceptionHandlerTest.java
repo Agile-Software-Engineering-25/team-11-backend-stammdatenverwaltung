@@ -1,6 +1,7 @@
 package com.ase.stammdatenverwaltung.controllers;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,9 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for authentication and authorization logging.
+ * Integration tests for authentication exception logging.
  *
- * <p>Verifies that 401 and 403 responses are properly logged with request details including:
+ * <p>Verifies that 401 (Unauthorized) responses are properly logged with request details including:
  *
  * <ul>
  *   <li>Endpoint URL
@@ -23,6 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
  *   <li>Exception type and message
  *   <li>Response timestamp
  * </ul>
+ *
+ * <p>Note: 403 (Forbidden) responses are handled by RoleAwareAccessDeniedHandler at the filter
+ * chain level.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,29 +42,12 @@ class AuthenticationExceptionHandlerTest {
   @Test
   void shouldReturn401WithErrorDetailsWhenAccessingProtectedEndpointWithoutAuth() throws Exception {
     mockMvc
-        .perform(get("/api/v1/hello"))
+        .perform(get("/api/v1/users"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.error").value("Unauthorized"))
         .andExpect(
             jsonPath("$.message").value("Authentication is required to access this resource"))
-        .andExpect(jsonPath("$.endpoint").value("/api/v1/hello"))
-        .andExpect(jsonPath("$.method").value("GET"))
-        .andExpect(jsonPath("$.timestamp").isNumber());
-  }
-
-  /**
-   * Tests that accessing an admin endpoint without the required role returns 403 with proper error
-   * response structure.
-   */
-  @Test
-  void shouldReturn403WithErrorDetailsWhenLackingRequiredRole() throws Exception {
-    mockMvc
-        .perform(get("/api/v1/admin/users").with(httpBasic("dev-user", "dev-password")))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.error").value("Forbidden"))
-        .andExpect(
-            jsonPath("$.message").value("You do not have permission to access this resource"))
-        .andExpect(jsonPath("$.endpoint").value("/api/v1/admin/users"))
+        .andExpect(jsonPath("$.endpoint").value("/api/v1/users"))
         .andExpect(jsonPath("$.method").value("GET"))
         .andExpect(jsonPath("$.timestamp").isNumber());
   }
@@ -79,17 +66,16 @@ class AuthenticationExceptionHandlerTest {
   @Test
   void shouldIncludeCorrectEndpointInErrorResponse() throws Exception {
     mockMvc
-        .perform(get("/api/v1/admin/users"))
+        .perform(get("/api/v1/users"))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.endpoint").value("/api/v1/admin/users"));
+        .andExpect(jsonPath("$.endpoint").value("/api/v1/users"));
   }
 
   /** Tests that valid credentials allow access to protected endpoints (positive case). */
   @Test
   void shouldAllowAccessWithValidCredentialsAndProperRole() throws Exception {
     mockMvc
-        .perform(get("/api/v1/admin/users").with(httpBasic("dev-admin", "dev-password")))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Admin endpoint accessed successfully!"));
+        .perform(get("/api/v1/users").with(jwt().authorities(() -> "ROLE_sau-admin")))
+        .andExpect(status().isOk());
   }
 }

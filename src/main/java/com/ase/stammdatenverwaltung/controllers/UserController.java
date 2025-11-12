@@ -119,8 +119,7 @@ public class UserController {
             })
       })
   @GetMapping
-  @PreAuthorize(
-      "hasRole('sau-admin') or hasRole('university-administrative-staff')")
+  @PreAuthorize("hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
