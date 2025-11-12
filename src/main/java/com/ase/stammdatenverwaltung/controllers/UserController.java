@@ -3,6 +3,7 @@ package com.ase.stammdatenverwaltung.controllers;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
+import com.ase.stammdatenverwaltung.dto.DeleteUserRequest;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
@@ -381,6 +382,42 @@ public class UserController {
       return ResponseEntity.noContent().build();
     } catch (EntityNotFoundException e) {
       log.warn("Failed to delete user with ID {}: {}", userId, e.getMessage());
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  /**
+   * Deletes a user (legacy endpoint). Requires delete access to the corresponding user type master
+   * data. This endpoint is maintained for backward compatibility with legacy systems.
+   *
+   * @param request the request body containing the user-id
+   * @return an empty response
+   */
+  @PostMapping("/delete")
+  @Operation(
+      summary = "Delete a user (legacy)",
+      description =
+          "Delete a user by ID. This is a legacy endpoint; use DELETE /{userId} for new implementations.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request - invalid request body"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - insufficient permissions for user type"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+      })
+  @PreAuthorize(
+      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
+  public ResponseEntity<Void> deleteUserByIdLegacy(@Valid @RequestBody DeleteUserRequest request) {
+    String id = request.getUserId();
+    log.debug("POST /api/v1/users/delete - Deleting user with ID {} (legacy endpoint)", id);
+    try {
+      personService.deleteById(id);
+      return ResponseEntity.noContent().build();
+    } catch (EntityNotFoundException e) {
+      log.warn("Failed to delete user with ID {}: {}", id, e.getMessage());
       return ResponseEntity.notFound().build();
     }
   }
