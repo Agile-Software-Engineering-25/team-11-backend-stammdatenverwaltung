@@ -3,7 +3,6 @@ package com.ase.stammdatenverwaltung.controllers;
 import com.ase.stammdatenverwaltung.dto.CreateEmployeeRequest;
 import com.ase.stammdatenverwaltung.dto.CreateLecturerRequest;
 import com.ase.stammdatenverwaltung.dto.CreateStudentRequest;
-import com.ase.stammdatenverwaltung.dto.DeleteUserRequest;
 import com.ase.stammdatenverwaltung.dto.PersonDetailsDTO;
 import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
@@ -28,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -356,15 +356,14 @@ public class UserController {
   /**
    * Deletes a user. Requires delete access to the corresponding user type master data.
    *
-   * @param request the request body containing the user-id
+   * @param userId The ID of the user to delete.
    * @return an empty response
    */
-  @PostMapping("/delete")
+  @DeleteMapping("/{userId}")
   @Operation(summary = "Delete a user", description = "Delete a user by ID")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "204", description = "User deleted successfully"),
-        @ApiResponse(responseCode = "400", description = "Bad request - invalid request body"),
         @ApiResponse(
             responseCode = "403",
             description = "Forbidden - insufficient permissions for user type"),
@@ -372,15 +371,16 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
       })
   @PreAuthorize(
-      "@personService.canAccessUser(#request.userId, 'Delete') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
-  public ResponseEntity<Void> deleteUserById(@Valid @RequestBody DeleteUserRequest request) {
-    String id = request.getUserId();
-    log.debug("POST /api/v1/users/delete - Deleting user with ID {}", id);
+      "@personService.canAccessUser(#userId, 'Delete') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
+  public ResponseEntity<Void> deleteUserById(
+      @Parameter(description = "ID of the user to delete", required = true) @PathVariable
+          String userId) {
+    log.debug("DELETE /api/v1/users/{} - Deleting user with ID {}", userId, userId);
     try {
-      personService.deleteById(id);
+      personService.deleteById(userId);
       return ResponseEntity.noContent().build();
     } catch (EntityNotFoundException e) {
-      log.warn("Failed to delete user with ID {}: {}", id, e.getMessage());
+      log.warn("Failed to delete user with ID {}: {}", userId, e.getMessage());
       return ResponseEntity.notFound().build();
     }
   }
