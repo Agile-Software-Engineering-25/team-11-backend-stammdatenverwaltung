@@ -73,7 +73,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         authHeader != null);
 
     if (authException.getCause() != null) {
-      log.debug("401 Exception cause: {}", authException.getCause().getMessage(), authException.getCause());
+      log.debug(
+          "401 Exception cause: {}",
+          authException.getCause().getMessage(),
+          authException.getCause());
     }
 
     // Send JSON response with 401 status
