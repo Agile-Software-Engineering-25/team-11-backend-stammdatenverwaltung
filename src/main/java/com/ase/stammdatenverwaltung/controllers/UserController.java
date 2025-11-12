@@ -120,7 +120,8 @@ public class UserController {
             })
       })
   @GetMapping
-  @PreAuthorize("hasRole('Area-3.Team-11.Read.User') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
+  @PreAuthorize(
+      "hasRole('Area-3.Team-11.Read.User') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<List<PersonDetailsDTO>> getUsers(
       @Parameter(description = "Flag to include details from Keycloak", required = false)
           @RequestParam(defaultValue = "true")
@@ -130,9 +131,13 @@ public class UserController {
               required = false)
           @RequestParam(required = false)
           String userType) {
+    log.debug("GET /api/v1/users - Authorization check passed");
+    log.debug("  withDetails={}, userType={}", withDetails, userType);
+
     try {
       Flux<PersonDetailsDTO> users = personService.findAll(withDetails, userType);
       List<PersonDetailsDTO> userList = users.collectList().block();
+      log.debug("Successfully retrieved {} users", userList != null ? userList.size() : 0);
       return ResponseEntity.ok(userList);
     } catch (Exception e) {
       log.error(

@@ -238,12 +238,17 @@ public class PersonService {
    *     found or has an unsupported type
    */
   public boolean canAccessUser(String userId, String permission) {
+    log.debug("canAccessUser() check - userId: {}, permission: {}", userId, permission);
+
     Person person = personRepository.findById(userId).orElse(null);
 
     if (person == null) {
       log.debug("User not found during permission check: {}", userId);
       return false;
     }
+
+    String personType = person.getClass().getSimpleName();
+    log.debug("Person found - ID: {}, Type: {}", userId, personType);
 
     String role;
     if (person instanceof Student) {
@@ -257,7 +262,12 @@ public class PersonService {
       return false;
     }
 
-    return UserInformationJWT.hasRole(role);
+    log.debug("Required role for permission check: {}", role);
+    boolean hasAccess = UserInformationJWT.hasRole(role);
+    log.debug(
+        "Permission check result: {} (role '{}' required)", hasAccess ? "GRANTED" : "DENIED", role);
+
+    return hasAccess;
   }
 
   /**

@@ -207,11 +207,26 @@ public class UserInformationJWT {
    */
   public static boolean hasRole(String role) {
     if (role == null) {
+      LOG.debug("hasRole() called with null role");
       return false;
     }
 
     List<String> roles = getRoles();
-    return roles.stream().anyMatch(r -> r.equalsIgnoreCase(role));
+
+    LOG.debug("hasRole('{}') check - User has {} total roles/groups", role, roles.size());
+
+    boolean hasRole = roles.stream().anyMatch(r -> r.equalsIgnoreCase(role));
+
+    if (!hasRole && !roles.isEmpty()) {
+      LOG.debug("  -> Role '{}' not found. Available roles:", role);
+      for (String availableRole : roles) {
+        LOG.debug("     - '{}'", availableRole);
+      }
+    } else if (hasRole) {
+      LOG.debug("  -> User HAS role '{}'", role);
+    }
+
+    return hasRole;
   }
 
   /**
