@@ -1,6 +1,5 @@
 package com.ase.stammdatenverwaltung.config;
 
-import com.ase.stammdatenverwaltung.security.CustomAccessDeniedHandler;
 import com.ase.stammdatenverwaltung.security.CustomAuthenticationEntryPoint;
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
 import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
@@ -26,7 +25,7 @@ public class SecurityConfig {
 
   /** Provides a centralized access denied handler for logging role information on auth failures */
   @Bean
-  public RoleAwareAccessDeniedHandler roleAwareAccessDeniedHandler() {
+  RoleAwareAccessDeniedHandler roleAwareAccessDeniedHandler() {
     return new RoleAwareAccessDeniedHandler();
   }
 
@@ -63,19 +62,16 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
-        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(accessDeniedHandler))
         .csrf(
             csrf ->
                 csrf.ignoringRequestMatchers(
                     "/h2-console/**", "/api/**")) // Ignore CSRF for H2 console and API endpoints
         .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-        .exceptionHandling(
-            exceptionHandling ->
-                exceptionHandling
-                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
-        // Support both Basic Auth (for dev tools) and JWT (for API)
-        .httpBasic(basic -> basic.realmName("Stammdatenverwaltung Development"))
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
     return http.build();
@@ -108,20 +104,22 @@ public class SecurityConfig {
                     .permitAll()
                     // User endpoints
                     .requestMatchers("/api/v1/users/**")
-                    .permitAll()
+                    .authenticated()
                     // Group endpoints
                     .requestMatchers("/api/v1/group/**")
-                    .permitAll()
+                    .authenticated()
+                    // Profile picture endpoints
+                    .requestMatchers("/api/v1/profile-picture/**")
+                    .authenticated()
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
-        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling
                     .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
+                    .accessDeniedHandler(accessDeniedHandler))
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
         // Support JWT (for API testing)
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
@@ -177,14 +175,13 @@ public class SecurityConfig {
                     // All other endpoints require authentication
                     .anyRequest()
                     .authenticated())
-        .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
-        .headers(headers -> headers.frameOptions(frame -> frame.deny()))
         .exceptionHandling(
             exceptionHandling ->
                 exceptionHandling
                     .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                    .accessDeniedHandler(new CustomAccessDeniedHandler()))
+                    .accessDeniedHandler(accessDeniedHandler))
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignore CSRF for API endpoints
+        .headers(headers -> headers.frameOptions(frame -> frame.deny()))
         // JWT-only authentication in production
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));

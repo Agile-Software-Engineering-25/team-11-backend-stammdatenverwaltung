@@ -117,8 +117,8 @@ src/main/resources/
 - **Keycloak Integration**: External user identity provider with role mapping
 - **Supported Roles**:
   - `Area-3.Team-11.Read.*` / `Area-3.Team-11.Write.*` / `Area-3.Team-11.Delete.*`: Fine-grained resource permissions
-  - `HVS-Admin`: Administrator privileges
-  - `Hochschulverwaltungsmitarbeiter`: University staff access
+  - `sau-admin`: Administrator privileges
+  - `university-administrative-staff`: University staff access
 
 ### Examples (Development Only)
 
@@ -161,8 +161,8 @@ DATABASE_PASSWORD=your-password
 ### Authorization Roles
 
 - `Area-3.Team-11.Read.User`: Read user data
-- `HVS-Admin`: Administrator privileges
-- `Hochschulverwaltungsmitarbeiter`: University staff
+- `sau-admin`: Administrator privileges
+- `university-administrative-staff`: University staff
 
 ---
 
@@ -193,20 +193,20 @@ flyway.validateOnMigrate=true
 
 | Method   | Endpoint     | Description         | Required Role                                  |
 | -------- | ------------ | ------------------- | ---------------------------------------------- |
-| `GET`    | `/`          | Get all persons     | `Area-3.Team-11.Read.*` or `HVS-Admin`         |
-| `GET`    | `/{id}`      | Get person by ID    | `Area-3.Team-11.Read.*` or `HVS-Admin`         |
-| `POST`   | `/students`  | Create new student  | `Area-3.Team-11.Write.Student` or `HVS-Admin`  |
-| `POST`   | `/employees` | Create new employee | `Area-3.Team-11.Write.Employee` or `HVS-Admin` |
-| `POST`   | `/lecturers` | Create new lecturer | `Area-3.Team-11.Write.Lecturer` or `HVS-Admin` |
-| `PUT`    | `/{id}`      | Update person       | `Area-3.Team-11.Write.*` or `HVS-Admin`        |
-| `DELETE` | `/{id}`      | Delete person       | `Area-3.Team-11.Delete.*` or `HVS-Admin`       |
+| `GET`    | `/`          | Get all persons     | `Area-3.Team-11.Read.*` or `sau-admin`         |
+| `GET`    | `/{id}`      | Get person by ID    | `Area-3.Team-11.Read.*` or `sau-admin`         |
+| `POST`   | `/students`  | Create new student  | `Area-3.Team-11.Write.Student` or `sau-admin`  |
+| `POST`   | `/employees` | Create new employee | `Area-3.Team-11.Write.Employee` or `sau-admin` |
+| `POST`   | `/lecturers` | Create new lecturer | `Area-3.Team-11.Write.Lecturer` or `sau-admin` |
+| `PUT`    | `/{id}`      | Update person       | `Area-3.Team-11.Write.*` or `sau-admin`        |
+| `DELETE` | `/{id}`      | Delete person       | `Area-3.Team-11.Delete.*` or `sau-admin`       |
 
 ### Groups (`/api/v1/group`)
 
 | Method | Endpoint       | Description       | Required Role                                |
 | ------ | -------------- | ----------------- | -------------------------------------------- |
-| `GET`  | `/`            | Get all groups    | `Area-3.Team-11.Read.User` or `HVS-Admin`    |
-| `GET`  | `/{groupName}` | Get group by name | `Area-3.Team-11.Read.Student` or `HVS-Admin` |
+| `GET`  | `/`            | Get all groups    | `Area-3.Team-11.Read.User` or `sau-admin`    |
+| `GET`  | `/{groupName}` | Get group by name | `Area-3.Team-11.Read.Student` or `sau-admin` |
 
 ### Examples (`/api/v1/examples`) - Dev Only
 

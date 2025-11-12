@@ -202,7 +202,7 @@ public class UserInformationJWT {
    * <p>Searches through all available roles from multiple JWT claim sources (groups,
    * realm_access.roles, and resource_access.account.roles).
    *
-   * @param role The role or group name to check (e.g., "HVS-Admin", "Area-3.Team-11.Read.User")
+   * @param role The role or group name to check (e.g., "sau-admin", "Area-3.Team-11.Read.User")
    * @return true if user has the role, false otherwise
    */
   public static boolean hasRole(String role) {
