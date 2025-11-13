@@ -36,47 +36,97 @@ public class MinioConfig {
   @Bean
   @ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = false)
   MinioClient minioClient() {
-    // Strip protocol from endpoint if present, as MinIO client expects only hostname
-    String cleanEndpoint = endpoint;
-    if (cleanEndpoint.startsWith("https://")) {
-      cleanEndpoint = cleanEndpoint.substring("https://".length());
-    } else if (cleanEndpoint.startsWith("http://")) {
-      cleanEndpoint = cleanEndpoint.substring("http://".length());
+    if (endpoint == null) {
+      throw new IllegalStateException("MinIO endpoint must not be null. Please set 'minio.endpoint' in your configuration.");
+    }
+    // Determine whether endpoint includes a scheme (https://, http://)
+    boolean hasScheme = endpoint.startsWith("https://") || endpoint.startsWith("http://");
+
+    if (hasScheme) {
+      return initializeWithUrlEndpoint();
+    } else {
+      return initializeWithHostPortEndpoint();
+    }
+  }
+
+  /**
+   * Initialize MinIO client using full URL with scheme. The MinIO SDK will automatically extract
+   * the port and protocol from the URL. This is the recommended approach for ingress-based setups
+   * where the endpoint is served at standard ports (443 for HTTPS, 80 for HTTP).
+   */
+  private MinioClient initializeWithUrlEndpoint() {
+    log.info(
+        "Initializing MinIO client with URL endpoint - endpoint={}, bucket={}, mode=URL",
+        endpoint,
+        bucketName);
+
+    try {
+      MinioClient client =
+          MinioClient.builder().endpoint(endpoint).credentials(accessKey, secretKey).build();
+      log.debug(
+          "MinIO client successfully initialized - endpoint={}, bucket={}, mode=URL, "
+              + "note=scheme and port extracted from URL",
+          endpoint,
+          bucketName);
+      return client;
+    } catch (Exception e) {
+      log.error(
+          "MinIO client initialization failed (URL mode) - endpoint={}, bucket={}, "
+              + "errorType={}, message={}",
+          endpoint,
+          bucketName,
+          e.getClass().getSimpleName(),
+          e.getMessage());
+      log.debug("MinIO initialization error details", e);
+      throw new RuntimeException("Failed to initialize MinIO client with URL endpoint", e);
+    }
+  }
+
+  /**
+   * Initialize MinIO client using explicit host, port, and TLS flag. This is the fallback mode for
+   * direct host-port-tls configurations without a full URL. The host is extracted from the endpoint
+   * (stripping any accidental scheme prefix), and explicit port/tls values are used.
+   */
+  private MinioClient initializeWithHostPortEndpoint() {
+    // Extract hostname in case there are any accidental prefixes
+    String host = endpoint;
+    if (host.startsWith("https://")) {
+      host = host.substring("https://".length());
+    } else if (host.startsWith("http://")) {
+      host = host.substring("http://".length());
     }
 
     log.info(
-        "Initializing MinIO client - endpoint={}, port={}, tls={}, bucket={}",
-        cleanEndpoint,
+        "Initializing MinIO client with host-port endpoint - host={}, port={}, tls={}, "
+            + "bucket={}, mode=HOST-PORT",
+        host,
         port,
         tls,
         bucketName);
 
     try {
       MinioClient client =
-          MinioClient.builder()
-              .endpoint(cleanEndpoint, port, tls)
-              .credentials(accessKey, secretKey)
-              .build();
+          MinioClient.builder().endpoint(host, port, tls).credentials(accessKey, secretKey).build();
       log.debug(
-          "MinIO client successfully initialized - endpoint={}, port={}, tls={}, "
-              + "bucket={}, originalEndpoint={}",
-          cleanEndpoint,
+          "MinIO client successfully initialized - host={}, port={}, tls={}, bucket={}, "
+              + "mode=HOST-PORT, note=explicit host and port used",
+          host,
           port,
           tls,
-          bucketName,
-          endpoint);
+          bucketName);
       return client;
     } catch (Exception e) {
       log.error(
-          "MinIO client initialization failed - endpoint={}, port={}, tls={}, "
-              + "errorType={}, message={}",
-          cleanEndpoint,
+          "MinIO client initialization failed (HOST-PORT mode) - host={}, port={}, tls={}, "
+              + "bucket={}, errorType={}, message={}",
+          host,
           port,
           tls,
+          bucketName,
           e.getClass().getSimpleName(),
           e.getMessage());
       log.debug("MinIO initialization error details", e);
-      throw new RuntimeException("Failed to initialize MinIO client", e);
+      throw new RuntimeException("Failed to initialize MinIO client with host-port endpoint", e);
     }
   }
 }
