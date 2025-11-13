@@ -1,0 +1,70 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        '[format_sql]': true
+        jdbc:
+          '[batch_size]': 50
+          '[batch_versioned_data]': true
+          '[order_inserts]': true
+          '[order_updates]': true
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/common,classpath:db/migration/h2
+    baseline-on-migrate: true
+    validate-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://keycloak.test.de/realms/test}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:https://keycloak.test.de/realms/test/protocol/openid-connect/certs}
+
+server:
+  port: 8080
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    '[com.ase.stammdatenverwaltung]': DEBUG
+    '[org.springframework.security]': WARN
+
+minio:
+  enabled: false
+  endpoint: ${MINIO_ENDPOINT:http://localhost}
+  port: ${MINIO_PORT:9000}
+  tls: ${MINIO_TLS:false}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:test-bucket}
+
+bitfrost:
+  api-url: ${BITFROST_API_URL:https://bitfrost.test.de/api/v1/messages/publish}
+  service-name: ${BITFROST_SERVICE_NAME:TestService}
+  topic-name: ${BITFROST_TOPIC_NAME:user:deletion}
+  project-secret: ${BITFROST_PROJECT_SECRET:}
+
+cors:
+  allowed-origins: "http://localhost:5173"
+
+openapi:
+  server:
+    url: http://localhost:8080
+    description: Test Server
