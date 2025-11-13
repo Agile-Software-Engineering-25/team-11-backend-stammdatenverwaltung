@@ -37,7 +37,8 @@ public class MinioConfig {
   @ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = false)
   MinioClient minioClient() {
     if (endpoint == null) {
-      throw new IllegalStateException("MinIO endpoint must not be null. Please set 'minio.endpoint' in your configuration.");
+      throw new IllegalStateException(
+          "MinIO endpoint must not be null. Please set 'minio.endpoint' in your configuration.");
     }
     // Determine whether endpoint includes a scheme (https://, http://)
     boolean hasScheme = endpoint.startsWith("https://") || endpoint.startsWith("http://");
