@@ -78,6 +78,11 @@ spec:
                 secretKeyRef:
                   name: minio-secret
                   key: MINIO_SECRET
+            - name: BITFROST_PROJECT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: bitfrost-secret
+                  key: BITFROST_PROJECT_SECRET
             # NOTE: The Ingress in this overlay contains a rewrite-target annotation
             # (traefik.ingress.kubernetes.io/rewrite-target: /) which rewrites requests
             # from /api -> /. Because of that, the application will receive requests
