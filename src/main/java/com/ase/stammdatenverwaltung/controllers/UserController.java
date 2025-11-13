@@ -60,6 +60,10 @@ public class UserController {
 
   private final LecturerService lecturerService;
 
+  private static final String bitfrostServiceName = "Stammdatenverwaltung",
+      bitfrostTopicName = "user:deletion";
+  private final String bitfrostProjectSecret = System.getenv("BITFROST_PROJECT_SECRET");
+
   /**
    * Creates a new student. Requires write access to student master data.
    *
@@ -420,6 +424,24 @@ public class UserController {
     log.debug("POST /api/v1/users/delete - Deleting user with ID {} (legacy endpoint)", id);
     try {
       personService.deleteById(id);
+      // Notify message broker
+      HttpRequest bitfrostRequest =
+          HttpRequest.newBuilder()
+              .uri(
+                  URI.create(
+                      String.format(
+                          "https://bitfrost.sau-portal.de/api/v1/messages/publish/%s/%s",
+                          bitfrostServiceName, bitfrostTopicName)))
+              .header(
+                  "authorization", "Executor " + bitfrostServiceName + ":" + bitfrostProjectSecret)
+              .header("content-type", "application/json")
+              .method(
+                  "POST",
+                  HttpRequest.BodyPublishers.ofString("{\n  \"user-id\": \"" + id + "\"\n}"))
+              .build();
+      HttpResponse<String> bitfrostResponse =
+          HttpClient.newHttpClient().send(bitfrostRequest, HttpResponse.BodyHandlers.ofString());
+
       return ResponseEntity.noContent().build();
     } catch (EntityNotFoundException e) {
       log.warn("Failed to delete user with ID {}: {}", id, e.getMessage());
