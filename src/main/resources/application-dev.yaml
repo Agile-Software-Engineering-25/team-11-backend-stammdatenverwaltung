@@ -67,6 +67,12 @@ minio:
   secret-key: ${MINIO_SECRET:minioadmin}
   bucket-name: ${MINIO_BUCKET_NAME:minio-bucket}
 
+bitfrost:
+  api-url: ${BITFROST_API_URL:https://localhost:8080/api/v1/messages/publish}
+  service-name: ${BITFROST_SERVICE_NAME:Stammdatenverwaltung}
+  topic-name: ${BITFROST_TOPIC_NAME:user:deletion}
+  project-secret: ${BITFROST_PROJECT_SECRET:}
+
 cors:
   allowed-origins: "http://localhost:5173"
 
