@@ -61,6 +61,12 @@ minio:
   secret-key: ${MINIO_SECRET}
   bucket-name: ${MINIO_BUCKET_NAME:ase-team-11}
 
+bitfrost:
+  api-url: ${BITFROST_API_URL:https://bitfrost.sau-portal.de/api/v1/messages/publish}
+  service-name: ${BITFROST_SERVICE_NAME:Stammdatenverwaltung}
+  topic-name: ${BITFROST_TOPIC_NAME:user:deletion}
+  project-secret: ${BITFROST_PROJECT_SECRET}
+
 cors:
   allowed-origins: "https://sau-portal.de/,http://localhost:3000"
 

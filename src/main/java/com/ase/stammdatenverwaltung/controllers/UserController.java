@@ -9,6 +9,7 @@ import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Student;
+import com.ase.stammdatenverwaltung.services.BitfrostNotificationService;
 import com.ase.stammdatenverwaltung.services.EmployeeService;
 import com.ase.stammdatenverwaltung.services.LecturerService;
 import com.ase.stammdatenverwaltung.services.PersonService;
@@ -59,6 +60,8 @@ public class UserController {
   private final EmployeeService employeeService;
 
   private final LecturerService lecturerService;
+
+  private final BitfrostNotificationService bitfrostNotificationService;
 
   /**
    * Creates a new student. Requires write access to student master data.
@@ -384,6 +387,9 @@ public class UserController {
     log.debug("DELETE /api/v1/users/{} - Deleting user with ID {}", userId, userId);
     try {
       personService.deleteById(userId);
+      if (!bitfrostNotificationService.notifyUserDeletion(userId)) {
+        log.warn("Bitfrost notification failed for user deletion with ID {}", userId);
+      }
       return ResponseEntity.noContent().build();
     } catch (EntityNotFoundException e) {
       log.warn("Failed to delete user with ID {}: {}", userId, e.getMessage());
@@ -420,6 +426,9 @@ public class UserController {
     log.debug("POST /api/v1/users/delete - Deleting user with ID {} (legacy endpoint)", id);
     try {
       personService.deleteById(id);
+      if (!bitfrostNotificationService.notifyUserDeletion(id)) {
+        log.warn("Bitfrost notification failed for user deletion with ID {}", id);
+      }
       return ResponseEntity.noContent().build();
     } catch (EntityNotFoundException e) {
       log.warn("Failed to delete user with ID {}: {}", id, e.getMessage());

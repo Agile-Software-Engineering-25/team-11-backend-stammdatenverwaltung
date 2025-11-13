@@ -258,19 +258,50 @@ spec:
 
 ### Configure Secrets
 
+The application requires several Kubernetes Secrets to be configured before deployment. Create them in your cluster:
+
 ```bash
-# Create secret for Keycloak
-kubectl create secret generic app-secrets \
-  --from-literal=keycloak-secret=YOUR_SECRET
+# Create secret for database (PostgreSQL)
+kubectl create secret generic postgres-secret \
+  --from-literal=POSTGRES_USER=postgres \
+  --from-literal=POSTGRES_PASSWORD=YOUR_DB_PASSWORD
 
-# Create ConfigMap for non-sensitive config
-kubectl create configmap app-config \
-  --from-literal=database-url=jdbc:postgresql://postgres:5432/db
+# Create secret for Keycloak (OAuth2)
+kubectl create secret generic keycloak-secret \
+  --from-literal=KEYCLOAK_ISSUER_URI=https://keycloak.sau-portal.de/realms/sau \
+  --from-literal=KEYCLOAK_JWK_SET_URI=https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs \
+  --from-literal=KEYCLOAK_CLIENT_SECRET=YOUR_KEYCLOAK_CLIENT_SECRET
 
-# View secrets
+# Create secret for MinIO (object storage)
+kubectl create secret generic minio-secret \
+  --from-literal=MINIO_SECRET=YOUR_MINIO_SECRET_KEY
+
+# Create secret for Bitfrost (message broker)
+# This secret is required for user deletion notifications
+kubectl create secret generic bitfrost-secret \
+  --from-literal=BITFROST_PROJECT_SECRET=YOUR_BITFROST_PROJECT_SECRET
+
+# View all secrets
 kubectl get secrets
-kubectl describe secret app-secrets
+
+# Verify specific secrets
+kubectl describe secret postgres-secret
+kubectl describe secret keycloak-secret
+kubectl describe secret minio-secret
+kubectl describe secret bitfrost-secret
 ```
+
+#### Bitfrost Configuration Details
+
+The Bitfrost integration is optional but recommended for notifying other services about user deletions:
+
+- **Purpose**: Publishes user deletion events to the Bitfrost message broker
+- **Secret Resource**: `bitfrost-secret`
+- **Secret Key**: `BITFROST_PROJECT_SECRET`
+- **Graceful Degradation**: If the secret is not configured or blank, notifications are skipped with debug logging, and the application continues operating normally
+- **Configuration Property**: `bitfrost.project-secret` (set from `BITFROST_PROJECT_SECRET` environment variable)
+
+If you do not have access to a Bitfrost instance, simply omit the `bitfrost-secret` creation, and the application will operate without this integration.
 
 ### Service Exposure
 
