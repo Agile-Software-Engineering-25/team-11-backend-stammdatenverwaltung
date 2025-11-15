@@ -134,10 +134,9 @@ public class PersonService {
             })
         .onErrorResume(
             error -> {
-              log.debug(
-                  "Failed to fetch user details from Keycloak for person ID: {} - returning person data without enrichment",
-                  person.getId(),
-                  error);
+              log.warn(
+                  "Keycloak unavailable for person ID {}, returning basic person data without enrichment",
+                  person.getId());
               return Mono.just(personDtoMapper.map(person));
             });
   }

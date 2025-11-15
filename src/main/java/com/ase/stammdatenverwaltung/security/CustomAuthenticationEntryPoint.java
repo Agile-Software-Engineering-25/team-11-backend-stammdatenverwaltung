@@ -1,5 +1,7 @@
 package com.ase.stammdatenverwaltung.security;
 
+import com.ase.stammdatenverwaltung.logging.ExceptionContext;
+import com.ase.stammdatenverwaltung.logging.LoggingHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -15,14 +18,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 /**
  * Custom authentication entry point to log 401 (Unauthorized) responses at the filter level.
  *
- * <p>This is called when an unauthenticated user tries to access a protected resource. It logs:
- *
- * <ul>
- *   <li>The endpoint that was attempted
- *   <li>The HTTP method used
- *   <li>The authentication exception type and message
- *   <li>Timestamp of the failure
- * </ul>
+ * <p>This is called when an unauthenticated user tries to access a protected resource. It logs
+ * structured error information using {@link LoggingHelper} for consistency across the application.
  *
  * <p>This handler captures 401 responses earlier in the filter chain than @ControllerAdvice,
  * ensuring all unauthorized access attempts are logged consistently.
@@ -53,40 +50,32 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     String requestUri = request.getRequestURI();
     String method = request.getMethod();
-    String queryString = request.getQueryString();
-    String remoteAddr = request.getRemoteAddr();
-    String userAgent = request.getHeader("User-Agent");
-    String authHeader = request.getHeader("Authorization");
 
-    log.warn(
-        "Unauthorized access attempt (401) to endpoint: {} {} | Exception: {} | Message: '{}'",
-        method,
-        requestUri,
-        authException.getClass().getSimpleName(),
-        authException.getMessage());
+    ExceptionContext ctx =
+        ExceptionContext.builder()
+            .errorCode("AUTH_001")
+            .errorCategory("Authentication - Entry Point")
+            .status(HttpStatus.UNAUTHORIZED)
+            .userMessage("Authentication is required to access this resource")
+            .technicalMessage(
+                String.format(
+                    "%s: %s", authException.getClass().getSimpleName(), authException.getMessage()))
+            .withContext("endpoint", requestUri)
+            .withContext("method", method)
+            .withContext("remoteAddr", request.getRemoteAddr())
+            .cause(authException)
+            .build();
 
-    log.debug(
-        "401 Request details - Remote IP: {} | Query: {} | User-Agent: {} | Has Auth Header: {}",
-        remoteAddr,
-        queryString != null ? queryString : "none",
-        userAgent,
-        authHeader != null);
-
-    if (authException.getCause() != null) {
-      log.debug(
-          "401 Exception cause: {}",
-          authException.getCause().getMessage(),
-          authException.getCause());
-    }
+    LoggingHelper.logSecurity(ctx, "password", "credentials", "token", "authorization");
 
     // Send JSON response with 401 status
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
     Map<String, Object> body = new HashMap<>();
-    body.put("error", "Unauthorized");
-    body.put("message", "Authentication is required to access this resource");
-    body.put("details", authException.getMessage());
+    body.put("error", ctx.getErrorCode());
+    body.put("message", ctx.getUserMessage());
+    body.put("details", ctx.getTechnicalMessage());
     body.put("endpoint", requestUri);
     body.put("method", method);
     body.put("timestamp", System.currentTimeMillis());

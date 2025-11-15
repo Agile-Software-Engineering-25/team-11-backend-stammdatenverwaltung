@@ -52,6 +52,8 @@ management:
 logging:
   level:
     '[com.ase.stammdatenverwaltung]': DEBUG
+    '[com.ase.stammdatenverwaltung.logging]': DEBUG
+    '[com.ase.stammdatenverwaltung.security]': DEBUG
     '[org.springframework.security]': DEBUG
 
 # Note: JWT roles are extracted from the "groups" claim automatically

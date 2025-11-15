@@ -1,10 +1,18 @@
 package com.ase.stammdatenverwaltung.exceptions;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+
 /**
  * Base exception thrown when profile picture operations fail. Encapsulates errors that occur during
  * profile picture storage, retrieval, or deletion operations in MinIO.
+ *
+ * <p>Implements {@link ApplicationException} to provide structured error information to the global
+ * exception handler.
  */
-public class ProfilePictureException extends RuntimeException {
+public abstract class ProfilePictureException extends RuntimeException
+    implements ApplicationException {
   private final String userId;
 
   /**
@@ -37,5 +45,33 @@ public class ProfilePictureException extends RuntimeException {
    */
   public String getUserId() {
     return userId;
+  }
+
+  @Override
+  public HttpStatus getHttpStatus() {
+    // Derived classes may override for specific status codes (e.g., 404 for not found)
+    return HttpStatus.INTERNAL_SERVER_ERROR;
+  }
+
+  @Override
+  public String getErrorCategory() {
+    return this.getClass().getSimpleName();
+  }
+
+  @Override
+  public String getUserMessage() {
+    return "Profile picture operation failed";
+  }
+
+  @Override
+  public String getTechnicalMessage() {
+    return getMessage();
+  }
+
+  @Override
+  public Map<String, String> getContextMap() {
+    Map<String, String> context = new HashMap<>();
+    context.put("userId", userId);
+    return context;
   }
 }

@@ -62,11 +62,6 @@ public class MinIOService {
       }
       return new ProfilePictureData(baos.toByteArray(), "application/octet-stream");
     } catch (Exception e) {
-      log.error(
-          "Error retrieving profile picture for user ID: {} ({})",
-          id,
-          e.getClass().getSimpleName());
-      log.debug("Error retrieving profile picture for user ID: {}", id, e);
       String errorMessage =
           String.format(
               "Failed to retrieve profile picture for user: %s (%s: %s)",
@@ -92,9 +87,6 @@ public class MinIOService {
       storageClient.putObject(minioConfig.getBucketName(), id, stream, size, partSize, contentType);
 
     } catch (Exception e) {
-      log.error(
-          "Error setting profile picture for user ID: {} ({})", id, e.getClass().getSimpleName());
-      log.debug("Error setting profile picture for user ID: {}", id, e);
       String errorMessage =
           String.format(
               "Failed to set profile picture for user: %s (%s: %s)",
@@ -114,9 +106,6 @@ public class MinIOService {
     try {
       storageClient.removeObject(minioConfig.getBucketName(), id);
     } catch (Exception e) {
-      log.error(
-          "Error deleting profile picture for user ID: {} ({})", id, e.getClass().getSimpleName());
-      log.debug("Error deleting profile picture for user ID: {}", id, e);
       String errorMessage =
           String.format(
               "Failed to delete profile picture for user: %s (%s: %s)",

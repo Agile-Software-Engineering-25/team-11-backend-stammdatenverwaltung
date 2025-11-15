@@ -120,8 +120,7 @@ public class GroupService {
                     Collectors.toMap(KeycloakUser::getId, user -> user, (user1, user2) -> user1));
       }
     } catch (Exception e) {
-      log.error("Failed to fetch user details from Keycloak ({})", e.getClass().getSimpleName());
-      log.debug("Failed to fetch user details from Keycloak", e);
+      log.warn("Keycloak unavailable, returning group without user details enrichment");
     }
 
     return keycloakUserMap;

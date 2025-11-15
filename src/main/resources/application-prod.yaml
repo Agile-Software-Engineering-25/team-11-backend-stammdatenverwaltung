@@ -47,6 +47,8 @@ management:
 logging:
   level:
     '[com.ase.stammdatenverwaltung]': INFO
+    '[com.ase.stammdatenverwaltung.logging]': INFO
+    '[com.ase.stammdatenverwaltung.security]': WARN
     '[org.springframework.security]': WARN
 
 # Note: JWT roles are extracted from the "groups" claim automatically

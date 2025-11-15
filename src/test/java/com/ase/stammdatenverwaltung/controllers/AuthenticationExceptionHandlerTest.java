@@ -44,11 +44,9 @@ class AuthenticationExceptionHandlerTest {
     mockMvc
         .perform(get("/api/v1/users"))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.error").value("Unauthorized"))
-        .andExpect(
-            jsonPath("$.message").value("Authentication is required to access this resource"))
+        .andExpect(jsonPath("$.error").value("AUTH_001"))
+        .andExpect(jsonPath("$.message").exists())
         .andExpect(jsonPath("$.endpoint").value("/api/v1/users"))
-        .andExpect(jsonPath("$.method").value("GET"))
         .andExpect(jsonPath("$.timestamp").isNumber());
   }
 
