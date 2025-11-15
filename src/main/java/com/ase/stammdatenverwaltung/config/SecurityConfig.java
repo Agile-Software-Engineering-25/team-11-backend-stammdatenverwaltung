@@ -6,7 +6,6 @@ import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,7 +19,6 @@ import org.springframework.security.web.SecurityFilterChain;
  * https://www.javacodegeeks.com/2025/07/spring-boot-keycloak-role-based-authorization.html
  */
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfig {
 
   /** Provides a centralized access denied handler for logging role information on auth failures */
