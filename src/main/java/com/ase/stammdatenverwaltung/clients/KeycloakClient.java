@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +47,17 @@ public class KeycloakClient {
    * JSON.
    */
   public Mono<CreateUserResponse> createUser(CreateUserRequest request) {
+    if (!keycloakConfigProperties.isEnabled()) {
+      // In development mode with Keycloak disabled, generate a synthetic ID and return
+      CreateUserResponse synthetic = new CreateUserResponse();
+      synthetic.setId("dev-" + UUID.randomUUID().toString());
+      synthetic.setUsername(request.getUsername());
+      synthetic.setEmail(request.getEmail());
+      synthetic.setFirstName(request.getFirstName());
+      synthetic.setLastName(request.getLastName());
+      log.info("Keycloak disabled - returning synthetic user id {}", synthetic.getId());
+      return Mono.just(synthetic);
+    }
     return getAdminAccessToken()
         .flatMap(
             token ->
@@ -81,6 +93,9 @@ public class KeycloakClient {
    * @return A Mono emitting a list of matching users, or empty list on 404 or error.
    */
   public Mono<List<KeycloakUser>> findUserById(String userId) {
+    if (!keycloakConfigProperties.isEnabled()) {
+      return Mono.just(Collections.emptyList());
+    }
     return getAdminAccessToken()
         .flatMap(
             token ->
@@ -134,6 +149,9 @@ public class KeycloakClient {
    * @return A Mono emitting a list of matching users, or empty list on 404 or error.
    */
   public Mono<List<KeycloakUser>> findUserByEmail(String email) {
+    if (!keycloakConfigProperties.isEnabled()) {
+      return Mono.just(Collections.emptyList());
+    }
     return getAdminAccessToken()
         .flatMap(
             token ->

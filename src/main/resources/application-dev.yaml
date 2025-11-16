@@ -41,6 +41,9 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:https://keycloak.sau-portal.de/realms/sau}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs}
 
+keycloak:
+  enabled: false
+
 server:
   port: 8080
 

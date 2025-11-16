@@ -3,6 +3,8 @@ package com.ase.stammdatenverwaltung.config;
 import com.ase.stammdatenverwaltung.security.CustomAuthenticationEntryPoint;
 import com.ase.stammdatenverwaltung.security.JwtAuthConverter;
 import com.ase.stammdatenverwaltung.security.RoleAwareAccessDeniedHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * https://www.javacodegeeks.com/2025/07/spring-boot-keycloak-role-based-authorization.html
  */
 @Configuration
+@Slf4j
 public class SecurityConfig {
 
   /** Provides a centralized access denied handler for logging role information on auth failures */
@@ -31,7 +34,19 @@ public class SecurityConfig {
   @Bean
   @Profile("dev")
   SecurityFilterChain devSecurityFilterChain(
-      HttpSecurity http, RoleAwareAccessDeniedHandler accessDeniedHandler) throws Exception {
+      HttpSecurity http,
+      RoleAwareAccessDeniedHandler accessDeniedHandler,
+      @Value("${keycloak.enabled:true}") boolean keycloakEnabled)
+      throws Exception {
+    // If Keycloak is disabled (dev mode), return a permissive filter chain with no JWT enforcement
+    if (!keycloakEnabled) {
+      log.info("Keycloak disabled for dev profile - running permissive security filter chain");
+      http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
+          .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/api/**"))
+          .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+      return http.build();
+    }
+
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(new JwtAuthConverter());
 
