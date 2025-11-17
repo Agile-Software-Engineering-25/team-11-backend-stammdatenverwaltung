@@ -8,16 +8,22 @@ import com.ase.stammdatenverwaltung.exceptions.ProfilePictureDeletionException;
 import com.ase.stammdatenverwaltung.exceptions.ProfilePictureRetrievalException;
 import com.ase.stammdatenverwaltung.exceptions.ProfilePictureStorageException;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
 /**
@@ -186,6 +192,62 @@ class GlobalExceptionHandlerTest {
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody().get("error")).isEqualTo("VALIDATION_001");
+    }
+
+    @Test
+    @DisplayName("should handle MethodArgumentNotValidException with field errors")
+    void testHandleMethodArgumentNotValid() {
+      // Create mock BindingResult with field errors
+      BindingResult bindingResult = mock(BindingResult.class);
+      List<FieldError> fieldErrors = new ArrayList<>();
+      fieldErrors.add(
+          new FieldError("createStudentRequest", "semester", "must be positive integer"));
+      fieldErrors.add(
+          new FieldError("createStudentRequest", "matriculationNumber", "must not be blank"));
+      when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
+
+      // Create mock MethodParameter
+      MethodParameter mockParameter = mock(MethodParameter.class);
+
+      // Create MethodArgumentNotValidException
+      MethodArgumentNotValidException ex =
+          new MethodArgumentNotValidException(mockParameter, bindingResult);
+
+      ResponseEntity<Map<String, Object>> response =
+          handler.handleMethodArgumentNotValid(ex, mockRequest);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody().get("error")).isEqualTo("VALIDATION_002");
+      assertThat(response.getBody().get("category")).isEqualTo("Request Body Validation");
+      assertThat((String) response.getBody().get("message")).isEqualTo("Invalid request data");
+
+      // Verify validation details are included in context
+      @SuppressWarnings("unchecked")
+      Map<String, String> context = (Map<String, String>) response.getBody().get("context");
+      assertThat(context).isNotNull().containsKey("validationDetails");
+      assertThat((String) context.get("validationDetails"))
+          .contains("semester")
+          .contains("matriculationNumber");
+    }
+
+    @Test
+    @DisplayName("should include endpoint and method in validation error context")
+    void testValidationErrorIncludesEndpointAndMethod() {
+      BindingResult bindingResult = mock(BindingResult.class);
+      List<FieldError> fieldErrors = new ArrayList<>();
+      fieldErrors.add(new FieldError("request", "email", "must be valid email"));
+      when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
+
+      MethodParameter mockParameter = mock(MethodParameter.class);
+      MethodArgumentNotValidException ex =
+          new MethodArgumentNotValidException(mockParameter, bindingResult);
+
+      ResponseEntity<Map<String, Object>> response =
+          handler.handleMethodArgumentNotValid(ex, mockRequest);
+
+      @SuppressWarnings("unchecked")
+      Map<String, String> context = (Map<String, String>) response.getBody().get("context");
+      assertThat(context).containsKey("endpoint").containsKey("method");
     }
   }
 

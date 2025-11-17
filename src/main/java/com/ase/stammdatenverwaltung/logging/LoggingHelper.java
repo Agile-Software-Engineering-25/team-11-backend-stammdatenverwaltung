@@ -98,6 +98,48 @@ public class LoggingHelper {
     }
   }
 
+  /**
+   * Specialized logging for HTTP 400 Bad Request errors at endpoints.
+   *
+   * <p>Logs all HTTP 400 validation errors at WARN level with focus on endpoint, method, and client
+   * context for operational monitoring. Captures which endpoints are receiving invalid requests and
+   * why, enabling debugging of client-side issues and attack patterns.
+   *
+   * <p>Log Format: {@code [CODE - Category] HTTP 400 | Validation failed: {reason} | endpoint={uri}
+   * | method={httpMethod} | validationDetails={details}}
+   *
+   * @param errorCode the validation error code (e.g., "VALIDATION_001", "VALIDATION_002")
+   * @param endpoint the request endpoint (e.g., "/api/users/register")
+   * @param method the HTTP method (e.g., "POST", "PUT")
+   * @param validationReason the reason for validation failure
+   * @param validationDetails additional context (e.g., field names, constraints violated)
+   */
+  public static void log400Endpoint(
+      String errorCode,
+      String endpoint,
+      String method,
+      String validationReason,
+      String validationDetails) {
+
+    if (errorCode == null || endpoint == null || method == null) {
+      log.warn("HTTP 400 logging invoked with null parameters");
+      return;
+    }
+
+    String details =
+        validationDetails != null && !validationDetails.isEmpty()
+            ? " | " + sanitizeValue(validationDetails)
+            : "";
+
+    log.warn(
+        "[{} - Validation] HTTP 400 | {} | endpoint={} | method={}{}",
+        errorCode,
+        sanitizeValue(validationReason),
+        endpoint,
+        method,
+        details);
+  }
+
   private static String formatBaseMessage(ExceptionContext ctx) {
     return String.format(
         "[%s - %s] HTTP %d | User: %s | Tech: %s",

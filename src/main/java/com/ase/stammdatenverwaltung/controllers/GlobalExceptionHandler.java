@@ -5,6 +5,7 @@ import com.ase.stammdatenverwaltung.logging.ExceptionContext;
 import com.ase.stammdatenverwaltung.logging.LoggingHelper;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -43,6 +45,8 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+  private static final int METHOD_PARAMETER_LENGTH = 7; // "method=".length()
 
   // ==================== Authentication Errors (401) ====================
 
@@ -205,6 +209,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
       IllegalArgumentException ex, WebRequest request) {
     String requestUri = extractUri(request);
+    String method = extractMethod(request);
 
     ExceptionContext ctx =
         ExceptionContext.builder()
@@ -214,6 +219,50 @@ public class GlobalExceptionHandler {
             .userMessage("Invalid input provided")
             .technicalMessage("IllegalArgumentException: " + ex.getMessage())
             .withContext("endpoint", requestUri)
+            .withContext("method", method)
+            .cause(ex)
+            .build();
+
+    LoggingHelper.log(ctx);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(ctx, requestUri));
+  }
+
+  /**
+   * Handles MethodArgumentNotValidException from Spring validation (@Valid/@NotNull/@NotBlank etc).
+   *
+   * <p>When request DTOs with validation constraints fail validation, Spring throws this exception.
+   * This handler logs all such 400 errors for operational monitoring and debugging of client
+   * requests.
+   *
+   * @param ex the Spring validation exception
+   * @param request the web request
+   * @return 400 Bad Request
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex, WebRequest request) {
+    String requestUri = extractUri(request);
+    String method = extractMethod(request);
+
+    // Extract field names and constraints that failed validation
+    String failedFields =
+        ex.getBindingResult().getFieldErrors().stream()
+            .map(fe -> fe.getField() + " (" + fe.getDefaultMessage() + ")")
+            .collect(Collectors.joining("; "));
+
+    ExceptionContext ctx =
+        ExceptionContext.builder()
+            .errorCode("VALIDATION_002")
+            .errorCategory("Request Body Validation")
+            .status(HttpStatus.BAD_REQUEST)
+            .userMessage("Invalid request data")
+            .technicalMessage(
+                "MethodArgumentNotValidException: "
+                    + (failedFields.isEmpty() ? ex.getMessage() : failedFields))
+            .withContext("endpoint", requestUri)
+            .withContext("method", method)
+            .withContext("validationDetails", failedFields)
             .cause(ex)
             .build();
 
@@ -319,5 +368,20 @@ public class GlobalExceptionHandler {
    */
   private String extractUri(WebRequest request) {
     return request.getDescription(false).replace("uri=", "");
+  }
+
+  /**
+   * Extracts the HTTP method from WebRequest.
+   *
+   * @param request the web request
+   * @return the HTTP method (e.g., "POST", "GET", "PUT", "DELETE") or "unknown" if not available
+   */
+  private String extractMethod(WebRequest request) {
+    String description = request.getDescription(false);
+    // WebRequest.getDescription(false) returns "uri=<path>" or "uri=<path>;method=<method>"
+    if (description.contains("method=")) {
+      return description.substring(description.indexOf("method=") + METHOD_PARAMETER_LENGTH);
+    }
+    return "unknown";
   }
 }
