@@ -222,7 +222,7 @@ public class UserController {
       })
   @GetMapping("/{userId}")
   @PreAuthorize(
-      "@personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
+      "hasRole('Area-3.Team-11.Read.User') or @personService.canAccessUser(#userId, 'Read') or hasRole('sau-admin') or hasRole('university-administrative-staff')")
   public ResponseEntity<PersonDetailsDTO> getUserById(
       @Parameter(description = "ID of the user to retrieve", required = true) @PathVariable
           String userId,
