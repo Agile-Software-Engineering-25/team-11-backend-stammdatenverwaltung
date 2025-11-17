@@ -5,6 +5,7 @@ import com.ase.stammdatenverwaltung.dto.KeycloakUser;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserRequest;
 import com.ase.stammdatenverwaltung.dto.keycloak.CreateUserResponse;
 import com.ase.stammdatenverwaltung.dto.keycloak.TokenResponse;
+import com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -40,11 +41,53 @@ public class KeycloakClient {
   private Instant tokenExpirationTime;
 
   /**
+   * Checks if a user with the given username already exists in Keycloak.
+   *
+   * @param username the username to check
+   * @return true if a user with this username exists, false otherwise
+   */
+  public boolean userExists(String username) {
+    if (!keycloakConfigProperties.isEnabled()) {
+      return false;
+    }
+    return getAdminAccessToken()
+        .flatMap(
+            token ->
+                webClient
+                    .get()
+                    .uri(keycloakConfigProperties.getUserApiUrl() + "/v1/user?username=" + username)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .onStatus(
+                        status -> status.equals(HttpStatus.NOT_FOUND),
+                        response -> {
+                          log.debug(
+                              "User not found in Keycloak for username: {} (404 Not Found)",
+                              username);
+                          return Mono.empty();
+                        })
+                    .bodyToMono(String.class)
+                    .map(this::parseFindUserByIdResponse)
+                    .map(users -> users != null && !users.isEmpty())
+                    .onErrorResume(
+                        error -> {
+                          log.warn(
+                              "Failed to check user existence in Keycloak for username: {} - assuming not found",
+                              username,
+                              error);
+                          return Mono.just(false);
+                        }))
+        .block();
+  }
+
+  /**
    * Creates a new user in Keycloak via the wrapped user API.
    *
    * <p>Temporary workaround: the user API currently returns invalid JSON — an array followed by an
    * "init-password" field. Parsing is handled manually until the endpoint is fixed to return proper
    * JSON.
+   *
+   * @throws KeycloakUserAlreadyExistsException if a user with this username already exists
    */
   public Mono<CreateUserResponse> createUser(CreateUserRequest request) {
     if (!keycloakConfigProperties.isEnabled()) {
@@ -68,6 +111,12 @@ public class KeycloakClient {
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(request)
                     .retrieve()
+                    .onStatus(
+                        status -> status == HttpStatus.CONFLICT,
+                        response -> {
+                          return Mono.error(
+                              new KeycloakUserAlreadyExistsException(request.getUsername()));
+                        })
                     .bodyToMono(String.class) // <-- read raw text
                     .map(this::parseCreateUserResponseSafe)
                     .flatMap(Mono::justOrEmpty)
@@ -77,11 +126,14 @@ public class KeycloakClient {
                                 "Successfully created user in Keycloak with ID: {}",
                                 response != null ? response.getId() : "unknown"))
                     .doOnError(
-                        error ->
+                        error -> {
+                          if (!(error instanceof KeycloakUserAlreadyExistsException)) {
                             log.error(
                                 "Failed to create user in Keycloak for username: {}",
                                 request.getUsername(),
-                                error)));
+                                error);
+                          }
+                        }));
   }
 
   /**

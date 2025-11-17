@@ -9,6 +9,7 @@ import com.ase.stammdatenverwaltung.dto.UpdateUserRequest;
 import com.ase.stammdatenverwaltung.entities.Employee;
 import com.ase.stammdatenverwaltung.entities.Lecturer;
 import com.ase.stammdatenverwaltung.entities.Student;
+import com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException;
 import com.ase.stammdatenverwaltung.services.BitfrostNotificationService;
 import com.ase.stammdatenverwaltung.services.EmployeeService;
 import com.ase.stammdatenverwaltung.services.LecturerService;
@@ -92,19 +93,13 @@ public class UserController {
     try {
       Student createdStudent = studentService.create(request);
       return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+    } catch (KeycloakUserAlreadyExistsException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (IllegalArgumentException e) {
-      log.warn("Failed to create student: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error(
-          "Failed to create student: external service error - {} ({})",
-          e.getMessage(),
-          e.getClass().getSimpleName());
-      log.debug("Failed to create student: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create student: {} ({})", e.getMessage(), e.getClass().getSimpleName());
-      log.debug("Failed to create student", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -185,19 +180,13 @@ public class UserController {
     try {
       Employee createdEmployee = employeeService.create(request);
       return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    } catch (KeycloakUserAlreadyExistsException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (IllegalArgumentException e) {
-      log.warn("Failed to create employee: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error(
-          "Failed to create employee: external service error - {} ({})",
-          e.getMessage(),
-          e.getClass().getSimpleName());
-      log.debug("Failed to create employee: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create employee: {} ({})", e.getMessage(), e.getClass().getSimpleName());
-      log.debug("Failed to create employee", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -345,19 +334,13 @@ public class UserController {
     try {
       Lecturer createdLecturer = lecturerService.create(request);
       return new ResponseEntity<>(createdLecturer, HttpStatus.CREATED);
+    } catch (KeycloakUserAlreadyExistsException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
     } catch (IllegalArgumentException e) {
-      log.warn("Failed to create lecturer: invalid request data - {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     } catch (IllegalStateException e) {
-      log.error(
-          "Failed to create lecturer: external service error - {} ({})",
-          e.getMessage(),
-          e.getClass().getSimpleName());
-      log.debug("Failed to create lecturer: external service error", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      log.error("Failed to create lecturer: {} ({})", e.getMessage(), e.getClass().getSimpleName());
-      log.debug("Failed to create lecturer", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }

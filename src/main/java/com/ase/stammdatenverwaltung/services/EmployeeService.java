@@ -32,15 +32,23 @@ public class EmployeeService {
   private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new employee from a request DTO. First creates the user in Keycloak with the
-   * "university-administrative-staff" group, then stores the employee data locally using the
-   * Keycloak user ID.
+   * Creates a new employee from a request DTO. First checks if the user already exists in Keycloak,
+   * then creates the user in Keycloak with the "university-administrative-staff" group, and finally
+   * stores the employee data locally using the Keycloak user ID.
    *
    * @param request The request body containing the employee data.
    * @return The created employee.
+   * @throws com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException if the user
+   *     already exists in Keycloak
    */
   public Employee create(CreateEmployeeRequest request) {
     log.debug("Creating new employee with employee number: {}", request.getEmployeeNumber());
+
+    // Check if user already exists in Keycloak (prevents 409 conflicts)
+    if (keycloakClient.userExists(request.getUsername())) {
+      throw new com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException(
+          request.getUsername());
+    }
 
     // Create user in Keycloak with university-administrative-staff group
     CreateUserRequest keycloakRequest =

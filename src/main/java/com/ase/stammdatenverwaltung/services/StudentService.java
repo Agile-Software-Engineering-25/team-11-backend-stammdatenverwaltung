@@ -34,15 +34,24 @@ public class StudentService {
   private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new student from a request DTO. First creates the user in Keycloak with the "student"
-   * group, then stores the student data locally using the Keycloak user ID.
+   * Creates a new student from a request DTO. First checks if the user already exists in Keycloak,
+   * then creates the user in Keycloak with the "student" group, and finally stores the student data
+   * locally using the Keycloak user ID.
    *
    * @param request The request body containing the student data.
    * @return The created student.
+   * @throws com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException if the user
+   *     already exists in Keycloak
    */
   public Student create(CreateStudentRequest request) {
     log.debug(
         "Creating new student with matriculation number: {}", request.getMatriculationNumber());
+
+    // Check if user already exists in Keycloak (prevents 409 conflicts)
+    if (keycloakClient.userExists(request.getUsername())) {
+      throw new com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException(
+          request.getUsername());
+    }
 
     // Create user in Keycloak with student group
     CreateUserRequest keycloakRequest =

@@ -32,14 +32,23 @@ public class LecturerService {
   private final KeycloakClient keycloakClient;
 
   /**
-   * Creates a new lecturer from a request DTO. First creates the user in Keycloak with the
-   * "lecturer" group, then stores the lecturer data locally using the Keycloak user ID.
+   * Creates a new lecturer from a request DTO. First checks if the user already exists in Keycloak,
+   * then creates the user in Keycloak with the "lecturer" group, and finally stores the lecturer
+   * data locally using the Keycloak user ID.
    *
    * @param request The request body containing the lecturer data.
    * @return The created lecturer.
+   * @throws com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException if the user
+   *     already exists in Keycloak
    */
   public Lecturer create(CreateLecturerRequest request) {
     log.debug("Creating new lecturer in field/chair: {}", request.getFieldChair());
+
+    // Check if user already exists in Keycloak (prevents 409 conflicts)
+    if (keycloakClient.userExists(request.getUsername())) {
+      throw new com.ase.stammdatenverwaltung.exceptions.KeycloakUserAlreadyExistsException(
+          request.getUsername());
+    }
 
     // Create user in Keycloak with lecturer group
     CreateUserRequest keycloakRequest =
