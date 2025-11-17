@@ -41,6 +41,9 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:https://keycloak.sau-portal.de/realms/sau}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:https://keycloak.sau-portal.de/realms/sau/protocol/openid-connect/certs}
 
+keycloak:
+  enabled: false
+
 server:
   port: 8080
 
@@ -52,6 +55,8 @@ management:
 logging:
   level:
     '[com.ase.stammdatenverwaltung]': DEBUG
+    '[com.ase.stammdatenverwaltung.logging]': DEBUG
+    '[com.ase.stammdatenverwaltung.security]': DEBUG
     '[org.springframework.security]': DEBUG
 
 # Note: JWT roles are extracted from the "groups" claim automatically

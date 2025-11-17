@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * Global exception handler for MinIO profile picture operations.
- *
- * <p>Maps custom ProfilePicture* exceptions to appropriate HTTP status codes and error responses.
- * Only registered if MinIO is enabled via configuration.
+ * @deprecated Use {@link GlobalExceptionHandler} instead. This handler is kept for backward
+ *     compatibility but will be removed in a future release. All profile picture exceptions are now
+ *     handled centrally by {@link GlobalExceptionHandler}.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @ControllerAdvice
 @Slf4j
 @ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = false)

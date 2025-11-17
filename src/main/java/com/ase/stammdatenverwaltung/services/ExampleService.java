@@ -88,9 +88,6 @@ public class ExampleService {
       log.info("Created example with ID: {}", savedExample.getId());
       return savedExample;
     } catch (DataIntegrityViolationException e) {
-      log.error(
-          "Data integrity violation while creating example ({})", e.getClass().getSimpleName());
-      log.debug("Data integrity violation while creating example", e);
       throw new IllegalArgumentException("Invalid example data", e);
     }
   }
@@ -127,9 +124,6 @@ public class ExampleService {
       log.info("Updated example with ID: {}", savedExample.getId());
       return savedExample;
     } catch (DataIntegrityViolationException e) {
-      log.error(
-          "Data integrity violation while updating example ({})", e.getClass().getSimpleName());
-      log.debug("Data integrity violation while updating example", e);
       throw new IllegalArgumentException("Invalid example data", e);
     }
   }

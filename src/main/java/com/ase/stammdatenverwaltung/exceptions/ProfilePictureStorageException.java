@@ -1,5 +1,7 @@
 package com.ase.stammdatenverwaltung.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 /**
  * Exception thrown when profile picture storage to MinIO fails. This indicates that the profile
  * picture could not be stored, potentially due to network issues, insufficient storage, or
@@ -25,5 +27,20 @@ public class ProfilePictureStorageException extends ProfilePictureException {
    */
   public ProfilePictureStorageException(String message, String userId) {
     super(message, userId);
+  }
+
+  @Override
+  public String getErrorCode() {
+    return "USER_002";
+  }
+
+  @Override
+  public String getUserMessage() {
+    return "Could not save profile picture";
+  }
+
+  @Override
+  public HttpStatus getHttpStatus() {
+    return HttpStatus.INTERNAL_SERVER_ERROR;
   }
 }

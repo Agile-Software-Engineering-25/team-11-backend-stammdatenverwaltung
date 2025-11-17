@@ -39,6 +39,8 @@ logging:
   level:
     '[org.springframework.security]': DEBUG
     '[com.ase.stammdatenverwaltung]': DEBUG
+    '[com.ase.stammdatenverwaltung.logging]': DEBUG
+    '[com.ase.stammdatenverwaltung.security]': DEBUG
     '[org.flywaydb]': INFO
 
 cors:

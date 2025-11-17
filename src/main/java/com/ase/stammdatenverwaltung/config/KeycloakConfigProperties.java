@@ -20,4 +20,5 @@ public class KeycloakConfigProperties {
   private String clientSecret;
   private String grantType;
   private String userApiUrl;
+  private boolean enabled = true;
 }

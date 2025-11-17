@@ -330,6 +330,31 @@ The `RoleAwareAccessDeniedHandler` logs authorization failures with user role in
 
 ---
 
+## Disabling Keycloak in development
+
+If you want to run the application locally without Keycloak, there is a feature toggle to disable Keycloak for the `dev` profile.
+
+Set the property in `src/main/resources/application-dev.yaml`:
+
+```yaml
+# Disable Keycloak for dev
+app:
+    security:
+        keycloak:
+            enabled: false
+```
+
+You can also override at startup:
+
+```bash
+# Run dev with Keycloak disabled
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run -Dspring-boot.run.arguments=--app.security.keycloak.enabled=false
+```
+
+When Keycloak is disabled:
+- HTTP-level JWT enforcement is disabled in the `dev` web security chain
+- `KeycloakClient` returns no-op behavior (synthetic IDs / empty lists) so services don't require a live Keycloak instance
+
 ## Code Standards
 
 ````

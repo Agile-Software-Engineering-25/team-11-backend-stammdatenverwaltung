@@ -77,7 +77,7 @@ class RoleAwareAccessDeniedHandlerTest {
 
     // Then
     String content = response.getContentAsString();
-    assertThat(content).contains("Forbidden", "Access denied", "insufficient permissions");
+    assertThat(content).contains("AUTHZ_001", "Access denied", "insufficient permissions");
   }
 
   @Test
@@ -142,7 +142,7 @@ class RoleAwareAccessDeniedHandlerTest {
     // Then
     assertThat(response.getStatus()).isEqualTo(403);
     String content = response.getContentAsString();
-    assertThat(content).contains("Forbidden");
+    assertThat(content).contains("AUTHZ_001");
   }
 
   @Test
@@ -171,7 +171,7 @@ class RoleAwareAccessDeniedHandlerTest {
     // Then
     assertThat(response.getStatus()).isEqualTo(403);
     String content = response.getContentAsString();
-    assertThat(content).contains("Forbidden");
+    assertThat(content).contains("AUTHZ_001");
   }
 
   @Test
@@ -200,6 +200,6 @@ class RoleAwareAccessDeniedHandlerTest {
     // Then
     assertThat(response.getStatus()).isEqualTo(403);
     String content = response.getContentAsString();
-    assertThat(content).contains("Forbidden");
+    assertThat(content).contains("AUTHZ_001");
   }
 }

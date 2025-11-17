@@ -13,22 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Global exception handler for authentication exceptions.
- *
- * <p>Logs all 401 (Unauthorized) responses with detailed information about:
- *
- * <ul>
- *   <li>Endpoint that was accessed
- *   <li>Authentication status
- *   <li>Exception type and message
- *   <li>Timestamp of the failure
- * </ul>
- *
- * <p>This handler catches exceptions thrown by Spring Security during authentication checks at the
- * controller layer. Note: Spring Security's filter chain handles lower-level authentication
- * failures. Authorization failures (403 Forbidden) are handled by RoleAwareAccessDeniedHandler in
- * the filter chain.
+ * @deprecated Use {@link GlobalExceptionHandler} instead. This handler is kept for backward
+ *     compatibility but will be removed in a future release. All authentication exceptions are now
+ *     handled centrally by {@link GlobalExceptionHandler}.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @ControllerAdvice
 @Slf4j
 public class AuthenticationExceptionHandler {
