@@ -37,11 +37,11 @@ spring:
 # Logging configuration for tests
 logging:
   level:
-    '[org.springframework.security]': DEBUG
-    '[com.ase.stammdatenverwaltung]': DEBUG
-    '[com.ase.stammdatenverwaltung.logging]': DEBUG
-    '[com.ase.stammdatenverwaltung.security]': DEBUG
-    '[org.flywaydb]': INFO
+    '[org.springframework.security]': ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY:DEBUG}
+    '[com.ase.stammdatenverwaltung]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG:DEBUG}
+    '[com.ase.stammdatenverwaltung.logging]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_LOGGING:DEBUG}
+    '[com.ase.stammdatenverwaltung.security]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_SECURITY:DEBUG}
+    '[org.flywaydb]': ${LOGGING_LEVEL_ORG_FLYWAYDB:INFO}
 
 cors:
   allowed-origins: "http://localhost:5173"

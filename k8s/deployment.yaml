@@ -83,6 +83,18 @@ spec:
                 secretKeyRef:
                   name: bitfrost-secret
                   key: BITFROST_PROJECT_SECRET
+            # Logging level configuration - can be overridden via kubectl or Rancher UI
+            # Example: kubectl -n ase-11 set env deployment/ase-stammdaten LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG=DEBUG
+            - name: LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG
+              value: "INFO"
+            - name: LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_LOGGING
+              value: "INFO"
+            - name: LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_SECURITY
+              value: "WARN"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+              value: "WARN"
+            - name: LOGGING_LEVEL_ORG_FLYWAYDB
+              value: "INFO"
             # NOTE: The Ingress in this overlay contains a rewrite-target annotation
             # (traefik.ingress.kubernetes.io/rewrite-target: /) which rewrites requests
             # from /api -> /. Because of that, the application will receive requests
