@@ -46,6 +46,7 @@ management:
 
 logging:
   level:
+    root: ${LOGGING_LEVEL_ROOT:WARN}
     '[com.ase.stammdatenverwaltung]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG:INFO}
     '[com.ase.stammdatenverwaltung.logging]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_LOGGING:INFO}
     '[com.ase.stammdatenverwaltung.security]': ${LOGGING_LEVEL_COM_ASE_STAMMDATENVERWALTUNG_SECURITY:WARN}
